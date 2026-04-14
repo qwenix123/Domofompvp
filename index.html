@@ -3,132 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Domofon PvP | GLOBAL + STANDOFF ANIMATION</title>
+    <title>Domofon PvP | Firebase Admin</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; }
-        body { background: #f0f2f8; height: 100vh; overflow: hidden; }
-        .sidebar { position: fixed; left: 0; top: 0; width: 280px; height: 100vh; background: white; box-shadow: 4px 0 20px rgba(0,0,0,0.08); border-right: 1px solid #e9edf2; padding: 24px 0; display: flex; flex-direction: column; z-index: 10; }
-        .logo { font-size: 26px; font-weight: 800; padding: 0 24px 24px 24px; border-bottom: 2px solid #f0f2f8; margin-bottom: 20px; background: linear-gradient(135deg,#1e2b6e,#ff5722); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .tab-btn { background: transparent; border: none; padding: 14px 24px; text-align: left; font-size: 15px; font-weight: 600; color: #4a5568; cursor: pointer; transition: 0.2s; margin: 4px 12px; border-radius: 14px; }
-        .tab-btn:hover { background: #f0f4fe; color: #1e2b6e; }
-        .tab-btn.active { background: #1e2b6e; color: white; box-shadow: 0 4px 12px rgba(30,43,110,0.25); }
-        .telegram-side { margin-top: auto; padding: 20px; }
-        .telegram-side a { display: flex; align-items: center; gap: 10px; background: #eef2ff; padding: 12px; border-radius: 40px; text-decoration: none; color: #1e2b6e; font-weight: bold; justify-content: center; }
-        .main-content { margin-left: 280px; height: 100vh; overflow-y: auto; padding: 20px 28px; }
-        .tab-pane { display: none; animation: fade 0.2s ease; }
-        .tab-pane.active-pane { display: block; }
-        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: white; border-radius: 32px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid #edf2f7; }
-        .flex-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
-        button { background: #1e2b6e; color: white; border: none; padding: 10px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.15s; }
-        button:active { transform: scale(0.96); }
-        .rank-badge { background: linear-gradient(135deg,#f6e05e,#ed8936); padding: 6px 16px; border-radius: 60px; font-weight: bold; display: inline-block; }
-        .avatar-img { width: 70px; height: 70px; border-radius: 60px; object-fit: cover; border: 3px solid #ffb347; }
-        .progress-bar { width: 100%; height: 12px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin: 10px 0; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg,#1e2b6e,#ff914d); width: 0%; transition: width 0.5s ease; border-radius: 20px; }
-        .rank-progress-bar { width: 100%; height: 14px; background: #2d3748; border-radius: 20px; overflow: hidden; margin: 8px 0; }
-        .rank-progress-fill { height: 100%; background: linear-gradient(90deg,#f6e05e,#ed8936); width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 20px; }
-        .aim-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .aim-game { background: #0a0e1a; border-radius: 48px; width: 95vw; height: 90vh; position: relative; overflow: hidden; border: 3px solid #ffb347; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
-        .target-dot { position: absolute; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px red; transition: 0.02s linear; }
-        .aim-stats { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.85); padding: 12px 24px; border-radius: 40px; color: #0f0; font-weight: bold; font-size: 18px; z-index: 10; font-family: monospace; }
-        
-        /* АНИМАЦИЯ ПОСЛЕ БОЯ (КАК В STANDOFF) */
-        .result-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.2s ease;
-        }
-        .result-card {
-            background: linear-gradient(145deg, #1a1f2e, #0f121f);
-            border-radius: 48px;
-            padding: 40px 60px;
-            text-align: center;
-            border: 2px solid;
-            box-shadow: 0 25px 50px -12px black;
-            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-width: 360px;
-        }
-        .result-card.win { border-color: #22c55e; }
-        .result-card.lose { border-color: #ef4444; }
-        .result-rank {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            color: #fbbf24;
-            text-shadow: 0 0 10px rgba(251,191,36,0.5);
-        }
-        .result-elo {
-            font-size: 52px;
-            font-weight: 800;
-            margin: 20px 0;
-        }
-        .result-elo.win { color: #22c55e; }
-        .result-elo.lose { color: #ef4444; }
-        .result-elo span { font-size: 24px; }
-        .result-progress {
-            margin: 20px 0;
-            text-align: left;
-        }
-        .result-progress-label {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-bottom: 5px;
-        }
-        .result-progress-bar {
-            width: 100%;
-            height: 16px;
-            background: #374151;
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        .result-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #fbbf24, #f59e0b);
-            width: 0%;
-            transition: width 0.8s ease-out;
-        }
-        .result-button {
-            margin-top: 24px;
-            background: #3b82f6;
-            padding: 12px 32px;
-            border-radius: 40px;
-            border: none;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .result-button:hover { background: #2563eb; transform: scale(1.02); }
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @media (max-width: 768px) { .sidebar { width: 80px; } .sidebar .logo { font-size: 12px; padding: 0 12px; text-align: center; } .tab-btn { padding: 12px 0; text-align: center; font-size: 11px; margin: 2px 6px; } .telegram-side a span { display: none; } .main-content { margin-left: 80px; } .result-card { padding: 24px 32px; min-width: 280px; } .result-elo { font-size: 40px; } }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eef2ff; }
-        .countdown { font-family: monospace; font-size: 22px; font-weight: bold; color: #c2410c; }
-        .clan-member { padding: 8px; background: #f8fafc; margin: 5px 0; border-radius: 20px; }
-        .admin-btn { background: #dc2626; margin-top: 10px; }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+        body{background:#f0f2f8;height:100vh;overflow:hidden}
+        .sidebar{position:fixed;left:0;top:0;width:280px;height:100vh;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,0.08);border-right:1px solid #e9edf2;padding:24px 0;display:flex;flex-direction:column;z-index:10}
+        .logo{font-size:26px;font-weight:800;padding:0 24px 24px 24px;border-bottom:2px solid #f0f2f8;margin-bottom:20px;background:linear-gradient(135deg,#1e2b6e,#ff5722);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .tab-btn{background:0 0;border:none;padding:14px 24px;text-align:left;font-size:15px;font-weight:600;color:#4a5568;cursor:pointer;transition:.2s;margin:4px 12px;border-radius:14px}
+        .tab-btn:hover{background:#f0f4fe;color:#1e2b6e}
+        .tab-btn.active{background:#1e2b6e;color:#fff;box-shadow:0 4px 12px rgba(30,43,110,0.25)}
+        .telegram-side{margin-top:auto;padding:20px}
+        .telegram-side a{display:flex;align-items:center;gap:10px;background:#eef2ff;padding:12px;border-radius:40px;text-decoration:none;color:#1e2b6e;font-weight:700;justify-content:center}
+        .main-content{margin-left:280px;height:100vh;overflow-y:auto;padding:20px 28px}
+        .tab-pane{display:none;animation:fade .2s ease}
+        .tab-pane.active-pane{display:block}
+        @keyframes fade{from{opacity:0}to{opacity:1}}
+        .card{background:#fff;border-radius:32px;padding:24px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,0.04);border:1px solid #edf2f7}
+        .flex-row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+        button{background:#1e2b6e;color:#fff;border:none;padding:10px 24px;border-radius:40px;font-weight:600;cursor:pointer;transition:.15s}
+        button:active{transform:scale(.96)}
+        .rank-badge{background:linear-gradient(135deg,#f6e05e,#ed8936);padding:6px 16px;border-radius:60px;font-weight:700;display:inline-block}
+        .avatar-img{width:70px;height:70px;border-radius:60px;object-fit:cover;border:3px solid #ffb347}
+        .progress-bar{width:100%;height:12px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin:10px 0}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#1e2b6e,#ff914d);width:0;transition:width .5s ease}
+        .rank-progress-bar{width:100%;height:14px;background:#2d3748;border-radius:20px;overflow:hidden;margin:8px 0}
+        .rank-progress-fill{height:100%;background:linear-gradient(90deg,#f6e05e,#ed8936);width:0;transition:width .6s cubic-bezier(0.4,0,0.2,1)}
+        .aim-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:1000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(8px)}
+        .aim-game{background:#0a0e1a;border-radius:48px;width:95vw;height:90vh;position:relative;overflow:hidden;border:3px solid #ffb347;box-shadow:0 0 40px rgba(0,0,0,0.5)}
+        .target-dot{position:absolute;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px red;transition:.02s linear}
+        .aim-stats{position:absolute;top:20px;left:20px;background:rgba(0,0,0,0.85);padding:12px 24px;border-radius:40px;color:#0f0;font-weight:700;font-size:18px;z-index:10;font-family:monospace}
+        .result-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2000;display:flex;justify-content:center;align-items:center;animation:fadeIn .2s}
+        .result-card{background:linear-gradient(145deg,#1a1f2e,#0f121f);border-radius:48px;padding:40px 60px;text-align:center;border:2px solid;box-shadow:0 25px 50px -12px #000;animation:slideUp .3s cubic-bezier(0.4,0,0.2,1);min-width:360px}
+        .result-card.win{border-color:#22c55e}
+        .result-card.lose{border-color:#ef4444}
+        .result-rank{font-size:28px;font-weight:700;margin-bottom:16px;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.5)}
+        .result-elo{font-size:52px;font-weight:800;margin:20px 0}
+        .result-elo.win{color:#22c55e}
+        .result-elo.lose{color:#ef4444}
+        .result-elo span{font-size:24px}
+        .result-progress{margin:20px 0;text-align:left}
+        .result-progress-label{font-size:12px;color:#9ca3af;margin-bottom:5px}
+        .result-progress-bar{width:100%;height:16px;background:#374151;border-radius:20px;overflow:hidden}
+        .result-progress-fill{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);width:0;transition:width .8s ease-out}
+        .result-button{margin-top:24px;background:#3b82f6;padding:12px 32px;border-radius:40px;border:none;color:#fff;font-weight:700;cursor:pointer;transition:.2s}
+        .result-button:hover{background:#2563eb;transform:scale(1.02)}
+        @keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @media (max-width:768px){.sidebar{width:80px}.sidebar .logo{font-size:12px;padding:0 12px;text-align:center}.tab-btn{padding:12px 0;text-align:center;font-size:11px;margin:2px 6px}.telegram-side a span{display:none}.main-content{margin-left:80px}.result-card{padding:24px 32px;min-width:280px}.result-elo{font-size:40px}}
+        table{width:100%;border-collapse:collapse}
+        th,td{padding:12px;text-align:left;border-bottom:1px solid #eef2ff}
+        .countdown{font-family:monospace;font-size:22px;font-weight:700;color:#c2410c}
+        .clan-member{padding:8px;background:#f8fafc;margin:5px 0;border-radius:20px}
+        .admin-btn{background:#dc2626;margin-top:10px}
     </style>
 </head>
 <body>
-
 <div class="sidebar">
     <div class="logo">🎯 DOMOFON</div>
     <button class="tab-btn active" data-tab="profile">👤 ПРОФИЛЬ</button>
@@ -137,19 +68,18 @@
     <button class="tab-btn" data-tab="clans">🏰 КЛАНЫ</button>
     <div class="telegram-side"><a href="https://t.me/snarashenie" target="_blank">📱 TG SUPPORT</a></div>
 </div>
-
 <div class="main-content">
     <div id="profile" class="tab-pane active-pane">
         <div class="card" id="authCard">
             <h3>🔐 ВХОД / РЕГИСТРАЦИЯ</h3>
-            <input type="text" id="loginUser" placeholder="Никнейм" style="width:100%; padding:12px; margin:10px 0; border-radius:60px; border:1px solid #ddd;">
-            <input type="password" id="loginPass" placeholder="Пароль" style="width:100%; padding:12px; margin:10px 0; border-radius:60px;">
-            <div class="flex-row"><button id="doLogin">Войти</button><button id="doRegister" style="background:#f0b34b;">Регистрация</button></div>
-            <div id="authMsg" style="color:red; margin-top:12px;"></div>
+            <input type="text" id="loginUser" placeholder="Никнейм" style="width:100%;padding:12px;margin:10px 0;border-radius:60px;border:1px solid #ddd">
+            <input type="password" id="loginPass" placeholder="Пароль" style="width:100%;padding:12px;margin:10px 0;border-radius:60px">
+            <div class="flex-row"><button id="doLogin">Войти</button><button id="doRegister" style="background:#f0b34b">Регистрация</button></div>
+            <div id="authMsg" style="color:red;margin-top:12px"></div>
         </div>
-        <div id="profileInfo" style="display:none;">
+        <div id="profileInfo" style="display:none">
             <div class="flex-row">
-                <div><img id="profAvatar" class="avatar-img" src="https://via.placeholder.com/70?text=👤"><br><button id="uploadAvatarBtnSide" style="margin-top:8px;">📷 Загрузить</button><input type="file" id="avatarFileInput" style="display:none"></div>
+                <div><img id="profAvatar" class="avatar-img" src="https://via.placeholder.com/70?text=👤"><br><button id="uploadAvatarBtnSide" style="margin-top:8px">📷 Загрузить</button><input type="file" id="avatarFileInput" style="display:none"></div>
                 <div style="flex:1">
                     <h2 id="profName">---</h2>
                     <span id="profRank" class="rank-badge">bronze 1</span>
@@ -160,37 +90,16 @@
                     <p>📊 Винрейт: <span id="profWr">0</span>% | 🎯 Сезон: <span id="seasonWl">0/0</span></p>
                 </div>
             </div>
-            <div class="flex-row"><button id="logoutBtnSide" style="background:#aaa;">Выйти</button>
+            <div class="flex-row"><button id="logoutBtnSide" style="background:#aaa">Выйти</button>
             <button id="forceSeasonEndBtn" class="admin-btn" style="display:none;">⚠️ ЗАВЕРШИТЬ СЕЗОН (ADMIN)</button></div>
         </div>
     </div>
-
-    <div id="pvp" class="tab-pane">
-        <div class="card"><h3>🤖 БОЙ С БОТОМ (10 раундов | AIM TRAINER)</h3>
-        <p>⚡ Чем выше ЭЛО — тем быстрее исчезает и меньше цель!</p>
-        <button id="startBotAimBtn" style="background:#ff5722;">🔥 НАЧАТЬ БОЙ (10 раундов)</button>
-        <div id="botBattleStatus" style="margin-top:20px;"></div></div>
-        <div class="card"><h3>🌍 ПОИСК ОНЛАЙН ИГРОКА</h3><button id="searchOnlineBtn">🔍 НАЙТИ СОПЕРНИКА</button><div id="onlineStatus"></div></div>
-    </div>
-
-    <div id="leaderboards" class="tab-pane">
-        <div class="card"><h3>📆 СЕЗОН (5 дней) — ОСТАЛОСЬ: <span id="seasonCountdown" class="countdown">--</span></h3><div id="seasonTop">Загрузка...</div></div>
-        <div class="card"><h3>🏅 ТОП ЗА ВСЕ ВРЕМЯ (макс ЭЛО)</h3><div id="alltimeTop">Загрузка...</div></div>
-    </div>
-
-    <div id="clans" class="tab-pane">
-        <div class="card"><h3>🏰 СОЗДАТЬ / ВСТУПИТЬ В КЛАН</h3>
-        <div class="flex-row"><input type="text" id="clanName" placeholder="Название клана" style="flex:1; padding:10px; border-radius:40px; border:1px solid #ddd;"><button id="createClanBtn">Создать клан</button><button id="refreshClans">Обновить</button></div>
-        <div id="clanList" style="margin-top:20px;"></div></div>
-        <div class="card" id="myClanCard" style="display:none;"><h3>👥 МОЙ КЛАН: <span id="myClanName"></span> <span id="myClanRank" class="clan-rank"></span></h3><div id="clanMembersList"></div><button id="leaveClanBtn" style="background:#dc2626; margin-top:12px;">Покинуть клан</button></div>
-    </div>
+    <div id="pvp" class="tab-pane"><div class="card"><h3>🤖 БОЙ С БОТОМ (10 раундов | AIM TRAINER)</h3><p>⚡ Чем выше ЭЛО — тем быстрее исчезает и меньше цель!</p><button id="startBotAimBtn" style="background:#ff5722">🔥 НАЧАТЬ БОЙ (10 раундов)</button><div id="botBattleStatus" style="margin-top:20px"></div></div><div class="card"><h3>🌍 ПОИСК ОНЛАЙН ИГРОКА</h3><button id="searchOnlineBtn">🔍 НАЙТИ СОПЕРНИКА</button><div id="onlineStatus"></div></div></div>
+    <div id="leaderboards" class="tab-pane"><div class="card"><h3>📆 СЕЗОН (5 дней) — ОСТАЛОСЬ: <span id="seasonCountdown" class="countdown">--</span></h3><div id="seasonTop">Загрузка...</div></div><div class="card"><h3>🏅 ТОП ЗА ВСЕ ВРЕМЯ (макс ЭЛО)</h3><div id="alltimeTop">Загрузка...</div></div></div>
+    <div id="clans" class="tab-pane"><div class="card"><h3>🏰 СОЗДАТЬ / ВСТУПИТЬ В КЛАН</h3><div class="flex-row"><input type="text" id="clanName" placeholder="Название клана" style="flex:1;padding:10px;border-radius:40px;border:1px solid #ddd"><button id="createClanBtn">Создать клан</button><button id="refreshClans">Обновить</button></div><div id="clanList" style="margin-top:20px"></div></div><div class="card" id="myClanCard" style="display:none"><h3>👥 МОЙ КЛАН: <span id="myClanName"></span> <span id="myClanRank" class="clan-rank"></span></h3><div id="clanMembersList"></div><button id="leaveClanBtn" style="background:#dc2626;margin-top:12px">Покинуть клан</button></div></div>
 </div>
-
 <script>
-    // ПРАВИЛЬНАЯ ИНИЦИАЛИЗАЦИЯ FIREBASE
-    const firebaseConfig = {
-        databaseURL: "https://qwenixpvp-default-rtdb.firebaseio.com/"
-    };
+    const firebaseConfig = { databaseURL: "https://qwenixpvp-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -230,24 +139,16 @@
     }
 
     function getEloChange(elo, isWin){
-        if(elo >= 6000){
-            return isWin ? Math.floor(Math.random() * 5) + 2 : -350;
-        }
-        if(elo >= 5000){
-            return isWin ? Math.floor(Math.random() * 5) + 3 : -75;
-        }
+        if(elo >= 6000) return isWin ? Math.floor(Math.random() * 5) + 2 : -350;
+        if(elo >= 5000) return isWin ? Math.floor(Math.random() * 5) + 3 : -75;
         let rank = getRankByElo(elo);
         if(isWin){
             let gain = Math.floor(22 * rank.gainMult);
             return Math.max(5, gain);
-        } else {
-            return -rank.lossPenalty;
-        }
+        } else return -rank.lossPenalty;
     }
 
-    // Сложность: слегка полегче
     function getDifficultyMultiplier(elo){
-        let mult = Math.min(1.8, 0.4 + (elo / 3500));
         return { timeMs: Math.max(550, 2100 - elo / 2.5), size: Math.max(42, 78 - elo / 80) };
     }
 
@@ -275,75 +176,24 @@
         }
     }
 
-    // АНИМАЦИЯ ПОСЛЕ БОЯ (STANDOFF STYLE)
-    function showResultAnimation(eloChange, isWin, oldElo, newElo, oldRank, newRank){
-        return new Promise((resolve) => {
-            let overlay = document.createElement("div");
-            overlay.className = "result-overlay";
-            
-            let resultCard = document.createElement("div");
-            resultCard.className = `result-card ${isWin ? 'win' : 'lose'}`;
-            
-            let rankHtml = `<div class="result-rank">${newRank.name}</div>`;
-            let eloHtml = `<div class="result-elo ${isWin ? 'win' : 'lose'}">${isWin ? '+' : ''}${eloChange}<span> ЭЛО</span></div>`;
-            
-            // вычисляем прогресс для анимации
-            let next = getNextRank(oldElo);
-            let oldProgress = 0;
-            let newProgress = 0;
-            
-            if(next.nextRank !== "MAX RANK" && next.needed > 0){
-                let rankRange = next.nextMin - next.currentMin;
-                oldProgress = ((oldElo - next.currentMin) / rankRange) * 100;
-                newProgress = ((newElo - next.currentMin) / rankRange) * 100;
-                if(newProgress > 100) newProgress = 100;
-                if(newProgress < 0) newProgress = 0;
-            } else if(next.nextRank === "MAX RANK"){
-                oldProgress = 100;
-                newProgress = 100;
-            } else {
-                oldProgress = 100;
-                newProgress = 100;
-            }
-            
-            let progressHtml = `
-                <div class="result-progress">
-                    <div class="result-progress-label">ПРОГРЕСС ДО СЛЕДУЮЩЕГО РАНГА</div>
-                    <div class="result-progress-bar">
-                        <div class="result-progress-fill" id="resultProgressFill" style="width: ${oldProgress}%;"></div>
-                    </div>
-                </div>
-            `;
-            
-            let buttonHtml = `<button class="result-button" id="closeResultBtn">ПРОДОЛЖИТЬ</button>`;
-            
-            resultCard.innerHTML = rankHtml + eloHtml + progressHtml + buttonHtml;
-            overlay.appendChild(resultCard);
-            document.body.appendChild(overlay);
-            
-            // анимируем шкалу
-            setTimeout(() => {
-                let fill = document.getElementById("resultProgressFill");
-                if(fill) fill.style.width = newProgress + "%";
-            }, 100);
-            
-            document.getElementById("closeResultBtn").onclick = () => {
-                overlay.remove();
-                resolve();
-            };
-        });
-    }
-
-    async function initSeason(){
-        let snap = await db.ref('global/season').once('value');
-        let data = snap.val();
-        if(data && data.endTime && Date.now() < data.endTime){
-            currentSeason = data.number;
-            seasonEnd = data.endTime;
-        } else {
-            await forceSeasonReset();
+    // АДМИН-ПРОВЕРКА ИЗ FIREBASE
+    async function checkAdminAndShowButton() {
+        if(!currentUser) return;
+        let adminsSnap = await db.ref('admins').once('value');
+        let admins = adminsSnap.val();
+        let isAdmin = false;
+        if(Array.isArray(admins)) {
+            isAdmin = admins.includes(currentUser.username);
+        } else if(admins && typeof admins === 'object') {
+            isAdmin = Object.values(admins).includes(currentUser.username);
+        } else if(admins === currentUser.username) {
+            isAdmin = true;
         }
-        updateCountdown();
+        if(isAdmin) {
+            document.getElementById("forceSeasonEndBtn").style.display = "block";
+        } else {
+            document.getElementById("forceSeasonEndBtn").style.display = "none";
+        }
     }
 
     async function forceSeasonReset(){
@@ -375,6 +225,18 @@
             await updateUser();
             renderProfile();
         }
+    }
+
+    async function initSeason(){
+        let snap = await db.ref('global/season').once('value');
+        let data = snap.val();
+        if(data && data.endTime && Date.now() < data.endTime){
+            currentSeason = data.number;
+            seasonEnd = data.endTime;
+        } else {
+            await forceSeasonReset();
+        }
+        updateCountdown();
     }
 
     function updateCountdown(){
@@ -441,6 +303,33 @@
         updateRankProgressBar();
     }
 
+    function showResultAnimation(eloChange, isWin, oldElo, newElo, oldRank, newRank){
+        return new Promise((resolve) => {
+            let overlay = document.createElement("div");
+            overlay.className = "result-overlay";
+            let resultCard = document.createElement("div");
+            resultCard.className = `result-card ${isWin ? 'win' : 'lose'}`;
+            let rankHtml = `<div class="result-rank">${newRank.name}</div>`;
+            let eloHtml = `<div class="result-elo ${isWin ? 'win' : 'lose'}">${isWin ? '+' : ''}${eloChange}<span> ЭЛО</span></div>`;
+            let next = getNextRank(oldElo);
+            let oldProgress = 0, newProgress = 0;
+            if(next.nextRank !== "MAX RANK" && next.needed > 0){
+                let rankRange = next.nextMin - next.currentMin;
+                oldProgress = ((oldElo - next.currentMin) / rankRange) * 100;
+                newProgress = ((newElo - next.currentMin) / rankRange) * 100;
+                if(newProgress > 100) newProgress = 100;
+                if(newProgress < 0) newProgress = 0;
+            } else { oldProgress = 100; newProgress = 100; }
+            let progressHtml = `<div class="result-progress"><div class="result-progress-label">ПРОГРЕСС ДО СЛЕДУЮЩЕГО РАНГА</div><div class="result-progress-bar"><div class="result-progress-fill" id="resultProgressFill" style="width: ${oldProgress}%;"></div></div></div>`;
+            let buttonHtml = `<button class="result-button" id="closeResultBtn">ПРОДОЛЖИТЬ</button>`;
+            resultCard.innerHTML = rankHtml + eloHtml + progressHtml + buttonHtml;
+            overlay.appendChild(resultCard);
+            document.body.appendChild(overlay);
+            setTimeout(() => { let fill = document.getElementById("resultProgressFill"); if(fill) fill.style.width = newProgress + "%"; }, 100);
+            document.getElementById("closeResultBtn").onclick = () => { overlay.remove(); resolve(); };
+        });
+    }
+
     function startBotArena(){
         if(!currentUser) return;
         let round = 0, playerWins = 0, botWins = 0;
@@ -457,11 +346,9 @@
             gameDiv.appendChild(stats);
             overlay.appendChild(gameDiv);
             document.body.appendChild(overlay);
-            
             let diff = getDifficultyMultiplier(currentUser.elo);
             let targetSize = diff.size;
             let timeLimit = diff.timeMs;
-            
             let target = document.createElement("div");
             target.className = "target-dot";
             target.style.width = targetSize+"px";
@@ -469,7 +356,6 @@
             target.style.fontSize = (targetSize-10)+"px";
             target.style.background = "radial-gradient(circle, #ff3366, #cc0033)";
             target.innerText = "🎯";
-            
             let reposition = () => {
                 let maxX = gameDiv.clientWidth - targetSize - 20;
                 let maxY = gameDiv.clientHeight - targetSize - 80;
@@ -479,37 +365,24 @@
             reposition();
             window.addEventListener('resize', reposition);
             gameDiv.appendChild(target);
-            
             let timer = setTimeout(()=>{ botWins++; document.body.removeChild(overlay); showAimRound(); }, timeLimit);
             target.onclick = (e)=>{ e.stopPropagation(); clearTimeout(timer); playerWins++; document.body.removeChild(overlay); showAimRound(); };
         }
-        
         async function endBattle(pScore, bScore){
             let isWin = pScore > bScore;
             let oldElo = currentUser.elo;
             let oldRank = getRankByElo(oldElo);
             let eloChange = getEloChange(currentUser.elo, isWin);
-            
-            if(isWin){
-                currentUser.wins++;
-                currentUser.seasonWins++;
-            } else {
-                currentUser.losses++;
-                currentUser.seasonLosses++;
-            }
+            if(isWin){ currentUser.wins++; currentUser.seasonWins++; }
+            else{ currentUser.losses++; currentUser.seasonLosses++; }
             let newElo = currentUser.elo + eloChange;
             if(newElo < 0) newElo = 0;
             if(eloChange < 0 && currentUser.elo >= 5000 && newElo < 1000) newElo = 1000;
             currentUser.elo = newElo;
             if(currentUser.elo > currentUser.maxEloEver) currentUser.maxEloEver = currentUser.elo;
-            
             let newRank = getRankByElo(currentUser.elo);
-            
             await updateUser();
-            
-            // ПОКАЗЫВАЕМ АНИМАЦИЮ
             await showResultAnimation(eloChange, isWin, oldElo, currentUser.elo, oldRank, newRank);
-            
             renderProfile();
             loadLeaderboards();
             document.getElementById("botBattleStatus").innerHTML = `🏁 ФИНАЛ: ${pScore}:${bScore} | ${isWin ? "ПОБЕДА" : "ПОРАЖЕНИЕ"}`;
@@ -609,11 +482,11 @@
         if(saved){
             try{
                 let data = JSON.parse(saved);
-                login(data.username, data.password).then(userData=>{
+                login(data.username, data.password).then(async (userData)=>{
                     currentUser = {username:data.username, password:data.password, ...userData};
                     document.getElementById("authCard").style.display = "none";
                     document.getElementById("profileInfo").style.display = "block";
-                    if(currentUser.username === "qwenix") document.getElementById("forceSeasonEndBtn").style.display = "block";
+                    await checkAdminAndShowButton();
                     renderProfile();
                     initSeason();
                     loadLeaderboards();
@@ -631,7 +504,7 @@
             localStorage.setItem("domofon_user", JSON.stringify({username:u, password:p}));
             document.getElementById("authCard").style.display = "none";
             document.getElementById("profileInfo").style.display = "block";
-            if(currentUser.username === "qwenix") document.getElementById("forceSeasonEndBtn").style.display = "block";
+            await checkAdminAndShowButton();
             renderProfile();
             initSeason();
             loadLeaderboards();
@@ -661,11 +534,19 @@
         }
     };
     document.getElementById("forceSeasonEndBtn").onclick = async ()=>{
-        if(currentUser && currentUser.username === "qwenix"){
-            await forceSeasonReset();
-            alert("Сезон принудительно завершён! Все ЭЛО сконвертированы в трофеи.");
-            if(currentUser) renderProfile();
-            loadLeaderboards();
+        if(currentUser){
+            let adminsSnap = await db.ref('admins').once('value');
+            let admins = adminsSnap.val();
+            let isAdmin = false;
+            if(Array.isArray(admins)) isAdmin = admins.includes(currentUser.username);
+            else if(admins && typeof admins === 'object') isAdmin = Object.values(admins).includes(currentUser.username);
+            else if(admins === currentUser.username) isAdmin = true;
+            if(isAdmin){
+                await forceSeasonReset();
+                alert("Сезон принудительно завершён! Все ЭЛО сконвертированы в трофеи.");
+                if(currentUser) renderProfile();
+                loadLeaderboards();
+            } else alert("У вас нет прав администратора!");
         }
     };
     document.getElementById("uploadAvatarBtnSide").onclick = ()=> document.getElementById("avatarFileInput").click();
