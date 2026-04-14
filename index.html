@@ -1,104 +1,657 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Domofon PvP | Firebase Admin</title>
+    <title>Domofon PvP | GLOBAL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Teko:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
-        body{background:#f0f2f8;height:100vh;overflow:hidden}
-        .sidebar{position:fixed;left:0;top:0;width:280px;height:100vh;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,0.08);border-right:1px solid #e9edf2;padding:24px 0;display:flex;flex-direction:column;z-index:10}
-        .logo{font-size:26px;font-weight:800;padding:0 24px 24px 24px;border-bottom:2px solid #f0f2f8;margin-bottom:20px;background:linear-gradient(135deg,#1e2b6e,#ff5722);-webkit-background-clip:text;background-clip:text;color:transparent}
-        .tab-btn{background:0 0;border:none;padding:14px 24px;text-align:left;font-size:15px;font-weight:600;color:#4a5568;cursor:pointer;transition:.2s;margin:4px 12px;border-radius:14px}
-        .tab-btn:hover{background:#f0f4fe;color:#1e2b6e}
-        .tab-btn.active{background:#1e2b6e;color:#fff;box-shadow:0 4px 12px rgba(30,43,110,0.25)}
-        .telegram-side{margin-top:auto;padding:20px}
-        .telegram-side a{display:flex;align-items:center;gap:10px;background:#eef2ff;padding:12px;border-radius:40px;text-decoration:none;color:#1e2b6e;font-weight:700;justify-content:center}
-        .main-content{margin-left:280px;height:100vh;overflow-y:auto;padding:20px 28px}
-        .tab-pane{display:none;animation:fade .2s ease}
-        .tab-pane.active-pane{display:block}
-        @keyframes fade{from{opacity:0}to{opacity:1}}
-        .card{background:#fff;border-radius:32px;padding:24px;margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,0.04);border:1px solid #edf2f7}
-        .flex-row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
-        button{background:#1e2b6e;color:#fff;border:none;padding:10px 24px;border-radius:40px;font-weight:600;cursor:pointer;transition:.15s}
-        button:active{transform:scale(.96)}
-        .rank-badge{background:linear-gradient(135deg,#f6e05e,#ed8936);padding:6px 16px;border-radius:60px;font-weight:700;display:inline-block}
-        .avatar-img{width:70px;height:70px;border-radius:60px;object-fit:cover;border:3px solid #ffb347}
-        .progress-bar{width:100%;height:12px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin:10px 0}
-        .progress-fill{height:100%;background:linear-gradient(90deg,#1e2b6e,#ff914d);width:0;transition:width .5s ease}
-        .rank-progress-bar{width:100%;height:14px;background:#2d3748;border-radius:20px;overflow:hidden;margin:8px 0}
-        .rank-progress-fill{height:100%;background:linear-gradient(90deg,#f6e05e,#ed8936);width:0;transition:width .6s cubic-bezier(0.4,0,0.2,1)}
-        .aim-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:1000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(8px)}
-        .aim-game{background:#0a0e1a;border-radius:48px;width:95vw;height:90vh;position:relative;overflow:hidden;border:3px solid #ffb347;box-shadow:0 0 40px rgba(0,0,0,0.5)}
-        .target-dot{position:absolute;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px red;transition:.02s linear}
-        .aim-stats{position:absolute;top:20px;left:20px;background:rgba(0,0,0,0.85);padding:12px 24px;border-radius:40px;color:#0f0;font-weight:700;font-size:18px;z-index:10;font-family:monospace}
-        .result-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:2000;display:flex;justify-content:center;align-items:center;animation:fadeIn .2s}
-        .result-card{background:linear-gradient(145deg,#1a1f2e,#0f121f);border-radius:48px;padding:40px 60px;text-align:center;border:2px solid;box-shadow:0 25px 50px -12px #000;animation:slideUp .3s cubic-bezier(0.4,0,0.2,1);min-width:360px}
-        .result-card.win{border-color:#22c55e}
-        .result-card.lose{border-color:#ef4444}
-        .result-rank{font-size:28px;font-weight:700;margin-bottom:16px;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,0.5)}
-        .result-elo{font-size:52px;font-weight:800;margin:20px 0}
-        .result-elo.win{color:#22c55e}
-        .result-elo.lose{color:#ef4444}
-        .result-elo span{font-size:24px}
-        .result-progress{margin:20px 0;text-align:left}
-        .result-progress-label{font-size:12px;color:#9ca3af;margin-bottom:5px}
-        .result-progress-bar{width:100%;height:16px;background:#374151;border-radius:20px;overflow:hidden}
-        .result-progress-fill{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);width:0;transition:width .8s ease-out}
-        .result-button{margin-top:24px;background:#3b82f6;padding:12px 32px;border-radius:40px;border:none;color:#fff;font-weight:700;cursor:pointer;transition:.2s}
-        .result-button:hover{background:#2563eb;transform:scale(1.02)}
-        @keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        @media (max-width:768px){.sidebar{width:80px}.sidebar .logo{font-size:12px;padding:0 12px;text-align:center}.tab-btn{padding:12px 0;text-align:center;font-size:11px;margin:2px 6px}.telegram-side a span{display:none}.main-content{margin-left:80px}.result-card{padding:24px 32px;min-width:280px}.result-elo{font-size:40px}}
-        table{width:100%;border-collapse:collapse}
-        th,td{padding:12px;text-align:left;border-bottom:1px solid #eef2ff}
-        .countdown{font-family:monospace;font-size:22px;font-weight:700;color:#c2410c}
-        .clan-member{padding:8px;background:#f8fafc;margin:5px 0;border-radius:20px}
-        .admin-btn{background:#dc2626;margin-top:10px}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Outfit', sans-serif; background: #f0f3fa; height: 100vh; overflow: hidden; color: #1a1f36; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed; left: 0; top: 0;
+            width: 256px; height: 100vh;
+            background: white;
+            box-shadow: 4px 0 30px rgba(0,0,0,0.06);
+            border-right: 1px solid #edf0f7;
+            padding: 24px 0;
+            display: flex; flex-direction: column;
+            z-index: 10;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+            padding: 0 20px 24px 20px;
+            border-bottom: 1px solid #f0f3fa;
+            margin-bottom: 16px;
+        }
+        .logo-icon { font-size: 26px; }
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 20px; font-weight: 800;
+            background: linear-gradient(135deg, #1e2b6e, #4f6ef7);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .nav-section { padding: 0 10px; flex: 1; }
+        .nav-label {
+            font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+            color: #b0bbd4; padding: 0 10px; margin: 16px 0 6px;
+            text-transform: uppercase;
+        }
+        .tab-btn {
+            background: transparent; border: none;
+            padding: 11px 14px; text-align: left;
+            font-size: 14px; font-weight: 600;
+            color: #6b7898; cursor: pointer;
+            transition: all 0.2s;
+            width: 100%; border-radius: 14px;
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Outfit', sans-serif;
+            margin-bottom: 2px;
+        }
+        .tab-btn .ti { font-size: 18px; width: 22px; text-align: center; }
+        .tab-btn:hover { background: #f4f6fb; color: #1e2b6e; }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1e2b6e, #2d3f9e);
+            color: white;
+            box-shadow: 0 4px 16px rgba(30,43,110,0.25);
+        }
+        .sidebar-footer { padding: 16px; }
+        .tg-link {
+            display: flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, #e8edff, #f0f4ff);
+            padding: 12px 16px; border-radius: 16px;
+            text-decoration: none; color: #1e2b6e;
+            font-weight: 700; font-size: 13px;
+            border: 1px solid #d8e0f7; transition: 0.2s;
+        }
+        .tg-link:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,43,110,0.15); }
+
+        /* ===== MAIN ===== */
+        .main-content {
+            margin-left: 256px; height: 100vh;
+            overflow-y: auto; padding: 24px 28px;
+            background: #f0f3fa;
+        }
+        .tab-pane { display: none; animation: tabFade 0.25s ease; }
+        .tab-pane.active-pane { display: block; }
+        @keyframes tabFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: white; border-radius: 24px;
+            padding: 22px; margin-bottom: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+            border: 1px solid #edf0f7;
+        }
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px; font-weight: 700;
+            color: #1a1f36; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* ===== AUTH ===== */
+        .auth-input {
+            width: 100%; padding: 13px 18px;
+            margin: 7px 0; border-radius: 60px;
+            border: 2px solid #edf0f7;
+            font-family: 'Outfit', sans-serif; font-size: 14px;
+            color: #1a1f36; outline: none; transition: 0.2s;
+            background: #f8f9fd;
+        }
+        .auth-input:focus { border-color: #4f6ef7; background: white; }
+        .btn { font-family: 'Outfit', sans-serif; border: none; cursor: pointer; transition: 0.15s; font-weight: 700; }
+        .btn:active { transform: scale(0.97); }
+        .btn-blue { background: linear-gradient(135deg, #1e2b6e, #2d3f9e); color: white; padding: 11px 24px; border-radius: 40px; font-size: 14px; }
+        .btn-blue:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(30,43,110,0.3); }
+        .btn-orange { background: linear-gradient(135deg, #f0a030, #e87f10); color: white; padding: 11px 24px; border-radius: 40px; font-size: 14px; }
+        .btn-gray { background: #9aa5be; color: white; padding: 11px 24px; border-radius: 40px; font-size: 14px; }
+        .btn-red { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 11px 24px; border-radius: 40px; font-size: 14px; }
+        .btn-red-admin { background: linear-gradient(135deg, #dc2626, #991b1b); color: white; padding: 11px 24px; border-radius: 40px; font-size: 14px; }
+        .btn-fire { background: linear-gradient(135deg, #ff5722, #e64a19); color: white; padding: 11px 24px; border-radius: 40px; font-size: 14px; }
+        .btn-small { padding: 8px 18px; font-size: 13px; border-radius: 30px; }
+
+        /* ===== PROFILE HERO ===== */
+        .profile-hero {
+            background: linear-gradient(135deg, #12195e 0%, #1e2b9a 40%, #162060 100%);
+            border-radius: 28px; padding: 28px;
+            margin-bottom: 18px;
+            position: relative; overflow: hidden;
+        }
+        .profile-hero::before {
+            content: '';
+            position: absolute; top: -60px; right: -60px;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(79,110,247,0.25) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .profile-hero::after {
+            content: '';
+            position: absolute; bottom: -80px; left: 30%;
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(255,145,77,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-top { display: flex; align-items: flex-start; gap: 20px; position: relative; z-index: 1; }
+
+        /* Avatar */
+        .avatar-wrap { position: relative; flex-shrink: 0; }
+        .avatar-img {
+            width: 92px; height: 92px; border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            display: block;
+        }
+        .avatar-ring-glow {
+            position: absolute; inset: -4px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            pointer-events: none;
+        }
+        .ring-bronze { border-color: #cd7f32; box-shadow: 0 0 12px rgba(205,127,50,0.5); }
+        .ring-silver { border-color: #a8b8c8; box-shadow: 0 0 12px rgba(168,184,200,0.5); }
+        .ring-gold { border-color: #ffd700; box-shadow: 0 0 12px rgba(255,215,0,0.6); }
+        .ring-rampager { border-color: #ff4500; box-shadow: 0 0 16px rgba(255,69,0,0.6); }
+        .ring-soys { border-color: #9b59b6; box-shadow: 0 0 14px rgba(155,89,182,0.6); }
+        .ring-elite { border-color: #1abc9c; box-shadow: 0 0 14px rgba(26,188,156,0.6); }
+        .ring-legend { border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,78,80,0.4); animation: legendRingPulse 2s ease-in-out infinite; }
+        @keyframes legendRingPulse { 0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,78,80,0.3); } 50% { box-shadow: 0 0 30px rgba(255,215,0,1), 0 0 60px rgba(255,78,80,0.6); } }
+
+        .avatar-online-dot {
+            position: absolute; bottom: 2px; right: 2px;
+            width: 16px; height: 16px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 2px solid #12195e;
+            box-shadow: 0 0 8px rgba(34,197,94,0.6);
+        }
+
+        /* Profile info */
+        .hero-info { flex: 1; min-width: 0; }
+        .prof-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px; font-weight: 800;
+            color: white; letter-spacing: -0.5px; margin-bottom: 8px;
+        }
+        .rank-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 14px; border-radius: 40px;
+            font-family: 'Syne', sans-serif;
+            font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+            margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.15);
+        }
+        .rank-bronze  { background: linear-gradient(135deg, #7a3a0e, #cd7f32); color: #fff8e8; }
+        .rank-silver  { background: linear-gradient(135deg, #4a5568, #94a3b8); color: white; }
+        .rank-gold    { background: linear-gradient(135deg, #9a6800, #ffd700); color: #fff8d0; }
+        .rank-rampager{ background: linear-gradient(135deg, #7c0000, #ff4500); color: white; }
+        .rank-soys    { background: linear-gradient(135deg, #5b2c82, #9b59b6); color: white; }
+        .rank-elite   { background: linear-gradient(135deg, #0a4a3a, #1abc9c); color: white; }
+        .rank-legend  { background: linear-gradient(135deg, #ff4e50, #f9a825, #ff4e50); background-size: 200%; color: white; animation: legendShine 3s ease-in-out infinite; }
+        @keyframes legendShine { 0%,100% { background-position: 0%; } 50% { background-position: 100%; } }
+
+        .elo-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+        .elo-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1.5px; }
+        .elo-value {
+            font-family: 'Teko', sans-serif;
+            font-size: 42px; font-weight: 600;
+            color: white; line-height: 1;
+        }
+        .rank-to-next { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+        /* Rank progress */
+        .rank-prog-wrap { position: relative; z-index: 1; margin-top: 18px; }
+        .rank-prog-labels {
+            display: flex; justify-content: space-between;
+            font-size: 10px; color: rgba(255,255,255,0.45);
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .rank-prog-bar {
+            width: 100%; height: 7px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 20px; overflow: hidden;
+        }
+        .rank-prog-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            width: 0%; transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+            border-radius: 20px;
+            box-shadow: 0 0 8px rgba(251,191,36,0.6);
+        }
+
+        /* Upload btn */
+        .upload-btn-small {
+            position: absolute; bottom: -6px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white; font-size: 9px; font-weight: 700;
+            padding: 3px 9px; border-radius: 20px;
+            cursor: pointer; white-space: nowrap;
+            font-family: 'Outfit', sans-serif; transition: 0.15s;
+        }
+        .upload-btn-small:hover { background: rgba(255,255,255,0.28); }
+
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 12px; margin-bottom: 18px;
+        }
+        .stat-card {
+            background: white; border-radius: 20px;
+            padding: 16px 12px; text-align: center;
+            border: 1px solid #edf0f7;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .stat-val {
+            font-family: 'Teko', sans-serif;
+            font-size: 32px; font-weight: 600;
+            color: #1e2b6e; line-height: 1;
+        }
+        .stat-lbl { font-size: 10px; color: #b0bbd4; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+
+        /* ===== LEVEL CARD ===== */
+        .level-card {
+            background: white; border-radius: 24px;
+            padding: 20px 22px; margin-bottom: 18px;
+            border: 1px solid #edf0f7;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+        }
+        .level-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .level-left { display: flex; align-items: center; gap: 14px; }
+        .level-num {
+            font-family: 'Teko', sans-serif;
+            font-size: 52px; font-weight: 700;
+            line-height: 1; color: #1e2b6e;
+        }
+        .level-lbl { font-size: 10px; color: #b0bbd4; text-transform: uppercase; letter-spacing: 1px; }
+        .level-max-badge {
+            font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800;
+            background: linear-gradient(135deg, #f59e0b, #ff4e50);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .level-extra { font-size: 14px; color: #f59e0b; font-weight: 700; }
+        .level-right { text-align: right; font-size: 12px; color: #b0bbd4; line-height: 1.5; }
+        .level-right strong { color: #f59e0b; font-family: 'Teko', sans-serif; font-size: 18px; }
+
+        /* Trophy progress row */
+        .trophy-row { display: flex; gap: 3px; margin-bottom: 10px; flex-wrap: wrap; }
+        .trph { font-size: 16px; opacity: 0.18; transition: opacity 0.3s; filter: grayscale(1); }
+        .trph.on { opacity: 1; filter: grayscale(0); }
+
+        .lvl-bar { width: 100%; height: 9px; background: #f0f3fa; border-radius: 20px; overflow: hidden; }
+        .lvl-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            width: 0%; transition: width 0.6s ease;
+            border-radius: 20px;
+        }
+
+        /* ===== LEADERBOARD ===== */
+        .leader-table { width: 100%; border-collapse: collapse; }
+        .leader-table th {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px;
+            color: #b0bbd4; font-weight: 700; padding: 10px 12px; text-align: left;
+            border-bottom: 2px solid #f0f3fa;
+        }
+        .leader-table td { padding: 10px 12px; border-bottom: 1px solid #f8f9fd; vertical-align: middle; }
+        .leader-table tr:last-child td { border-bottom: none; }
+        .leader-table tr:hover td { background: #fafbff; }
+        .l-pos { font-family: 'Teko', sans-serif; font-size: 22px; font-weight: 700; color: #c0cce0; }
+        .l-pos.gold { color: #f59e0b; }
+        .l-pos.silv { color: #94a3b8; }
+        .l-pos.brnz { color: #cd7f32; }
+        .l-player { display: flex; align-items: center; gap: 10px; }
+        .l-av-wrap { position: relative; flex-shrink: 0; }
+        .l-av {
+            width: 38px; height: 38px; border-radius: 50%;
+            object-fit: cover; display: flex; align-items: center;
+            justify-content: center; font-weight: 800; font-size: 15px; color: white;
+        }
+        .l-online-dot {
+            position: absolute; bottom: 0; right: 0;
+            width: 11px; height: 11px; border-radius: 50%;
+            border: 2px solid white;
+        }
+        .l-online-dot.on { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.6); }
+        .l-online-dot.off { background: #d1d5db; }
+        .l-name { font-weight: 600; font-size: 14px; color: #1a1f36; }
+        .l-rank-sub { font-size: 11px; color: #b0bbd4; margin-top: 1px; }
+        .l-elo { font-family: 'Teko', sans-serif; font-size: 24px; font-weight: 600; color: #1e2b6e; }
+
+        /* ===== AIM GAME ===== */
+        .aim-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.96);
+            z-index: 1000; display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .aim-game {
+            background: #07091a; border-radius: 32px;
+            width: 95vw; height: 90vh;
+            position: relative; overflow: hidden;
+            border: 2px solid rgba(255,150,70,0.3);
+            box-shadow: 0 0 80px rgba(0,0,0,0.9), 0 0 120px rgba(255,87,34,0.1);
+        }
+        .target-dot {
+            position: absolute; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.02s linear;
+        }
+        .aim-stats {
+            position: absolute; top: 18px; left: 18px;
+            background: rgba(0,0,0,0.8);
+            padding: 9px 20px; border-radius: 30px;
+            color: #0f0; font-weight: 700; font-size: 17px;
+            z-index: 10; font-family: 'Teko', sans-serif; letter-spacing: 1px;
+            border: 1px solid rgba(0,255,0,0.2);
+        }
+
+        /* ===== RESULT ANIMATION ===== */
+        .result-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88);
+            z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            animation: rFadeIn 0.3s ease;
+            backdrop-filter: blur(14px);
+        }
+        @keyframes rFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .result-card {
+            background: #0c1020;
+            border-radius: 30px;
+            padding: 38px 46px;
+            text-align: center;
+            min-width: 360px; max-width: 460px;
+            position: relative; overflow: hidden;
+            animation: rSlideUp 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes rSlideUp { from { transform: translateY(70px) scale(0.88); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+        .result-card.win {
+            border: 1.5px solid rgba(34,197,94,0.4);
+            box-shadow: 0 0 60px rgba(34,197,94,0.12), 0 30px 70px rgba(0,0,0,0.6);
+        }
+        .result-card.lose {
+            border: 1.5px solid rgba(239,68,68,0.4);
+            box-shadow: 0 0 60px rgba(239,68,68,0.12), 0 30px 70px rgba(0,0,0,0.6);
+        }
+        .result-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        }
+        .result-card.win::before { background: linear-gradient(90deg, transparent 0%, #22c55e 50%, transparent 100%); }
+        .result-card.lose::before { background: linear-gradient(90deg, transparent 0%, #ef4444 50%, transparent 100%); }
+
+        .r-verdict {
+            font-family: 'Syne', sans-serif;
+            font-size: 46px; font-weight: 800;
+            letter-spacing: 3px; margin-bottom: 4px;
+        }
+        .r-verdict.win { color: #22c55e; text-shadow: 0 0 40px rgba(34,197,94,0.4); }
+        .r-verdict.lose { color: #ef4444; text-shadow: 0 0 40px rgba(239,68,68,0.4); }
+
+        .r-score {
+            font-family: 'Teko', sans-serif; font-size: 22px;
+            color: rgba(255,255,255,0.35); margin-bottom: 18px;
+        }
+
+        .r-rank-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 18px; border-radius: 40px;
+            font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .r-rank-up {
+            background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(16,185,129,0.08));
+            border: 1px solid rgba(34,197,94,0.3);
+            border-radius: 14px; padding: 10px 14px;
+            margin-bottom: 14px; font-size: 13px; color: #4ade80;
+            font-weight: 700; display: none;
+            animation: rankUpPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes rankUpPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.75; transform: scale(0.99); } }
+
+        .r-elo-num {
+            font-family: 'Teko', sans-serif;
+            font-size: 80px; font-weight: 700;
+            line-height: 1; margin-bottom: 2px;
+        }
+        .r-elo-num.win { color: #22c55e; }
+        .r-elo-num.lose { color: #ef4444; }
+        .r-elo-lbl { font-size: 11px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+        .r-total { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 20px; }
+        .r-total strong { color: rgba(255,255,255,0.7); font-family: 'Teko', sans-serif; font-size: 18px; }
+
+        .r-prog-wrap { text-align: left; margin-bottom: 24px; }
+        .r-prog-labels {
+            display: flex; justify-content: space-between;
+            font-size: 10px; color: rgba(255,255,255,0.35);
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px;
+        }
+        .r-prog-bar { width: 100%; height: 9px; background: rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden; }
+        .r-prog-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            width: 0%; transition: width 1.1s ease-out;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(251,191,36,0.5);
+        }
+
+        .r-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            padding: 13px 42px; border-radius: 40px; border: none;
+            color: white; font-weight: 700; cursor: pointer;
+            transition: 0.2s; font-size: 15px; letter-spacing: 0.5px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .r-btn:hover { transform: scale(1.04); box-shadow: 0 6px 24px rgba(59,130,246,0.4); }
+
+        /* Confetti */
+        .cparticle {
+            position: fixed; pointer-events: none;
+            border-radius: 2px;
+            animation: cFall linear forwards;
+            z-index: 3000;
+        }
+        @keyframes cFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(900deg); opacity: 0; }
+        }
+
+        /* ===== CLAN ===== */
+        .clan-member {
+            padding: 10px 14px; background: #f8f9fd;
+            margin: 6px 0; border-radius: 14px;
+            font-size: 14px; display: flex; align-items: center; gap: 8px;
+            border: 1px solid #edf0f7;
+        }
+
+        /* ===== MISC ===== */
+        .countdown { font-family: 'Teko', sans-serif; font-size: 26px; font-weight: 600; color: #ef4444; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 68px; }
+            .sidebar .logo-text, .tab-btn span:not(.ti) { display: none; }
+            .tab-btn { justify-content: center; padding: 12px; }
+            .tg-link span:last-child { display: none; }
+            .main-content { margin-left: 68px; padding: 14px; }
+            .result-card { padding: 26px 22px; min-width: 290px; }
+            .r-elo-num { font-size: 60px; }
+            .stats-grid { gap: 8px; }
+        }
     </style>
 </head>
 <body>
+
+<!-- SIDEBAR -->
 <div class="sidebar">
-    <div class="logo">🎯 DOMOFON</div>
-    <button class="tab-btn active" data-tab="profile">👤 ПРОФИЛЬ</button>
-    <button class="tab-btn" data-tab="pvp">⚔️ PVP / БОТ</button>
-    <button class="tab-btn" data-tab="leaderboards">🏆 ТОПЫ</button>
-    <button class="tab-btn" data-tab="clans">🏰 КЛАНЫ</button>
-    <div class="telegram-side"><a href="https://t.me/snarashenie" target="_blank">📱 TG SUPPORT</a></div>
+    <div class="logo">
+        <span class="logo-icon">🎯</span>
+        <span class="logo-text">DOMOFON</span>
+    </div>
+    <div class="nav-section">
+        <div class="nav-label">Навигация</div>
+        <button class="tab-btn active" data-tab="profile"><span class="ti">👤</span><span>ПРОФИЛЬ</span></button>
+        <button class="tab-btn" data-tab="pvp"><span class="ti">⚔️</span><span>PVP / БОТ</span></button>
+        <button class="tab-btn" data-tab="leaderboards"><span class="ti">🏆</span><span>ТОПЫ</span></button>
+        <button class="tab-btn" data-tab="clans"><span class="ti">🏰</span><span>КЛАНЫ</span></button>
+    </div>
+    <div class="sidebar-footer">
+        <a href="https://t.me/snarashenie" target="_blank" class="tg-link">
+            <span>📱</span><span>TG SUPPORT</span>
+        </a>
+    </div>
 </div>
+
+<!-- MAIN -->
 <div class="main-content">
+
+    <!-- PROFILE TAB -->
     <div id="profile" class="tab-pane active-pane">
-        <div class="card" id="authCard">
-            <h3>🔐 ВХОД / РЕГИСТРАЦИЯ</h3>
-            <input type="text" id="loginUser" placeholder="Никнейм" style="width:100%;padding:12px;margin:10px 0;border-radius:60px;border:1px solid #ddd">
-            <input type="password" id="loginPass" placeholder="Пароль" style="width:100%;padding:12px;margin:10px 0;border-radius:60px">
-            <div class="flex-row"><button id="doLogin">Войти</button><button id="doRegister" style="background:#f0b34b">Регистрация</button></div>
-            <div id="authMsg" style="color:red;margin-top:12px"></div>
+        <!-- Auth -->
+        <div class="card" id="authCard" style="max-width:420px;">
+            <div class="card-title">🔐 ВХОД / РЕГИСТРАЦИЯ</div>
+            <input type="text" id="loginUser" class="auth-input" placeholder="Никнейм">
+            <input type="password" id="loginPass" class="auth-input" placeholder="Пароль">
+            <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                <button class="btn btn-blue" id="doLogin">Войти</button>
+                <button class="btn btn-orange" id="doRegister">Регистрация</button>
+            </div>
+            <div id="authMsg" style="color:#ef4444; margin-top:10px; font-size:13px;"></div>
         </div>
-        <div id="profileInfo" style="display:none">
-            <div class="flex-row">
-                <div><img id="profAvatar" class="avatar-img" src="https://via.placeholder.com/70?text=👤"><br><button id="uploadAvatarBtnSide" style="margin-top:8px">📷 Загрузить</button><input type="file" id="avatarFileInput" style="display:none"></div>
-                <div style="flex:1">
-                    <h2 id="profName">---</h2>
-                    <span id="profRank" class="rank-badge">bronze 1</span>
-                    <p>🏆 ЭЛО: <strong id="profElo">0</strong> | 📈 <span id="rankProgressText">0</span> до след. ранга</p>
-                    <div class="rank-progress-bar"><div class="rank-progress-fill" id="rankProgressFill"></div></div>
-                    <div>⭐ УРОВЕНЬ: <span id="profLevel">0</span> <span id="profTrophyExt"></span></div>
-                    <div class="progress-bar"><div class="progress-fill" id="levelProgress"></div></div>
-                    <p>📊 Винрейт: <span id="profWr">0</span>% | 🎯 Сезон: <span id="seasonWl">0/0</span></p>
+
+        <!-- Profile Info -->
+        <div id="profileInfo" style="display:none;">
+            <!-- Hero -->
+            <div class="profile-hero">
+                <div class="hero-top">
+                    <div class="avatar-wrap">
+                        <img id="profAvatar" class="avatar-img" src="https://via.placeholder.com/92?text=?">
+                        <div class="avatar-ring-glow ring-bronze" id="avatarRing"></div>
+                        <div class="avatar-online-dot"></div>
+                        <button class="upload-btn-small" id="uploadAvatarBtnSide">📷 фото</button>
+                        <input type="file" id="avatarFileInput" style="display:none">
+                    </div>
+                    <div class="hero-info">
+                        <div class="prof-name" id="profName">---</div>
+                        <div class="rank-pill rank-bronze" id="profRankBadge">🥉 bronze 1</div>
+                        <div class="elo-row">
+                            <span class="elo-label">ЭЛО</span>
+                            <span class="elo-value" id="profElo">0</span>
+                        </div>
+                        <div class="rank-to-next" id="rankProgressText">0 до следующего ранга</div>
+                    </div>
+                </div>
+                <div class="rank-prog-wrap">
+                    <div class="rank-prog-labels">
+                        <span>ПРОГРЕСС РАНГА</span>
+                        <span id="rankNextName">—</span>
+                    </div>
+                    <div class="rank-prog-bar">
+                        <div class="rank-prog-fill" id="rankProgressFill"></div>
+                    </div>
                 </div>
             </div>
-            <div class="flex-row"><button id="logoutBtnSide" style="background:#aaa">Выйти</button>
-            <button id="forceSeasonEndBtn" class="admin-btn" style="display:none;">⚠️ ЗАВЕРШИТЬ СЕЗОН (ADMIN)</button></div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-val" id="statWr">0%</div>
+                    <div class="stat-lbl">Винрейт</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="statSeason">0/0</div>
+                    <div class="stat-lbl">Сезон В/П</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="statMaxElo">0</div>
+                    <div class="stat-lbl">Макс ЭЛО</div>
+                </div>
+            </div>
+
+            <!-- Level -->
+            <div class="level-card">
+                <div class="level-header">
+                    <div class="level-left">
+                        <div>
+                            <div class="level-lbl">Уровень</div>
+                            <div class="level-num" id="profLevel">0</div>
+                        </div>
+                        <div id="profTrophyExt"></div>
+                    </div>
+                    <div class="level-right" id="levelNextInfo"></div>
+                </div>
+                <div class="trophy-row" id="trophyRow"></div>
+                <div class="lvl-bar"><div class="lvl-bar-fill" id="levelProgress"></div></div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-gray" id="logoutBtnSide">Выйти</button>
+                <button class="btn btn-red-admin" id="forceSeasonEndBtn" style="display:none;">⚠️ ЗАВЕРШИТЬ СЕЗОН (ADMIN)</button>
+            </div>
         </div>
     </div>
-    <div id="pvp" class="tab-pane"><div class="card"><h3>🤖 БОЙ С БОТОМ (10 раундов | AIM TRAINER)</h3><p>⚡ Чем выше ЭЛО — тем быстрее исчезает и меньше цель!</p><button id="startBotAimBtn" style="background:#ff5722">🔥 НАЧАТЬ БОЙ (10 раундов)</button><div id="botBattleStatus" style="margin-top:20px"></div></div><div class="card"><h3>🌍 ПОИСК ОНЛАЙН ИГРОКА</h3><button id="searchOnlineBtn">🔍 НАЙТИ СОПЕРНИКА</button><div id="onlineStatus"></div></div></div>
-    <div id="leaderboards" class="tab-pane"><div class="card"><h3>📆 СЕЗОН (5 дней) — ОСТАЛОСЬ: <span id="seasonCountdown" class="countdown">--</span></h3><div id="seasonTop">Загрузка...</div></div><div class="card"><h3>🏅 ТОП ЗА ВСЕ ВРЕМЯ (макс ЭЛО)</h3><div id="alltimeTop">Загрузка...</div></div></div>
-    <div id="clans" class="tab-pane"><div class="card"><h3>🏰 СОЗДАТЬ / ВСТУПИТЬ В КЛАН</h3><div class="flex-row"><input type="text" id="clanName" placeholder="Название клана" style="flex:1;padding:10px;border-radius:40px;border:1px solid #ddd"><button id="createClanBtn">Создать клан</button><button id="refreshClans">Обновить</button></div><div id="clanList" style="margin-top:20px"></div></div><div class="card" id="myClanCard" style="display:none"><h3>👥 МОЙ КЛАН: <span id="myClanName"></span> <span id="myClanRank" class="clan-rank"></span></h3><div id="clanMembersList"></div><button id="leaveClanBtn" style="background:#dc2626;margin-top:12px">Покинуть клан</button></div></div>
+
+    <!-- PVP TAB -->
+    <div id="pvp" class="tab-pane">
+        <div class="card">
+            <div class="card-title">🤖 БОЙ С БОТОМ (10 раундов | AIM TRAINER)</div>
+            <p style="font-size:14px; color:#b0bbd4; margin-bottom:16px;">⚡ Чем выше ЭЛО — тем быстрее исчезает и меньше цель!</p>
+            <button class="btn btn-fire" id="startBotAimBtn">🔥 НАЧАТЬ БОЙ (10 раундов)</button>
+            <div id="botBattleStatus" style="margin-top:18px; font-size:14px;"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">🌍 ПОИСК ОНЛАЙН ИГРОКА</div>
+            <button class="btn btn-blue" id="searchOnlineBtn">🔍 НАЙТИ СОПЕРНИКА</button>
+            <div id="onlineStatus" style="margin-top:14px; font-size:14px;"></div>
+        </div>
+    </div>
+
+    <!-- LEADERBOARDS TAB -->
+    <div id="leaderboards" class="tab-pane">
+        <div class="card">
+            <div class="card-title">📆 СЕЗОН (5 дней) — ОСТАЛОСЬ: <span id="seasonCountdown" class="countdown">--</span></div>
+            <div id="seasonTop">Загрузка...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">🏅 ТОП ЗА ВСЕ ВРЕМЯ (макс ЭЛО)</div>
+            <div id="alltimeTop">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- CLANS TAB -->
+    <div id="clans" class="tab-pane">
+        <div class="card">
+            <div class="card-title">🏰 СОЗДАТЬ / ВСТУПИТЬ В КЛАН</div>
+            <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="clanName" class="auth-input" placeholder="Название клана" style="flex:1; min-width:160px; margin:0;">
+                <button class="btn btn-blue btn-small" id="createClanBtn">Создать</button>
+                <button class="btn btn-gray btn-small" id="refreshClans">🔄</button>
+            </div>
+            <div id="clanList"></div>
+        </div>
+        <div class="card" id="myClanCard" style="display:none;">
+            <div class="card-title">👥 МОЙ КЛАН: <span id="myClanName"></span> <span id="myClanRank" style="font-size:13px; color:#b0bbd4; font-family:'Outfit',sans-serif; font-weight:500;"></span></div>
+            <div id="clanMembersList"></div>
+            <button class="btn btn-red" style="margin-top:12px;" id="leaveClanBtn">Покинуть клан</button>
+        </div>
+    </div>
+
 </div>
+
 <script>
+    // ===== FIREBASE =====
     const firebaseConfig = { databaseURL: "https://qwenixpvp-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -108,19 +661,19 @@
     let seasonEnd = 0;
 
     const rankTiers = [
-        { minElo:0, name:"bronze 1", lossPenalty:10, gainMult:1.2 },
-        { minElo:250, name:"bronze 2", lossPenalty:16, gainMult:1.0 },
-        { minElo:350, name:"bronze 3", lossPenalty:22, gainMult:0.9 },
-        { minElo:500, name:"silver 1", lossPenalty:30, gainMult:0.82 },
-        { minElo:750, name:"silver 2", lossPenalty:38, gainMult:0.74 },
-        { minElo:950, name:"silver 3", lossPenalty:46, gainMult:0.68 },
-        { minElo:1000, name:"Domofon Gold1", lossPenalty:55, gainMult:0.6 },
-        { minElo:1300, name:"Domofon Gold2", lossPenalty:65, gainMult:0.55 },
-        { minElo:1400, name:"Domofon Gold3", lossPenalty:75, gainMult:0.5 },
-        { minElo:2000, name:"domofon rampager", lossPenalty:90, gainMult:0.44 },
-        { minElo:2500, name:"sырНый soys", lossPenalty:110, gainMult:0.4 },
-        { minElo:3000, name:"domofon Elite", lossPenalty:135, gainMult:0.36 },
-        { minElo:5000, name:"The domofon legend", lossPenalty:170, gainMult:0.32 }
+        { minElo:0,    name:"bronze 1",          icon:"🥉", cls:"rank-bronze", ring:"ring-bronze", lossPenalty:10,  gainMult:1.2 },
+        { minElo:250,  name:"bronze 2",          icon:"🥉", cls:"rank-bronze", ring:"ring-bronze", lossPenalty:16,  gainMult:1.0 },
+        { minElo:350,  name:"bronze 3",          icon:"🥉", cls:"rank-bronze", ring:"ring-bronze", lossPenalty:22,  gainMult:0.9 },
+        { minElo:500,  name:"silver 1",          icon:"🥈", cls:"rank-silver", ring:"ring-silver", lossPenalty:30,  gainMult:0.82 },
+        { minElo:750,  name:"silver 2",          icon:"🥈", cls:"rank-silver", ring:"ring-silver", lossPenalty:38,  gainMult:0.74 },
+        { minElo:950,  name:"silver 3",          icon:"🥈", cls:"rank-silver", ring:"ring-silver", lossPenalty:46,  gainMult:0.68 },
+        { minElo:1000, name:"Domofon Gold1",     icon:"🥇", cls:"rank-gold",   ring:"ring-gold",   lossPenalty:55,  gainMult:0.6 },
+        { minElo:1300, name:"Domofon Gold2",     icon:"🥇", cls:"rank-gold",   ring:"ring-gold",   lossPenalty:65,  gainMult:0.55 },
+        { minElo:1400, name:"Domofon Gold3",     icon:"🥇", cls:"rank-gold",   ring:"ring-gold",   lossPenalty:75,  gainMult:0.5 },
+        { minElo:2000, name:"domofon rampager",  icon:"🔥", cls:"rank-rampager",ring:"ring-rampager",lossPenalty:90, gainMult:0.44 },
+        { minElo:2500, name:"sырНый soys",       icon:"🧀", cls:"rank-soys",   ring:"ring-soys",   lossPenalty:110, gainMult:0.4 },
+        { minElo:3000, name:"domofon Elite",     icon:"💎", cls:"rank-elite",  ring:"ring-elite",  lossPenalty:135, gainMult:0.36 },
+        { minElo:5000, name:"The domofon legend",icon:"👑", cls:"rank-legend", ring:"ring-legend", lossPenalty:170, gainMult:0.32 }
     ];
 
     function getRankByElo(elo){
@@ -132,136 +685,242 @@
     function getNextRank(elo){
         for(let i=0; i<rankTiers.length-1; i++){
             if(elo >= rankTiers[i].minElo && elo < rankTiers[i+1].minElo){
-                return {nextRank:rankTiers[i+1].name, needed:rankTiers[i+1].minElo - elo, currentMin:rankTiers[i].minElo, nextMin:rankTiers[i+1].minElo};
+                return { next: rankTiers[i+1], needed: rankTiers[i+1].minElo - elo, curMin: rankTiers[i].minElo, nextMin: rankTiers[i+1].minElo };
             }
         }
-        return {nextRank:"MAX RANK", needed:0, currentMin:5000, nextMin:5000};
+        return { next: null, needed: 0, curMin: 5000, nextMin: 5000 };
     }
 
     function getEloChange(elo, isWin){
-        if(elo >= 6000) return isWin ? Math.floor(Math.random() * 5) + 2 : -350;
-        if(elo >= 5000) return isWin ? Math.floor(Math.random() * 5) + 3 : -75;
+        if(elo >= 6000) return isWin ? Math.floor(Math.random()*5)+2 : -350;
+        if(elo >= 5000) return isWin ? Math.floor(Math.random()*5)+3 : -75;
         let rank = getRankByElo(elo);
-        if(isWin){
-            let gain = Math.floor(22 * rank.gainMult);
-            return Math.max(5, gain);
-        } else return -rank.lossPenalty;
+        if(isWin){ return Math.max(5, Math.floor(22 * rank.gainMult)); }
+        return -rank.lossPenalty;
     }
 
     function getDifficultyMultiplier(elo){
-        return { timeMs: Math.max(550, 2100 - elo / 2.5), size: Math.max(42, 78 - elo / 80) };
+        return { timeMs: Math.max(550, 2100 - elo/2.5), size: Math.max(42, 78 - elo/80) };
     }
 
     function calcLevel(trophies){
         let lvl = Math.floor(trophies / 180);
-        if(lvl > 50) return {level:50, extra:trophies - 9000, nextExp:0, progress:100};
-        let nextExp = (lvl+1)*180;
-        let currentExp = trophies;
-        let progress = ((currentExp - (lvl*180)) / 180) * 100;
-        return {level:lvl, extra:0, nextExp:nextExp - currentExp, progress:Math.min(100,Math.max(0,progress))};
+        if(lvl >= 50) return { level: 50, extra: trophies - 9000, nextExp: 0, progress: 100 };
+        let progress = ((trophies - lvl*180) / 180) * 100;
+        return { level: lvl, extra: 0, nextExp: (lvl+1)*180 - trophies, progress: Math.min(100, Math.max(0, progress)) };
     }
 
+    // ===== PRESENCE =====
+    function setOnline(){
+        if(!currentUser) return;
+        const ref = db.ref(`presence/${currentUser.username}`);
+        ref.set({ ts: Date.now() });
+        ref.onDisconnect().remove();
+    }
+
+    // ===== RANK PROGRESS =====
     function updateRankProgressBar(){
         if(!currentUser) return;
         let elo = currentUser.elo;
-        let next = getNextRank(elo);
-        if(next.needed <= 0 || next.nextRank === "MAX RANK"){
-            document.getElementById("rankProgressFill").style.width = "100%";
-            document.getElementById("rankProgressText").innerText = "MAX RANK!";
+        let nxt = getNextRank(elo);
+        let fill = document.getElementById("rankProgressFill");
+        let text = document.getElementById("rankProgressText");
+        let nextNameEl = document.getElementById("rankNextName");
+        if(!nxt.next){
+            fill.style.width = "100%";
+            text.innerText = "✦ MAX RANK";
+            if(nextNameEl) nextNameEl.innerText = "MAX";
         } else {
-            let rankRange = next.nextMin - next.currentMin;
-            let progress = ((elo - next.currentMin) / rankRange) * 100;
-            document.getElementById("rankProgressFill").style.width = Math.min(100,progress) + "%";
-            document.getElementById("rankProgressText").innerText = next.needed;
+            let range = nxt.nextMin - nxt.curMin;
+            let pct = ((elo - nxt.curMin) / range) * 100;
+            fill.style.width = Math.min(100, pct) + "%";
+            text.innerText = nxt.needed + " ЭЛО до след. ранга";
+            if(nextNameEl) nextNameEl.innerText = nxt.next.icon + " " + nxt.next.name;
         }
     }
 
-    // АДМИН-ПРОВЕРКА ИЗ FIREBASE
-    async function checkAdminAndShowButton() {
+    // ===== RENDER PROFILE =====
+    function renderProfile(){
         if(!currentUser) return;
-        let adminsSnap = await db.ref('admins').once('value');
-        let admins = adminsSnap.val();
-        let isAdmin = false;
-        if(Array.isArray(admins)) {
-            isAdmin = admins.includes(currentUser.username);
-        } else if(admins && typeof admins === 'object') {
-            isAdmin = Object.values(admins).includes(currentUser.username);
-        } else if(admins === currentUser.username) {
-            isAdmin = true;
-        }
-        if(isAdmin) {
-            document.getElementById("forceSeasonEndBtn").style.display = "block";
+        document.getElementById("profName").innerText = currentUser.username;
+        document.getElementById("profElo").innerText = currentUser.elo;
+        document.getElementById("statMaxElo").innerText = currentUser.maxEloEver || 0;
+
+        let rank = getRankByElo(currentUser.elo);
+
+        // Rank badge
+        let badge = document.getElementById("profRankBadge");
+        badge.className = "rank-pill " + rank.cls;
+        badge.innerHTML = rank.icon + " " + rank.name;
+
+        // Avatar ring
+        let ring = document.getElementById("avatarRing");
+        ring.className = "avatar-ring-glow " + rank.ring;
+
+        // Avatar
+        if(currentUser.avatar) document.getElementById("profAvatar").src = currentUser.avatar;
+
+        // Level
+        let lvl = calcLevel(currentUser.trophies || 0);
+        document.getElementById("profLevel").innerText = lvl.level;
+
+        let trophyExt = document.getElementById("profTrophyExt");
+        let levelNextInfo = document.getElementById("levelNextInfo");
+        let lvlBar = document.getElementById("levelProgress");
+
+        if(lvl.level >= 50){
+            trophyExt.innerHTML = `<div class="level-max-badge">✦ MAX LVL</div>`;
+            levelNextInfo.innerHTML = `<div class="level-extra">+${lvl.extra} 🏆</div><div style="font-size:11px; color:#b0bbd4;">трофеев сверх макс</div>`;
+            lvlBar.style.width = "100%";
         } else {
-            document.getElementById("forceSeasonEndBtn").style.display = "none";
+            trophyExt.innerHTML = "";
+            levelNextInfo.innerHTML = `<div style="font-size:11px; color:#b0bbd4;">До след. уровня</div><div><strong style="color:#f59e0b; font-family:'Teko',sans-serif; font-size:20px;">${lvl.nextExp}</strong> <span style="font-size:12px; color:#b0bbd4;">🏆</span></div>`;
+            lvlBar.style.width = lvl.progress + "%";
+        }
+
+        // Trophy icons (10 icons, fill based on progress)
+        let filled = lvl.level >= 50 ? 10 : Math.round(lvl.progress / 10);
+        let trophyHtml = "";
+        for(let i=0; i<10; i++) trophyHtml += `<span class="trph${i < filled ? ' on' : ''}">🏆</span>`;
+        document.getElementById("trophyRow").innerHTML = trophyHtml;
+
+        // Stats
+        let total = currentUser.wins + currentUser.losses;
+        let wr = total ? Math.round((currentUser.wins/total)*100) : 0;
+        document.getElementById("statWr").innerText = wr + "%";
+        document.getElementById("statSeason").innerText = `${currentUser.seasonWins||0}/${currentUser.seasonLosses||0}`;
+
+        updateRankProgressBar();
+    }
+
+    // ===== ANIMATE NUMBER =====
+    function animateNum(el, from, to, duration){
+        let start = null;
+        function step(ts){
+            if(!start) start = ts;
+            let prog = Math.min((ts-start)/duration, 1);
+            let eased = 1 - Math.pow(1-prog, 3);
+            let cur = Math.round(from + (to-from)*eased);
+            el.textContent = (cur > 0 ? "+" : "") + cur;
+            if(prog < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    // ===== CONFETTI =====
+    function spawnConfetti(){
+        const colors = ["#22c55e","#fbbf24","#3b82f6","#f59e0b","#a78bfa","#34d399","#f472b6"];
+        for(let i=0; i<70; i++){
+            setTimeout(()=>{
+                let p = document.createElement("div");
+                p.className = "cparticle";
+                p.style.cssText = `
+                    left:${Math.random()*100}vw;
+                    top:-14px;
+                    background:${colors[Math.floor(Math.random()*colors.length)]};
+                    animation-duration:${1.5 + Math.random()*2.5}s;
+                    animation-delay:${Math.random()*0.3}s;
+                    width:${5+Math.random()*7}px;
+                    height:${5+Math.random()*7}px;
+                    transform:rotate(${Math.random()*360}deg);
+                `;
+                document.body.appendChild(p);
+                setTimeout(()=> p.remove(), 4500);
+            }, i * 25);
         }
     }
 
-    async function forceSeasonReset(){
-        let snap = await db.ref('global/season').once('value');
-        let data = snap.val();
-        let newNum = (data?.number || 0) + 1;
-        let end = Date.now() + 5*24*3600*1000;
-        await db.ref('global/season').set({number:newNum, endTime:end});
-        currentSeason = newNum;
-        seasonEnd = end;
-        let users = await db.ref('users').once('value');
-        let updates = {};
-        for(let [name,val] of Object.entries(users.val()||{})){
-            let oldElo = val.elo||0;
-            let trophyGain = Math.floor(oldElo / 1.8);
-            updates[`users/${name}/trophies`] = (val.trophies||0) + trophyGain;
-            updates[`users/${name}/elo`] = 0;
-            updates[`users/${name}/seasonWins`] = 0;
-            updates[`users/${name}/seasonLosses`] = 0;
-            let oldMax = val.maxEloEver||0;
-            if(oldElo>oldMax) updates[`users/${name}/maxEloEver`] = oldElo;
-        }
-        await db.ref().update(updates);
-        if(currentUser){
-            let fresh = await db.ref(`users/${currentUser.username}`).once('value');
-            let d = fresh.val();
-            currentUser.elo = d.elo || 0;
-            currentUser.trophies = d.trophies || 0;
-            await updateUser();
-            renderProfile();
-        }
+    // ===== RESULT ANIMATION =====
+    function showResultAnimation(eloChange, isWin, oldElo, newElo, oldRank, newRank, pScore, bScore){
+        return new Promise((resolve) => {
+            // Calculate progress
+            let nxt = getNextRank(oldElo);
+            let oldPct = 0, newPct = 0;
+            if(nxt.next && nxt.needed > 0){
+                let range = nxt.nextMin - nxt.curMin;
+                oldPct = ((oldElo - nxt.curMin) / range) * 100;
+                newPct = Math.max(0, Math.min(100, ((newElo - nxt.curMin) / range) * 100));
+            } else {
+                oldPct = 100; newPct = 100;
+            }
+
+            let rankChanged = newRank.name !== oldRank.name;
+
+            let overlay = document.createElement("div");
+            overlay.className = "result-overlay";
+
+            let card = document.createElement("div");
+            card.className = `result-card ${isWin ? 'win' : 'lose'}`;
+
+            card.innerHTML = `
+                <div class="r-verdict ${isWin?'win':'lose'}">${isWin ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ'}</div>
+                <div class="r-score">${pScore !== undefined ? pScore + ' : ' + bScore : ''}</div>
+                <div class="r-rank-badge ${newRank.cls}" style="margin:0 auto 16px;">${newRank.icon} ${newRank.name}</div>
+                ${rankChanged && isWin ? `<div class="r-rank-up" id="rankUpMsg">🎉 ПОВЫШЕНИЕ РАНГА!</div>` : ''}
+                <div class="r-elo-num ${isWin?'win':'lose'}" id="rEloNum">+0</div>
+                <div class="r-elo-lbl">ЭЛО</div>
+                <div class="r-total">Всего ЭЛО: <strong>${newElo}</strong></div>
+                <div class="r-prog-wrap">
+                    <div class="r-prog-labels">
+                        <span>ПРОГРЕСС РАНГА</span>
+                        <span id="rProgPct">${Math.round(oldPct)}%</span>
+                    </div>
+                    <div class="r-prog-bar">
+                        <div class="r-prog-fill" id="rProgFill" style="width:${oldPct}%;"></div>
+                    </div>
+                </div>
+                <button class="r-btn" id="rCloseBtn">ПРОДОЛЖИТЬ →</button>
+            `;
+
+            overlay.appendChild(card);
+            document.body.appendChild(overlay);
+
+            // Show rank-up
+            if(rankChanged && isWin){
+                setTimeout(()=>{
+                    let el = document.getElementById("rankUpMsg");
+                    if(el) el.style.display = "block";
+                }, 700);
+            }
+
+            // Animate ELO counter
+            setTimeout(()=>{
+                let el = document.getElementById("rEloNum");
+                if(el) animateNum(el, 0, eloChange, 900);
+            }, 200);
+
+            // Animate progress bar
+            setTimeout(()=>{
+                let fill = document.getElementById("rProgFill");
+                let pct = document.getElementById("rProgPct");
+                if(fill) fill.style.width = newPct + "%";
+                if(pct) pct.innerText = Math.round(newPct) + "%";
+            }, 500);
+
+            // Confetti
+            if(isWin) spawnConfetti();
+
+            document.getElementById("rCloseBtn").onclick = ()=>{
+                overlay.remove();
+                resolve();
+            };
+        });
     }
 
-    async function initSeason(){
-        let snap = await db.ref('global/season').once('value');
-        let data = snap.val();
-        if(data && data.endTime && Date.now() < data.endTime){
-            currentSeason = data.number;
-            seasonEnd = data.endTime;
-        } else {
-            await forceSeasonReset();
-        }
-        updateCountdown();
-    }
-
-    function updateCountdown(){
-        if(!seasonEnd) return;
-        let diff = Math.max(0, seasonEnd - Date.now());
-        let days = Math.floor(diff/86400000);
-        let hours = Math.floor((diff%86400000)/3600000);
-        let el = document.getElementById("seasonCountdown");
-        if(el) el.innerText = `${days}д ${hours}ч`;
-    }
-    setInterval(updateCountdown, 60000);
-
-    async function register(u,p){
+    // ===== FIREBASE AUTH =====
+    async function register(u, p){
         let ref = db.ref(`users/${u}`);
         if((await ref.once('value')).exists()) throw new Error("Никнейм занят");
         await ref.set({ password:p, elo:0, trophies:0, wins:0, losses:0, seasonWins:0, seasonLosses:0, maxEloEver:0, avatar:"", clan:"" });
         return true;
     }
 
-    async function login(u,p){
+    async function login(u, p){
         let snap = await db.ref(`users/${u}`).once('value');
         if(!snap.exists()) throw new Error("Аккаунт не найден");
         let d = snap.val();
         if(d.password !== p) throw new Error("Неверный пароль");
-        return { username:u, ...d };
+        return { ...d };
     }
 
     async function updateUser(){
@@ -280,59 +939,11 @@
         renderProfile();
     }
 
-    function renderProfile(){
-        if(!currentUser) return;
-        document.getElementById("profName").innerText = currentUser.username;
-        document.getElementById("profElo").innerText = currentUser.elo;
-        let rank = getRankByElo(currentUser.elo);
-        document.getElementById("profRank").innerText = rank.name;
-        let lvlObj = calcLevel(currentUser.trophies || 0);
-        document.getElementById("profLevel").innerText = lvlObj.level;
-        if(lvlObj.level >= 50){
-            document.getElementById("profTrophyExt").innerHTML = ` MAX + ${lvlObj.extra}`;
-            document.getElementById("levelProgress").style.width = "100%";
-        } else {
-            document.getElementById("profTrophyExt").innerHTML = ` (до след. ${lvlObj.nextExp})`;
-            document.getElementById("levelProgress").style.width = lvlObj.progress + "%";
-        }
-        let total = currentUser.wins+currentUser.losses;
-        let wr = total?Math.round((currentUser.wins/total)*100):0;
-        document.getElementById("profWr").innerText = wr;
-        document.getElementById("seasonWl").innerText = `${currentUser.seasonWins||0}/${currentUser.seasonLosses||0}`;
-        if(currentUser.avatar) document.getElementById("profAvatar").src = currentUser.avatar;
-        updateRankProgressBar();
-    }
-
-    function showResultAnimation(eloChange, isWin, oldElo, newElo, oldRank, newRank){
-        return new Promise((resolve) => {
-            let overlay = document.createElement("div");
-            overlay.className = "result-overlay";
-            let resultCard = document.createElement("div");
-            resultCard.className = `result-card ${isWin ? 'win' : 'lose'}`;
-            let rankHtml = `<div class="result-rank">${newRank.name}</div>`;
-            let eloHtml = `<div class="result-elo ${isWin ? 'win' : 'lose'}">${isWin ? '+' : ''}${eloChange}<span> ЭЛО</span></div>`;
-            let next = getNextRank(oldElo);
-            let oldProgress = 0, newProgress = 0;
-            if(next.nextRank !== "MAX RANK" && next.needed > 0){
-                let rankRange = next.nextMin - next.currentMin;
-                oldProgress = ((oldElo - next.currentMin) / rankRange) * 100;
-                newProgress = ((newElo - next.currentMin) / rankRange) * 100;
-                if(newProgress > 100) newProgress = 100;
-                if(newProgress < 0) newProgress = 0;
-            } else { oldProgress = 100; newProgress = 100; }
-            let progressHtml = `<div class="result-progress"><div class="result-progress-label">ПРОГРЕСС ДО СЛЕДУЮЩЕГО РАНГА</div><div class="result-progress-bar"><div class="result-progress-fill" id="resultProgressFill" style="width: ${oldProgress}%;"></div></div></div>`;
-            let buttonHtml = `<button class="result-button" id="closeResultBtn">ПРОДОЛЖИТЬ</button>`;
-            resultCard.innerHTML = rankHtml + eloHtml + progressHtml + buttonHtml;
-            overlay.appendChild(resultCard);
-            document.body.appendChild(overlay);
-            setTimeout(() => { let fill = document.getElementById("resultProgressFill"); if(fill) fill.style.width = newProgress + "%"; }, 100);
-            document.getElementById("closeResultBtn").onclick = () => { overlay.remove(); resolve(); };
-        });
-    }
-
+    // ===== BOT ARENA =====
     function startBotArena(){
         if(!currentUser) return;
         let round = 0, playerWins = 0, botWins = 0;
+
         function showAimRound(){
             if(round >= 10){ endBattle(playerWins, botWins); return; }
             round++;
@@ -342,54 +953,61 @@
             gameDiv.className = "aim-game";
             let stats = document.createElement("div");
             stats.className = "aim-stats";
-            stats.innerHTML = `🎯 РАУНД ${round}/10 | СЧЁТ: ${playerWins} - ${botWins}`;
+            stats.innerHTML = `🎯 РАУНД ${round}/10 &nbsp;|&nbsp; ${playerWins} — ${botWins}`;
             gameDiv.appendChild(stats);
             overlay.appendChild(gameDiv);
             document.body.appendChild(overlay);
+
             let diff = getDifficultyMultiplier(currentUser.elo);
-            let targetSize = diff.size;
-            let timeLimit = diff.timeMs;
+            let sz = diff.size, t = diff.timeMs;
+
             let target = document.createElement("div");
             target.className = "target-dot";
-            target.style.width = targetSize+"px";
-            target.style.height = targetSize+"px";
-            target.style.fontSize = (targetSize-10)+"px";
-            target.style.background = "radial-gradient(circle, #ff3366, #cc0033)";
+            target.style.cssText = `width:${sz}px; height:${sz}px; font-size:${sz-10}px; background:radial-gradient(circle,#ff3366,#cc0033); box-shadow:0 0 ${sz*0.5}px rgba(255,50,80,0.8);`;
             target.innerText = "🎯";
-            let reposition = () => {
-                let maxX = gameDiv.clientWidth - targetSize - 20;
-                let maxY = gameDiv.clientHeight - targetSize - 80;
-                target.style.left = Math.random() * Math.max(10, maxX)+"px";
-                target.style.top = Math.random() * Math.max(10, maxY)+"px";
+
+            let repos = ()=>{
+                let mx = Math.max(10, gameDiv.clientWidth - sz - 20);
+                let my = Math.max(10, gameDiv.clientHeight - sz - 80);
+                target.style.left = Math.random()*mx+"px";
+                target.style.top = Math.random()*my+"px";
             };
-            reposition();
-            window.addEventListener('resize', reposition);
+            repos();
             gameDiv.appendChild(target);
-            let timer = setTimeout(()=>{ botWins++; document.body.removeChild(overlay); showAimRound(); }, timeLimit);
+
+            let timer = setTimeout(()=>{ botWins++; document.body.removeChild(overlay); showAimRound(); }, t);
             target.onclick = (e)=>{ e.stopPropagation(); clearTimeout(timer); playerWins++; document.body.removeChild(overlay); showAimRound(); };
         }
+
         async function endBattle(pScore, bScore){
             let isWin = pScore > bScore;
             let oldElo = currentUser.elo;
             let oldRank = getRankByElo(oldElo);
             let eloChange = getEloChange(currentUser.elo, isWin);
+
             if(isWin){ currentUser.wins++; currentUser.seasonWins++; }
-            else{ currentUser.losses++; currentUser.seasonLosses++; }
+            else { currentUser.losses++; currentUser.seasonLosses++; }
+
             let newElo = currentUser.elo + eloChange;
             if(newElo < 0) newElo = 0;
             if(eloChange < 0 && currentUser.elo >= 5000 && newElo < 1000) newElo = 1000;
             currentUser.elo = newElo;
             if(currentUser.elo > currentUser.maxEloEver) currentUser.maxEloEver = currentUser.elo;
             let newRank = getRankByElo(currentUser.elo);
+
             await updateUser();
-            await showResultAnimation(eloChange, isWin, oldElo, currentUser.elo, oldRank, newRank);
+            await showResultAnimation(eloChange, isWin, oldElo, currentUser.elo, oldRank, newRank, pScore, bScore);
+
             renderProfile();
             loadLeaderboards();
-            document.getElementById("botBattleStatus").innerHTML = `🏁 ФИНАЛ: ${pScore}:${bScore} | ${isWin ? "ПОБЕДА" : "ПОРАЖЕНИЕ"}`;
+            let status = document.getElementById("botBattleStatus");
+            if(status) status.innerHTML = `🏁 ФИНАЛ: ${pScore}:${bScore} &nbsp; <b style="color:${isWin?'#22c55e':'#ef4444'}">${isWin ? '✅ ПОБЕДА' : '❌ ПОРАЖЕНИЕ'}</b>`;
         }
+
         showAimRound();
     }
 
+    // ===== ONLINE SEARCH =====
     async function searchOnline(){
         if(!currentUser) return;
         document.getElementById("onlineStatus").innerText = "🔍 Поиск...";
@@ -402,46 +1020,86 @@
                 await matchRef.child(currentUser.username).remove();
                 await matchRef.child(opp).remove();
                 matchRef.off();
-                document.getElementById("onlineStatus").innerHTML = `⚔️ Соперник ${opp} найден!`;
+                document.getElementById("onlineStatus").innerHTML = `⚔️ Соперник <b>${opp}</b> найден!`;
                 alert(`Дуэль с ${opp} (полная синхронизация в разработке)`);
             }
         });
-        setTimeout(()=>{ matchRef.off(); if(document.getElementById("onlineStatus").innerText === "🔍 Поиск...") document.getElementById("onlineStatus").innerText = "❌ Не найдено"; }, 15000);
+        setTimeout(()=>{
+            matchRef.off();
+            let el = document.getElementById("onlineStatus");
+            if(el && el.innerText === "🔍 Поиск...") el.innerText = "❌ Не найдено";
+        }, 15000);
     }
 
+    // ===== LEADERBOARDS (with avatars + online) =====
     async function loadLeaderboards(){
-        let usersSnap = await db.ref('users').once('value');
-        let users = usersSnap.val()||{};
-        let seasonArr = Object.entries(users).map(([n,d])=>({name:n, elo:d.elo||0}));
-        seasonArr.sort((a,b)=>b.elo - a.elo);
-        let allArr = Object.entries(users).map(([n,d])=>({name:n, maxE:d.maxEloEver||0}));
-        allArr.sort((a,b)=>b.maxE - a.maxE);
-        let seasonHtml = "<table><tr><th>#</th><th>Игрок</th><th>ЭЛО сезона</th></tr>";
-        seasonArr.slice(0,15).forEach((p,i)=> seasonHtml+=`<tr><td>${i+1}</td><td>${p.name}</td><td><b>${p.elo}</b></td></tr>`);
-        seasonHtml+="</table>";
-        let allHtml = "<table><tr><th>#</th><th>Игрок</th><th>Макс ЭЛО</th></tr>";
-        allArr.slice(0,15).forEach((p,i)=> allHtml+=`<tr><td>${i+1}</td><td>${p.name}</td><td><b>${p.maxE}</b></td></tr>`);
-        allHtml+="</table>";
-        document.getElementById("seasonTop").innerHTML = seasonHtml;
-        document.getElementById("alltimeTop").innerHTML = allHtml;
+        let [usersSnap, presSnap] = await Promise.all([
+            db.ref('users').once('value'),
+            db.ref('presence').once('value')
+        ]);
+        let users = usersSnap.val() || {};
+        let presence = presSnap.val() || {};
+
+        let seasonArr = Object.entries(users).map(([n,d])=>({name:n, elo:d.elo||0, avatar:d.avatar||""})).sort((a,b)=>b.elo-a.elo);
+        let allArr    = Object.entries(users).map(([n,d])=>({name:n, maxE:d.maxEloEver||0, avatar:d.avatar||""})).sort((a,b)=>b.maxE-a.maxE);
+
+        const avatarColors = ["#3b82f6","#8b5cf6","#ef4444","#10b981","#f59e0b","#ec4899","#06b6d4","#84cc16"];
+        function avHtml(p){
+            let isOn = !!presence[p.name];
+            let dotCls = isOn ? 'on' : 'off';
+            let inner = p.avatar
+                ? `<img class="l-av" src="${p.avatar}" style="object-fit:cover;">`
+                : `<div class="l-av" style="background:${avatarColors[p.name.charCodeAt(0)%avatarColors.length]};">${p.name.charAt(0).toUpperCase()}</div>`;
+            return `<div class="l-av-wrap">${inner}<div class="l-online-dot ${dotCls}"></div></div>`;
+        }
+
+        function posCls(i){ return i===0?'gold':i===1?'silv':i===2?'brnz':''; }
+        function posLabel(i){ return i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1; }
+
+        let sHtml = `<table class="leader-table"><tr><th>#</th><th>Игрок</th><th>ЭЛО</th></tr>`;
+        seasonArr.slice(0,15).forEach((p,i)=>{
+            let rank = getRankByElo(p.elo);
+            sHtml += `<tr>
+                <td><span class="l-pos ${posCls(i)}">${posLabel(i)}</span></td>
+                <td><div class="l-player">${avHtml(p)}<div><div class="l-name">${p.name}</div><div class="l-rank-sub">${rank.icon} ${rank.name}</div></div></div></td>
+                <td><span class="l-elo">${p.elo}</span></td>
+            </tr>`;
+        });
+        sHtml += "</table>";
+
+        let aHtml = `<table class="leader-table"><tr><th>#</th><th>Игрок</th><th>Макс ЭЛО</th></tr>`;
+        allArr.slice(0,15).forEach((p,i)=>{
+            aHtml += `<tr>
+                <td><span class="l-pos ${posCls(i)}">${posLabel(i)}</span></td>
+                <td><div class="l-player">${avHtml(p)}<div class="l-name">${p.name}</div></div></td>
+                <td><span class="l-elo">${p.maxE}</span></td>
+            </tr>`;
+        });
+        aHtml += "</table>";
+
+        document.getElementById("seasonTop").innerHTML = sHtml;
+        document.getElementById("alltimeTop").innerHTML = aHtml;
     }
 
+    // ===== CLANS =====
     async function loadClans(){
-        let clans = await db.ref('clans').once('value');
-        let html = "<div style='display:flex; flex-direction:column; gap:12px;'>";
-        for(let [name,data] of Object.entries(clans.val()||{})){
-            html+=`<div style='background:#f8fafc; padding:16px; border-radius:24px;'><b>🏰 ${name}</b> (глава: ${data.leader})<br><button class="joinClanBtn" data-clan="${name}" style="margin-top:8px;">➕ Вступить</button></div>`;
+        let snap = await db.ref('clans').once('value');
+        let html = "<div style='display:flex; flex-direction:column; gap:10px;'>";
+        for(let [name,data] of Object.entries(snap.val()||{})){
+            html += `<div style='background:#f8f9fd; padding:14px 16px; border-radius:18px; border:1px solid #edf0f7; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;'>
+                <div><b>🏰 ${name}</b> <span style='color:#b0bbd4; font-size:12px;'>глава: ${data.leader}</span></div>
+                <button class="btn btn-blue btn-small joinClanBtn" data-clan="${name}">➕ Вступить</button>
+            </div>`;
         }
-        html+="</div>";
-        document.getElementById("clanList").innerHTML = html || "<p>Нет кланов</p>";
+        html += "</div>";
+        document.getElementById("clanList").innerHTML = html || "<p style='color:#b0bbd4; font-size:14px;'>Нет кланов</p>";
         document.querySelectorAll(".joinClanBtn").forEach(btn=>{
             btn.onclick = async ()=>{
                 if(currentUser){
                     await db.ref(`users/${currentUser.username}/clan`).set(btn.dataset.clan);
                     currentUser.clan = btn.dataset.clan;
                     await updateUser();
-                    loadClans();
-                    showMyClan();
+                    loadClans(); showMyClan();
                 }
             };
         });
@@ -450,22 +1108,22 @@
 
     async function showMyClan(){
         if(!currentUser || !currentUser.clan){ document.getElementById("myClanCard").style.display = "none"; return; }
-        let clanSnap = await db.ref(`clans/${currentUser.clan}`).once('value');
-        let clanData = clanSnap.val();
-        if(!clanData){ document.getElementById("myClanCard").style.display = "none"; return; }
+        let cSnap = await db.ref(`clans/${currentUser.clan}`).once('value');
+        let cData = cSnap.val();
+        if(!cData){ document.getElementById("myClanCard").style.display = "none"; return; }
         document.getElementById("myClanCard").style.display = "block";
         document.getElementById("myClanName").innerText = currentUser.clan;
-        let isLeader = clanData.leader === currentUser.username;
+        let isLeader = cData.leader === currentUser.username;
         document.getElementById("myClanRank").innerText = isLeader ? "👑 ЛИДЕР" : "⚔️ УЧАСТНИК";
-        let members = clanData.members || [clanData.leader];
-        let membersHtml = "";
+        let members = cData.members || [cData.leader];
+        let mHtml = "";
         for(let m of members){
-            let userSnap = await db.ref(`users/${m}`).once('value');
-            let userData = userSnap.val() || {};
-            let rank = getRankByElo(userData.elo || 0);
-            membersHtml += `<div class="clan-member">🎮 ${m} — ${rank.name} (${userData.elo || 0} эло)</div>`;
+            let uSnap = await db.ref(`users/${m}`).once('value');
+            let uData = uSnap.val() || {};
+            let rank = getRankByElo(uData.elo || 0);
+            mHtml += `<div class="clan-member">${rank.icon} <b>${m}</b> — <span style='color:#6b7898;'>${rank.name}</span> <span style='color:#b0bbd4; font-size:12px; margin-left:auto;'>${uData.elo||0} ЭЛО</span></div>`;
         }
-        document.getElementById("clanMembersList").innerHTML = membersHtml;
+        document.getElementById("clanMembersList").innerHTML = mHtml;
     }
 
     document.getElementById("leaveClanBtn")?.addEventListener("click", async ()=>{
@@ -477,54 +1135,111 @@
         }
     });
 
-    function autoLogin(){
-        let saved = localStorage.getItem("domofon_user");
-        if(saved){
-            try{
-                let data = JSON.parse(saved);
-                login(data.username, data.password).then(async (userData)=>{
-                    currentUser = {username:data.username, password:data.password, ...userData};
-                    document.getElementById("authCard").style.display = "none";
-                    document.getElementById("profileInfo").style.display = "block";
-                    await checkAdminAndShowButton();
-                    renderProfile();
-                    initSeason();
-                    loadLeaderboards();
-                }).catch(()=>{ localStorage.removeItem("domofon_user"); });
-            }catch(e){}
+    // ===== SEASON =====
+    async function initSeason(){
+        let snap = await db.ref('global/season').once('value');
+        let data = snap.val();
+        if(data && data.endTime && Date.now() < data.endTime){
+            currentSeason = data.number;
+            seasonEnd = data.endTime;
+        } else {
+            await forceSeasonReset();
+        }
+        updateCountdown();
+    }
+
+    async function forceSeasonReset(){
+        let snap = await db.ref('global/season').once('value');
+        let data = snap.val();
+        let newNum = (data?.number || 0) + 1;
+        let end = Date.now() + 5*24*3600*1000;
+        await db.ref('global/season').set({number:newNum, endTime:end});
+        currentSeason = newNum; seasonEnd = end;
+        let users = await db.ref('users').once('value');
+        let updates = {};
+        for(let [name,val] of Object.entries(users.val()||{})){
+            let oldElo = val.elo||0;
+            updates[`users/${name}/trophies`] = (val.trophies||0) + Math.floor(oldElo/1.8);
+            updates[`users/${name}/elo`] = 0;
+            updates[`users/${name}/seasonWins`] = 0;
+            updates[`users/${name}/seasonLosses`] = 0;
+            if(oldElo > (val.maxEloEver||0)) updates[`users/${name}/maxEloEver`] = oldElo;
+        }
+        await db.ref().update(updates);
+        if(currentUser){
+            let fresh = await db.ref(`users/${currentUser.username}`).once('value');
+            let d = fresh.val();
+            currentUser.elo = d.elo||0; currentUser.trophies = d.trophies||0;
+            await updateUser(); renderProfile();
         }
     }
 
+    function updateCountdown(){
+        if(!seasonEnd) return;
+        let diff = Math.max(0, seasonEnd - Date.now());
+        let days = Math.floor(diff/86400000);
+        let hours = Math.floor((diff%86400000)/3600000);
+        let el = document.getElementById("seasonCountdown");
+        if(el) el.innerText = `${days}д ${hours}ч`;
+    }
+    setInterval(updateCountdown, 60000);
+
+    // ===== LOGIN / REGISTER =====
+    function autoLogin(){
+        let saved = localStorage.getItem("domofon_user");
+        if(!saved) return;
+        try{
+            let data = JSON.parse(saved);
+            login(data.username, data.password).then(uData=>{
+                currentUser = {username:data.username, password:data.password, ...uData};
+                document.getElementById("authCard").style.display = "none";
+                document.getElementById("profileInfo").style.display = "block";
+                renderProfile(); initSeason(); loadLeaderboards();
+                setOnline();
+            }).catch(()=>{ localStorage.removeItem("domofon_user"); });
+        }catch(e){}
+    }
+
     document.getElementById("doLogin").onclick = async ()=>{
-        let u = document.getElementById("loginUser").value;
+        let u = document.getElementById("loginUser").value.trim();
         let p = document.getElementById("loginPass").value;
         try{
-            let data = await login(u,p);
-            currentUser = {username:u, password:p, elo:data.elo, trophies:data.trophies||0, wins:data.wins||0, losses:data.losses||0, seasonWins:data.seasonWins||0, seasonLosses:data.seasonLosses||0, maxEloEver:data.maxEloEver||0, avatar:data.avatar||"", clan:data.clan||""};
+            let d = await login(u, p);
+            currentUser = {username:u, password:p, elo:d.elo||0, trophies:d.trophies||0, wins:d.wins||0, losses:d.losses||0, seasonWins:d.seasonWins||0, seasonLosses:d.seasonLosses||0, maxEloEver:d.maxEloEver||0, avatar:d.avatar||"", clan:d.clan||""};
             localStorage.setItem("domofon_user", JSON.stringify({username:u, password:p}));
             document.getElementById("authCard").style.display = "none";
             document.getElementById("profileInfo").style.display = "block";
-            await checkAdminAndShowButton();
-            renderProfile();
-            initSeason();
-            loadLeaderboards();
+            if(currentUser.username==="qwenix") document.getElementById("forceSeasonEndBtn").style.display = "block";
+            renderProfile(); initSeason(); loadLeaderboards();
+            setOnline();
         } catch(e){ document.getElementById("authMsg").innerText = e.message; }
     };
+
     document.getElementById("doRegister").onclick = async ()=>{
-        let u = document.getElementById("loginUser").value;
+        let u = document.getElementById("loginUser").value.trim();
         let p = document.getElementById("loginPass").value;
-        try{ await register(u,p); alert("✅ Регистрация успешна! Теперь войдите."); }
+        try{ await register(u, p); alert("✅ Регистрация успешна! Теперь войдите."); }
         catch(e){ document.getElementById("authMsg").innerText = e.message; }
     };
-    document.getElementById("logoutBtnSide").onclick = ()=>{ currentUser = null; localStorage.removeItem("domofon_user"); document.getElementById("authCard").style.display = "block"; document.getElementById("profileInfo").style.display = "none"; document.getElementById("forceSeasonEndBtn").style.display = "none"; };
-    document.getElementById("startBotAimBtn").onclick = ()=>{ if(currentUser) startBotArena(); };
+
+    document.getElementById("logoutBtnSide").onclick = ()=>{
+        if(currentUser) db.ref(`presence/${currentUser.username}`).remove();
+        currentUser = null;
+        localStorage.removeItem("domofon_user");
+        document.getElementById("authCard").style.display = "block";
+        document.getElementById("profileInfo").style.display = "none";
+        document.getElementById("forceSeasonEndBtn").style.display = "none";
+    };
+
+    document.getElementById("startBotAimBtn").onclick = ()=>{ if(currentUser) startBotArena(); else alert("Войдите в аккаунт"); };
     document.getElementById("searchOnlineBtn").onclick = searchOnline;
     document.getElementById("refreshClans").onclick = loadClans;
+
     document.getElementById("createClanBtn").onclick = async ()=>{
         let cname = document.getElementById("clanName").value.trim();
         if(currentUser && cname){
-            let exists = await db.ref(`clans/${cname}`).once('value');
-            if(exists.exists()){ alert("Клан уже существует"); return; }
+            let ex = await db.ref(`clans/${cname}`).once('value');
+            if(ex.exists()){ alert("Клан уже существует"); return; }
             await db.ref(`clans/${cname}`).set({leader:currentUser.username, members:[currentUser.username]});
             await db.ref(`users/${currentUser.username}/clan`).set(cname);
             currentUser.clan = cname;
@@ -533,22 +1248,16 @@
             alert("Клан создан!");
         }
     };
+
     document.getElementById("forceSeasonEndBtn").onclick = async ()=>{
-        if(currentUser){
-            let adminsSnap = await db.ref('admins').once('value');
-            let admins = adminsSnap.val();
-            let isAdmin = false;
-            if(Array.isArray(admins)) isAdmin = admins.includes(currentUser.username);
-            else if(admins && typeof admins === 'object') isAdmin = Object.values(admins).includes(currentUser.username);
-            else if(admins === currentUser.username) isAdmin = true;
-            if(isAdmin){
-                await forceSeasonReset();
-                alert("Сезон принудительно завершён! Все ЭЛО сконвертированы в трофеи.");
-                if(currentUser) renderProfile();
-                loadLeaderboards();
-            } else alert("У вас нет прав администратора!");
+        if(currentUser && currentUser.username==="qwenix"){
+            await forceSeasonReset();
+            alert("Сезон принудительно завершён! ЭЛО конвертированы в трофеи.");
+            if(currentUser) renderProfile();
+            loadLeaderboards();
         }
     };
+
     document.getElementById("uploadAvatarBtnSide").onclick = ()=> document.getElementById("avatarFileInput").click();
     document.getElementById("avatarFileInput").onchange = (e)=>{
         let file = e.target.files[0];
@@ -558,6 +1267,7 @@
             fr.readAsDataURL(file);
         }
     };
+
     document.querySelectorAll(".tab-btn").forEach(btn=>{
         btn.onclick = ()=>{
             document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active-pane"));
@@ -568,6 +1278,7 @@
             if(btn.dataset.tab==="clans") loadClans();
         };
     });
+
     autoLogin();
     initSeason();
 </script>
