@@ -1,1591 +1,195 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Domofon PvP</title>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<style>
-:root {
-  --primary: #1e2b6e;
-  --primary-light: #eef2ff;
-  --accent: #ff5722;
-  --accent2: #ff914d;
-  --gold: #f59e0b;
-  --green: #22c55e;
-  --red: #ef4444;
-  --bg: #f4f6fb;
-  --card: #ffffff;
-  --border: #e8edf5;
-  --text: #1a202c;
-  --text2: #64748b;
-  --shadow: 0 4px 24px rgba(30,43,110,0.08);
-  --shadow2: 0 8px 32px rgba(30,43,110,0.13);
-}
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Inter',system-ui,sans-serif;}
-body{background:var(--bg);height:100vh;overflow:hidden;color:var(--text);}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domofon PvP | Технические работы</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --card-blue: linear-gradient(180deg, #2563eb 0%, #1e40af 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+        }
 
-/* SIDEBAR */
-.sidebar{position:fixed;left:0;top:0;width:260px;height:100vh;background:var(--card);box-shadow:var(--shadow2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow:hidden;}
-.logo-wrap{padding:22px 22px 18px;border-bottom:1px solid var(--border);}
-.logo{font-size:22px;font-weight:900;background:linear-gradient(135deg,#1e2b6e,#ff5722);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.5px;}
-.logo-sub{font-size:11px;color:var(--text2);margin-top:2px;font-weight:500;}
-.nav{flex:1;padding:12px 12px;overflow-y:auto;}
-.tab-btn{display:flex;align-items:center;gap:10px;background:transparent;border:none;padding:11px 16px;text-align:left;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.18s;margin:2px 0;border-radius:14px;width:100%;}
-.tab-btn .icon{font-size:18px;width:24px;text-align:center;}
-.tab-btn:hover{background:var(--primary-light);color:var(--primary);}
-.tab-btn.active{background:linear-gradient(135deg,#1e2b6e,#3b4fb8);color:white;box-shadow:0 4px 16px rgba(30,43,110,0.3);}
-.sidebar-bottom{padding:16px;border-top:1px solid var(--border);}
-.tg-btn{display:flex;align-items:center;gap:8px;background:var(--primary-light);padding:11px 16px;border-radius:14px;text-decoration:none;color:var(--primary);font-weight:700;font-size:13px;}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-/* MAIN */
-.main-content{margin-left:260px;height:100vh;overflow-y:auto;padding:24px 28px;background:var(--bg);}
-.tab-pane{display:none;animation:fadeUp 0.22s ease;}
-.tab-pane.active-pane{display:block;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+        body {
+            background: var(--bg-gradient);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+        }
 
-/* PAGE HEADER */
-.page-header{margin-bottom:20px;}
-.page-title{font-size:22px;font-weight:800;color:var(--text);}
-.page-sub{font-size:14px;color:var(--text2);margin-top:3px;}
+        .container {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
 
-/* CARD */
-.card{background:var(--card);border-radius:24px;padding:22px;margin-bottom:18px;box-shadow:var(--shadow);border:1px solid var(--border);}
-.card-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        /* Основная карточка в стиле профиля */
+        .maintenance-card {
+            background: var(--card-blue);
+            padding: 40px 20px;
+            border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            margin-bottom: 20px;
+            border: 1px solid var(--glass-border);
+        }
 
-/* INPUTS */
-input[type=text],input[type=password]{width:100%;padding:12px 18px;border-radius:40px;border:1.5px solid var(--border);background:#f8fafc;font-size:14px;color:var(--text);outline:none;transition:border 0.15s;}
-input:focus{border-color:var(--primary);background:white;}
+        .icon-wrapper {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            border: 4px solid var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+        }
 
-/* BUTTONS */
-.btn{background:linear-gradient(135deg,#1e2b6e,#3b4fb8);color:white;border:none;padding:11px 24px;border-radius:40px;font-weight:700;cursor:pointer;transition:all 0.15s;font-size:14px;display:inline-flex;align-items:center;gap:6px;}
-.btn:active{transform:scale(0.95);}
-.btn:hover{box-shadow:0 4px 16px rgba(30,43,110,0.3);}
-.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);}
-.btn-success{background:linear-gradient(135deg,#22c55e,#16a34a);}
-.btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);}
-.btn-gray{background:linear-gradient(135deg,#94a3b8,#64748b);}
-.btn-sm{padding:7px 16px;font-size:12px;}
-button{cursor:pointer;}
+        .status-badge {
+            background: var(--accent-green);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
 
-/* AVATAR */
-.avatar{border-radius:50%;object-fit:cover;border:3px solid var(--border);}
-.av40{width:40px;height:40px;}
-.av56{width:56px;height:56px;}
-.av72{width:72px;height:72px;border-color:#ffb347;}
+        h1 {
+            font-size: 32px;
+            text-transform: lowercase;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
 
-/* RANK BADGES */
-.rank-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:30px;font-weight:700;font-size:12px;white-space:nowrap;}
-.rb-b1{background:linear-gradient(135deg,#cd7f32,#a0522d);color:#fff;}
-.rb-b2{background:linear-gradient(135deg,#b8733a,#7a3b1e);color:#fff;}
-.rb-b3{background:linear-gradient(135deg,#a05c2d,#5e2a0e);color:#fff;}
-.rb-s1{background:linear-gradient(135deg,#b0b8c8,#7a8a9a);color:#fff;}
-.rb-s2{background:linear-gradient(135deg,#909aaa,#5a6a7a);color:#fff;}
-.rb-s3{background:linear-gradient(135deg,#707a8a,#3a4a5a);color:#fff;}
-.rb-g1{background:linear-gradient(135deg,#ffd700,#ffa500);color:#1a1a1a;}
-.rb-g2{background:linear-gradient(135deg,#ffb300,#e67e00);color:#fff;}
-.rb-g3{background:linear-gradient(135deg,#ff9500,#d46000);color:#fff;}
-.rb-r{background:linear-gradient(135deg,#ff4500,#b00000);color:#fff;}
-.rb-sy{background:linear-gradient(135deg,#9b59b6,#5e2a8a);color:#fff;}
-.rb-el{background:linear-gradient(135deg,#00bfff,#0055cc);color:#fff;}
-.rb-lg{background:linear-gradient(135deg,#ffe066,#ff4d00);color:#1a1a1a;box-shadow:0 0 12px rgba(255,200,0,0.4);}
+        .elo-text {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 10px 0;
+        }
 
-/* PROGRESS BARS */
-.prog-wrap{width:100%;height:10px;background:#e8edf5;border-radius:20px;overflow:hidden;margin:6px 0;}
-.prog-fill{height:100%;border-radius:20px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);}
-.prog-elo{background:linear-gradient(90deg,#f6e05e,#ed8936);}
-.prog-lvl{background:linear-gradient(90deg,#1e2b6e,#ff914d);}
-.prog-trophy{background:linear-gradient(90deg,#22c55e,#16a34a);}
+        .description {
+            opacity: 0.8;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 0 10px;
+        }
 
-/* PROFILE STATS GRID */
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
-.stat-box{background:#f8fafc;border-radius:16px;padding:12px;text-align:center;border:1px solid var(--border);}
-.stat-val{font-size:20px;font-weight:800;color:var(--text);}
-.stat-lbl{font-size:11px;color:var(--text2);margin-top:3px;}
+        /* Полоска прогресса (загрузки) */
+        .progress-container {
+            margin-top: 30px;
+            text-align: left;
+        }
 
-/* TABLE */
-table{width:100%;border-collapse:collapse;}
-th{padding:10px 12px;text-align:left;font-size:12px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid var(--border);}
-td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:#f8fafc;}
-tr{cursor:pointer;transition:0.15s;}
+        .progress-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
 
-/* CLAN MEMBER ROW */
-.member-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:16px;margin:6px 0;border:1px solid var(--border);}
-.member-info{flex:1;}
-.member-name{font-weight:700;font-size:14px;}
-.member-sub{font-size:12px;color:var(--text2);margin-top:1px;}
+        .progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
 
-/* SHOP GRID */
-.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:14px;}
-.shop-card{background:#f8fafc;border-radius:20px;padding:18px;text-align:center;border:2px solid var(--border);transition:all 0.18s;}
-.shop-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow);}
-.shop-card.equipped{border-color:var(--green);background:#f0fdf4;}
-.shop-card.locked{opacity:0.55;}
-.shop-icon{font-size:40px;margin-bottom:8px;}
-.shop-name{font-weight:800;font-size:14px;margin-bottom:4px;}
-.shop-desc{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.4;}
+        .progress-fill {
+            height: 100%;
+            width: 65%; /* Уровень готовности */
+            background: var(--accent-orange);
+            border-radius: 10px;
+            box-shadow: 0 0 10px var(--accent-orange);
+        }
 
-/* GOLD BADGE */
-.gold-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:white;padding:3px 12px;border-radius:30px;font-weight:700;font-size:13px;}
+        /* Нижние инфо-блоки */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
 
-/* FRIEND ROWS */
-.friend-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:16px;margin:6px 0;border:1px solid var(--border);}
-.friend-req-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fffbeb;border-radius:16px;margin:6px 0;border:1px solid #fde68a;}
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 25px;
+            color: #1e293b;
+        }
 
-/* NOTIFICATIONS */
-.notify{position:fixed;top:20px;right:20px;background:var(--primary);color:white;padding:13px 22px;border-radius:16px;z-index:9999;font-weight:600;font-size:14px;animation:notifyIn 0.3s ease;box-shadow:var(--shadow2);max-width:320px;}
-@keyframes notifyIn{from{transform:translateX(110%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: #1e3a8a;
+        }
 
-/* COUNTDOWN */
-.countdown{font-family:monospace;font-size:18px;font-weight:800;color:var(--accent);background:#fff5f0;padding:4px 14px;border-radius:30px;display:inline-block;}
-
-/* ===== RESULT OVERLAY ===== */
-.result-overlay{position:fixed;inset:0;background:rgba(10,14,30,0.92);z-index:4000;display:flex;justify-content:center;align-items:center;animation:fadeIn 0.25s ease;}
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.result-card{background:#ffffff;border-radius:36px;padding:0;overflow:hidden;min-width:360px;max-width:440px;width:92%;animation:slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);position:relative;box-shadow:0 30px 60px rgba(0,0,0,0.5);}
-@keyframes slideUp{from{transform:translateY(60px) scale(0.9);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
-.result-header{padding:28px 28px 20px;text-align:center;position:relative;}
-.result-header.win{background:linear-gradient(135deg,#1a5c2a,#22c55e);}
-.result-header.lose{background:linear-gradient(135deg,#5c1a1a,#ef4444);}
-.result-verdict{font-size:32px;font-weight:900;color:white;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,0.3);}
-.result-score{font-size:14px;color:rgba(255,255,255,0.8);margin-top:4px;font-weight:600;}
-.result-body{padding:22px 28px;}
-.result-elo-row{display:flex;justify-content:center;align-items:baseline;gap:6px;margin:8px 0;}
-.result-elo-num{font-size:56px;font-weight:900;line-height:1;}
-.result-elo-num.pos{color:var(--green);}
-.result-elo-num.neg{color:var(--red);}
-.result-elo-lbl{font-size:18px;font-weight:700;color:var(--text2);}
-.result-streak{background:linear-gradient(135deg,#ff8c00,#ff4500);color:white;border-radius:30px;padding:6px 18px;font-weight:800;font-size:15px;display:inline-block;margin:8px 0;}
-.result-section{margin:14px 0;}
-.result-section-label{font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
-.result-rank-row{display:flex;align-items:center;gap:10px;background:#f8fafc;border-radius:16px;padding:12px 16px;border:1px solid var(--border);}
-.result-rank-arrow{font-size:18px;color:var(--text2);}
-.result-prog-bar{width:100%;height:12px;background:#e8edf5;border-radius:20px;overflow:hidden;margin:6px 0;}
-.result-prog-fill{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:20px;transition:width 1s ease-out;}
-.result-lvl-section{background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-radius:16px;padding:14px 16px;margin:12px 0;}
-.result-lvl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.result-lvl-num{font-size:22px;font-weight:900;color:var(--primary);}
-.result-trophy-gain{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;border-radius:30px;padding:4px 14px;font-weight:800;font-size:13px;}
-.result-prog-lvl{height:10px;background:#c7d2fe;border-radius:20px;overflow:hidden;margin:6px 0;}
-.result-prog-lvl-fill{height:100%;background:linear-gradient(90deg,#1e2b6e,#3b4fb8);border-radius:20px;transition:width 1.2s 0.3s ease-out;}
-.result-continue-btn{width:100%;padding:14px;background:linear-gradient(135deg,#1e2b6e,#3b4fb8);color:white;font-size:16px;font-weight:800;border:none;border-radius:0 0 36px 36px;cursor:pointer;transition:0.15s;letter-spacing:0.5px;}
-.result-continue-btn:active{transform:scale(0.98);}
-
-/* CONFETTI CANVAS */
-#confetti-canvas{position:fixed;inset:0;z-index:4500;pointer-events:none;}
-
-/* ===== ONLINE GAME ===== */
-.online-overlay{position:fixed;inset:0;background:#0a0e1a;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.online-header{color:white;text-align:center;padding:20px;}
-.online-title{font-size:20px;font-weight:800;margin-bottom:4px;}
-.online-sub{font-size:14px;color:#94a3b8;}
-.online-arena{display:flex;gap:24px;align-items:flex-start;padding:0 24px;flex-wrap:wrap;justify-content:center;}
-.tap-zone{background:#111827;border-radius:28px;padding:24px;border:3px solid #374151;flex:1;min-width:280px;max-width:360px;text-align:center;position:relative;}
-.tap-zone.mine{border-color:#1e2b6e;}
-.tap-zone.theirs{border-color:#374151;}
-.tap-player{font-size:14px;font-weight:700;color:#94a3b8;margin-bottom:8px;}
-.tap-score{font-size:80px;font-weight:900;color:white;line-height:1;margin:12px 0;}
-.tap-score.mine-score{color:#60a5fa;}
-.tap-score.their-score{color:#f87171;}
-.tap-button{width:100%;padding:20px;font-size:20px;font-weight:900;background:linear-gradient(135deg,#1e2b6e,#3b4fb8);border:none;border-radius:18px;color:white;cursor:pointer;transition:all 0.1s;user-select:none;-webkit-user-select:none;margin-top:8px;}
-.tap-button:active{transform:scale(0.93);background:linear-gradient(135deg,#2563eb,#1e40af);}
-.tap-progress-wrap{margin:12px 0;}
-.tap-progress{width:100%;height:14px;background:#1f2937;border-radius:20px;overflow:hidden;}
-.tap-progress-fill{height:100%;border-radius:20px;transition:width 0.15s;}
-.tap-vs{font-size:28px;font-weight:900;color:white;display:flex;align-items:center;}
-.online-status-bar{color:#94a3b8;font-size:14px;text-align:center;padding:12px;font-weight:600;}
-.online-wait{text-align:center;color:white;padding:40px;}
-.spinner{width:48px;height:48px;border:4px solid #374151;border-top-color:#3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* AIM GAME (BOT) */
-.aim-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:2000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(8px);}
-.aim-game{background:#0a0e1a;border-radius:40px;width:95vw;height:90vh;position:relative;overflow:hidden;border:3px solid #ffb347;}
-.target-dot{position:absolute;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.aim-stats{position:absolute;top:18px;left:18px;background:rgba(0,0,0,0.8);padding:8px 18px;border-radius:30px;color:#0f0;font-weight:700;font-size:15px;z-index:10;font-family:monospace;backdrop-filter:blur(4px);}
-.aim-streak{position:absolute;top:18px;right:18px;background:rgba(255,140,0,0.9);padding:7px 16px;border-radius:30px;color:white;font-weight:800;font-size:14px;z-index:10;}
-
-/* PLAYER MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:5000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);}
-.modal-card{background:white;border-radius:28px;padding:28px;min-width:300px;max-width:420px;width:92%;animation:slideUp 0.3s ease;box-shadow:var(--shadow2);}
-.modal-header{text-align:center;margin-bottom:18px;}
-.modal-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
-.modal-stat{background:#f8fafc;border-radius:14px;padding:12px;text-align:center;}
-.modal-stat-val{font-size:22px;font-weight:800;}
-.modal-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
-
-/* ADMIN */
-.admin-user-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:16px;margin:6px 0;border:1px solid var(--border);}
-
-@media(max-width:768px){
-  .sidebar{width:62px;}
-  .logo-wrap{padding:14px 10px;}
-  .logo,.logo-sub{display:none;}
-  .tab-btn .label{display:none;}
-  .tab-btn{padding:11px 0;justify-content:center;}
-  .main-content{margin-left:62px;padding:14px 12px;}
-  .stat-grid{grid-template-columns:repeat(2,1fr);}
-  .result-card{min-width:300px;}
-  .result-elo-num{font-size:44px;}
-  .online-arena{flex-direction:column;align-items:stretch;}
-}
-</style>
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            opacity: 0.5;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <div class="logo-wrap">
-    <div class="logo">🎯 DOMOFON</div>
-    <div class="logo-sub">PvP Platform</div>
-  </div>
-  <nav class="nav">
-    <button class="tab-btn active" data-tab="profile"><span class="icon">👤</span><span class="label">Профиль</span></button>
-    <button class="tab-btn" data-tab="pvp"><span class="icon">⚔️</span><span class="label">PvP / Бот</span></button>
-    <button class="tab-btn" data-tab="leaderboards"><span class="icon">🏆</span><span class="label">Топы</span></button>
-    <button class="tab-btn" data-tab="clans"><span class="icon">🏰</span><span class="label">Кланы</span></button>
-    <button class="tab-btn" data-tab="friends"><span class="icon">👥</span><span class="label">Друзья</span></button>
-    <button class="tab-btn" data-tab="shop"><span class="icon">🛍️</span><span class="label">Магазин</span></button>
-    <button class="tab-btn" data-tab="admin" id="adminTabBtn" style="display:none;"><span class="icon">🔑</span><span class="label">Админка</span></button>
-  </nav>
-  <div class="sidebar-bottom">
-    <a href="https://t.me/snarashenie" target="_blank" class="tg-btn">📱 <span>TG Support</span></a>
-  </div>
-</div>
-
-<div class="main-content">
-
-  <!-- ПРОФИЛЬ -->
-  <div id="profile" class="tab-pane active-pane">
-    <div class="page-header"><div class="page-title">👤 Профиль</div></div>
-    <div class="card" id="authCard">
-      <div class="card-title">🔐 Вход / Регистрация</div>
-      <input type="text" id="loginUser" placeholder="Никнейм" style="margin-bottom:10px;">
-      <input type="password" id="loginPass" placeholder="Пароль" style="margin-bottom:14px;">
-      <div style="display:flex;gap:10px;">
-        <button class="btn" id="doLogin">Войти</button>
-        <button class="btn btn-gold" id="doRegister">Регистрация</button>
-      </div>
-      <div id="authMsg" style="color:var(--red);margin-top:10px;font-size:14px;"></div>
-    </div>
-    <div id="profileInfo" style="display:none;">
-      <div class="card">
-        <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
-          <div style="text-align:center;">
-            <img id="profAvatar" class="avatar av72" src="https://via.placeholder.com/72?text=👤">
-            <br><button class="btn btn-gray btn-sm" id="uploadAvatarBtnSide" style="margin-top:8px;">📷</button>
-            <input type="file" id="avatarFileInput" style="display:none" accept="image/*">
-          </div>
-          <div style="flex:1;min-width:200px;">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
-              <h2 id="profName" style="font-size:22px;font-weight:900;">---</h2>
-              <span id="profClanTag" style="font-size:13px;color:var(--text2);font-weight:700;"></span>
-            </div>
-            <div id="profRankBadge" style="margin-bottom:10px;"></div>
-
-            <div style="font-size:12px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">ЭЛО → Следующий ранг</div>
-            <div class="prog-wrap"><div class="prog-fill prog-elo" id="rankProgressFill" style="width:0%"></div></div>
-            <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">До следующего ранга: <b id="rankProgressText">--</b></div>
-
-            <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
-              <span>🏆 ЭЛО: <b id="profElo">0</b></span>
-              <span>🔥 Стрик: <b id="profStreak">0</b></span>
-              <span>💰 Голда: <span id="profGold" class="gold-badge">0</span></span>
-            </div>
-          </div>
-        </div>
-        <div class="stat-grid" style="margin-top:14px;">
-          <div class="stat-box"><div class="stat-val" id="profLevel">0</div><div class="stat-lbl">Уровень</div></div>
-          <div class="stat-box"><div class="stat-val" id="profWins">0</div><div class="stat-lbl">Победы</div></div>
-          <div class="stat-box"><div class="stat-val" id="profWr">0%</div><div class="stat-lbl">Винрейт</div></div>
-          <div class="stat-box"><div class="stat-val" id="profTrophies">0</div><div class="stat-lbl">🏆 Трофеи</div></div>
-          <div class="stat-box"><div class="stat-val" id="profSeasonW">0</div><div class="stat-lbl">Сезон побед</div></div>
-          <div class="stat-box"><div class="stat-val" id="profSeasonL">0</div><div class="stat-lbl">Сезон пор.</div></div>
-        </div>
-        <div style="margin-top:12px;">
-          <div style="font-size:12px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Уровень (трофеи)</div>
-          <div class="prog-wrap"><div class="prog-fill prog-lvl" id="levelProgress" style="width:0%"></div></div>
-          <div style="font-size:12px;color:var(--text2);">До след. уровня: <b id="levelNext">--</b></div>
-        </div>
-        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-gray btn-sm" id="logoutBtnSide">Выйти</button>
-          <button class="btn btn-danger btn-sm" id="forceSeasonEndBtn" style="display:none;">⚠️ Завершить сезон</button>
-        </div>
-      </div>
-      <div class="card" id="activeAbilityCard">
-        <div class="card-title">⚡ Активная способность</div>
-        <div id="activeAbilityDisplay" style="color:var(--text2);font-size:14px;">Нет активной способности</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PVP -->
-  <div id="pvp" class="tab-pane">
-    <div class="page-header"><div class="page-title">⚔️ PvP</div></div>
-    <div class="card">
-      <div class="card-title">🤖 Бой с ботом</div>
-      <p style="color:var(--text2);font-size:14px;margin-bottom:12px;">10 раундов. Кликай по цели быстрее бота!</p>
-      <div id="activeAbilityPvpHint" style="font-size:13px;color:var(--primary);margin-bottom:10px;"></div>
-      <button class="btn" id="startBotAimBtn" style="background:linear-gradient(135deg,#ff5722,#ff914d);">🔥 Начать бой</button>
-      <div id="botBattleStatus" style="margin-top:14px;font-size:14px;color:var(--text2);"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">🌍 Онлайн дуэль</div>
-      <p style="color:var(--text2);font-size:14px;margin-bottom:12px;">Кто первый наберёт <b>10 тапов</b> — победит!</p>
-      <button class="btn" id="searchOnlineBtn">🔍 Найти соперника</button>
-      <div id="onlineStatus" style="margin-top:12px;font-size:14px;color:var(--text2);"></div>
-    </div>
-  </div>
-
-  <!-- ТОПЫ -->
-  <div id="leaderboards" class="tab-pane">
-    <div class="page-header">
-      <div class="page-title">🏆 Топы</div>
-      <div class="page-sub">Сезон: <span id="seasonCountdown" class="countdown">--</span></div>
-    </div>
-    <div class="card">
-      <div class="card-title">📆 Топ сезона (текущее ЭЛО)</div>
-      <div id="seasonTop">Загрузка...</div>
-    </div>
-    <div class="card">
-      <div class="card-title">🏅 Топ всех времён (макс ЭЛО)</div>
-      <div id="alltimeTop">Загрузка...</div>
-    </div>
-    <div class="card">
-      <div class="card-title">🏰 Топ кланов</div>
-      <div id="clanTop">Загрузка...</div>
-    </div>
-  </div>
-
-  <!-- КЛАНЫ -->
-  <div id="clans" class="tab-pane">
-    <div class="page-header"><div class="page-title">🏰 Кланы</div></div>
-    <div class="card">
-      <div class="card-title">Создать клан</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <input type="text" id="clanName" placeholder="Название клана" style="flex:2;min-width:140px;">
-        <input type="text" id="clanPrefix" placeholder="Тег (до 5)" style="flex:1;min-width:100px;">
-        <button class="btn btn-sm" id="createClanBtn">Создать</button>
-        <button class="btn btn-gray btn-sm" id="refreshClans">🔄</button>
-      </div>
-    </div>
-    <div class="card" id="myClanCard" style="display:none;">
-      <div class="card-title" id="myClanTitle">👥 Мой клан</div>
-      <div id="myClanRankDisplay" style="margin-bottom:12px;"></div>
-      <div id="clanMembersList"></div>
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-danger btn-sm" id="leaveClanBtn">Покинуть клан</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Все кланы</div>
-      <div id="clanList">Загрузка...</div>
-    </div>
-  </div>
-
-  <!-- ДРУЗЬЯ -->
-  <div id="friends" class="tab-pane">
-    <div class="page-header"><div class="page-title">👥 Друзья</div></div>
-    <div class="card">
-      <div class="card-title">Добавить друга</div>
-      <div style="display:flex;gap:10px;">
-        <input type="text" id="friendReqInput" placeholder="Никнейм игрока" style="flex:1;">
-        <button class="btn btn-sm" id="sendFriendReqBtn">➕ Запрос</button>
-      </div>
-    </div>
-    <div class="card">
-      <div id="friendRequestsSection"></div>
-      <div id="friendsList"></div>
-    </div>
-  </div>
-
-  <!-- МАГАЗИН -->
-  <div id="shop" class="tab-pane">
-    <div class="page-header">
-      <div class="page-title">🛍️ Магазин</div>
-      <div class="page-sub">Голда: <span id="shopGold" class="gold-badge">0</span> &nbsp;·&nbsp; +1 голда за каждую победу</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Способности и скины</div>
-      <div class="shop-grid" id="shopGrid"></div>
-    </div>
-  </div>
-
-  <!-- АДМИНКА -->
-  <div id="admin" class="tab-pane">
-    <div class="page-header"><div class="page-title">🔑 Админ панель</div></div>
-    <div class="card">
-      <div class="card-title">👑 Администраторы</div>
-      <div id="adminsList"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">👤 Все игроки</div>
-      <div style="margin-bottom:12px;">
-        <input type="text" id="adminSearch" placeholder="Поиск игрока..." style="max-width:300px;">
-      </div>
-      <div id="adminUsersList"></div>
-    </div>
-  </div>
-
-</div>
-
-<!-- CONFETTI CANVAS -->
-<canvas id="confetti-canvas" style="display:none;"></canvas>
-
-<!-- PLAYER MODAL -->
-<div id="playerModalOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal()">
-  <div class="modal-card">
-    <div class="modal-header">
-      <img id="modalAvatar" class="avatar av56" src="" style="margin-bottom:8px;">
-      <h2 id="modalName" style="font-size:20px;font-weight:900;"></h2>
-      <div id="modalRankBadge" style="margin:6px 0;"></div>
-      <div id="modalClan" style="color:var(--text2);font-size:13px;"></div>
-    </div>
-    <div class="modal-stat-grid">
-      <div class="modal-stat"><div class="modal-stat-val" id="modalElo">0</div><div class="modal-stat-lbl">ЭЛО</div></div>
-      <div class="modal-stat"><div class="modal-stat-val" id="modalLevel">0</div><div class="modal-stat-lbl">Уровень</div></div>
-      <div class="modal-stat"><div class="modal-stat-val" id="modalWr">0%</div><div class="modal-stat-lbl">Винрейт</div></div>
-      <div class="modal-stat"><div class="modal-stat-val" id="modalTrophies">0</div><div class="modal-stat-lbl">Трофеи</div></div>
-    </div>
-    <div id="modalStreak" style="text-align:center;margin:8px 0;font-weight:700;color:#ff8c00;"></div>
-    <div style="display:flex;gap:10px;margin-top:14px;">
-      <button class="btn btn-sm" style="flex:1;" id="modalAddFriendBtn">➕ Добавить</button>
-      <button class="btn btn-gray btn-sm" style="flex:1;" onclick="closeModal()">Закрыть</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ═══════════════════════════════════════
-// FIREBASE
-// ═══════════════════════════════════════
-const firebaseConfig = { databaseURL: "https://qwenixpvp-default-rtdb.firebaseio.com/" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let currentUser = null;
-let seasonEnd = 0;
-
-// ═══════════════════════════════════════
-// РАНГИ
-// ═══════════════════════════════════════
-const RANKS = [
-  { min:0,    name:"Bronze 1",         cls:"rb-b1", icon:"🥉", loss:10,  gain:1.2  },
-  { min:250,  name:"Bronze 2",         cls:"rb-b2", icon:"🥉", loss:16,  gain:1.0  },
-  { min:350,  name:"Bronze 3",         cls:"rb-b3", icon:"🥉", loss:22,  gain:0.9  },
-  { min:500,  name:"Silver 1",         cls:"rb-s1", icon:"🥈", loss:30,  gain:0.82 },
-  { min:750,  name:"Silver 2",         cls:"rb-s2", icon:"🥈", loss:38,  gain:0.74 },
-  { min:950,  name:"Silver 3",         cls:"rb-s3", icon:"🥈", loss:46,  gain:0.68 },
-  { min:1000, name:"Domofon Gold I",   cls:"rb-g1", icon:"🥇", loss:55,  gain:0.6  },
-  { min:1300, name:"Domofon Gold II",  cls:"rb-g2", icon:"🥇", loss:65,  gain:0.55 },
-  { min:1400, name:"Domofon Gold III", cls:"rb-g3", icon:"🥇", loss:75,  gain:0.5  },
-  { min:2000, name:"Rampager",         cls:"rb-r",  icon:"💀", loss:90,  gain:0.44 },
-  { min:2500, name:"sырНый soys",      cls:"rb-sy", icon:"🧀", loss:110, gain:0.4  },
-  { min:3000, name:"Domofon Elite",    cls:"rb-el", icon:"💎", loss:135, gain:0.36 },
-  { min:5000, name:"The Legend",       cls:"rb-lg", icon:"👑", loss:170, gain:0.32 }
-];
-
-function getRank(elo) {
-  let r = RANKS[0];
-  for (let x of RANKS) if (elo >= x.min) r = x;
-  return r;
-}
-function getNextRank(elo) {
-  for (let i = 0; i < RANKS.length - 1; i++)
-    if (elo >= RANKS[i].min && elo < RANKS[i+1].min)
-      return { r: RANKS[i+1], needed: RANKS[i+1].min - elo, curMin: RANKS[i].min, nxtMin: RANKS[i+1].min };
-  return { r: null, needed: 0, curMin: 5000, nxtMin: 5000 };
-}
-function rankPill(elo) {
-  let r = getRank(elo);
-  return `<span class="rank-pill ${r.cls}">${r.icon} ${r.name}</span>`;
-}
-
-// ═══════════════════════════════════════
-// ЭЛО / УРОВЕНЬ
-// ═══════════════════════════════════════
-function calcEloChange(elo, isWin, streak) {
-  // После 5000 ЭЛО — только +1
-  if (elo >= 5000) {
-    return isWin ? 1 : -Math.max(20, RANKS[RANKS.length-1].loss);
-  }
-  let r = getRank(elo);
-  if (isWin) {
-    let base = Math.max(5, Math.floor(22 * r.gain));
-    // Винстрик бонус: макс +5
-    let bonus = Math.min(5, Math.max(0, streak - 1));
-    return base + bonus;
-  }
-  return -r.loss;
-}
-
-function calcLevel(trophies) {
-  const PER_LEVEL = 180;
-  let lvl = Math.floor(trophies / PER_LEVEL);
-  if (lvl > 50) return { level: 50, progress: 100, toNext: 0, extra: trophies - 9000 };
-  let inLevel = trophies - lvl * PER_LEVEL;
-  return { level: lvl, progress: (inLevel / PER_LEVEL) * 100, toNext: PER_LEVEL - inLevel, extra: 0 };
-}
-
-// ═══════════════════════════════════════
-// БЕЗОПАСНОСТЬ — хэш пароля
-// ═══════════════════════════════════════
-function hashStr(s) {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) + s.charCodeAt(i) | 0;
-  return (h >>> 0).toString(36);
-}
-
-// ═══════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════
-async function doRegister(u, p) {
-  let ref = db.ref(`users/${u}`);
-  if ((await ref.once('value')).exists()) throw new Error("Никнейм занят");
-  await ref.set({
-    pwHash: hashStr(p), elo: 0, trophies: 0, wins: 0, losses: 0,
-    seasonWins: 0, seasonLosses: 0, maxEloEver: 0, avatar: "",
-    clan: "", gold: 0, winStreak: 0, ownedItems: [],
-    equippedAbility: "", equippedSkin: "", friends: [], friendRequests: []
-  });
-}
-async function doLogin(u, p) {
-  let snap = await db.ref(`users/${u}`).once('value');
-  if (!snap.exists()) throw new Error("Аккаунт не найден");
-  let d = snap.val();
-  if (d.banned) throw new Error("🚫 Аккаунт заблокирован: " + (d.banReason || "нарушение правил"));
-  if (d.pwHash !== undefined) {
-    if (d.pwHash !== hashStr(p)) throw new Error("Неверный пароль");
-  } else if (d.password !== undefined) {
-    if (d.password !== p) throw new Error("Неверный пароль");
-    await db.ref(`users/${u}`).update({ pwHash: hashStr(p), password: null });
-  } else throw new Error("Ошибка аккаунта");
-  return d;
-}
-
-// ═══════════════════════════════════════
-// СЕРВЕР — обновление статистики
-// ═══════════════════════════════════════
-const ALLOWED_FIELDS = ["elo","trophies","wins","losses","seasonWins","seasonLosses",
-  "maxEloEver","avatar","clan","gold","winStreak","ownedItems","equippedAbility",
-  "equippedSkin","friends","friendRequests"];
-
-async function saveStats(fields) {
-  if (!currentUser) return;
-  let upd = {};
-  for (let k of ALLOWED_FIELDS) if (fields[k] !== undefined) { upd[k] = fields[k]; currentUser[k] = fields[k]; }
-  await db.ref(`users/${currentUser.username}`).update(upd);
-  renderProfile();
-}
-
-// ═══════════════════════════════════════
-// РЕНДЕР ПРОФИЛЯ
-// ═══════════════════════════════════════
-function renderProfile() {
-  if (!currentUser) return;
-  let u = currentUser;
-  document.getElementById("profName").innerText = u.username;
-  document.getElementById("profElo").innerText = u.elo || 0;
-  document.getElementById("profStreak").innerText = "🔥×" + (u.winStreak || 0);
-  document.getElementById("profGold").innerText = u.gold || 0;
-  document.getElementById("shopGold").innerText = u.gold || 0;
-  document.getElementById("profWins").innerText = u.wins || 0;
-  document.getElementById("profTrophies").innerText = u.trophies || 0;
-  document.getElementById("profSeasonW").innerText = u.seasonWins || 0;
-  document.getElementById("profSeasonL").innerText = u.seasonLosses || 0;
-  let total = (u.wins || 0) + (u.losses || 0);
-  document.getElementById("profWr").innerText = total ? Math.round((u.wins / total) * 100) + "%" : "0%";
-  // Rank badge
-  document.getElementById("profRankBadge").innerHTML = rankPill(u.elo || 0);
-  // Clan tag
-  document.getElementById("profClanTag").innerText = u.clan ? `[${u.clan}]` : "";
-  // Rank progress
-  let next = getNextRank(u.elo || 0);
-  if (!next.r) {
-    document.getElementById("rankProgressFill").style.width = "100%";
-    document.getElementById("rankProgressText").innerText = "MAX";
-  } else {
-    let pct = ((u.elo - next.curMin) / (next.nxtMin - next.curMin)) * 100;
-    document.getElementById("rankProgressFill").style.width = Math.min(100, Math.max(0, pct)) + "%";
-    document.getElementById("rankProgressText").innerText = next.needed + " ЭЛО";
-  }
-  // Level progress
-  let lvl = calcLevel(u.trophies || 0);
-  document.getElementById("profLevel").innerText = lvl.level;
-  document.getElementById("levelProgress").style.width = lvl.progress + "%";
-  document.getElementById("levelNext").innerText = lvl.toNext ? lvl.toNext + " трофеев" : "MAX";
-  // Avatar
-  if (u.avatar) document.getElementById("profAvatar").src = u.avatar;
-  renderActiveAbility();
-}
-
-// ═══════════════════════════════════════
-// МАГАЗИН
-// ═══════════════════════════════════════
-const SHOP = [
-  { id:"bigButtons",  name:"Большие кнопки", desc:"Цель увеличивается ×2 на 2 сек (1 раз за бой)",    icon:"🔍", price:100, type:"ability" },
-  { id:"autoClick",   name:"Авто-клик",      desc:"Через 1 сек автоматический клик по цели",           icon:"⚡", price:150, type:"ability" },
-  { id:"skinRed",     name:"Красный прицел", desc:"Огненный стиль прицела",                            icon:"🔴", price:80,  type:"skin"    },
-  { id:"skinBlue",    name:"Синий прицел",   desc:"Ледяной стиль прицела",                             icon:"🔵", price:80,  type:"skin"    },
-  { id:"skinGold",    name:"Золотой прицел", desc:"Эксклюзивный золотой прицел",                       icon:"⭐", price:300, type:"skin"    },
-  { id:"skinRainbow", name:"Радуга",          desc:"Радужный прицел",                                   icon:"🌈", price:200, type:"skin"    }
-];
-
-function renderShop() {
-  let gold = currentUser ? (currentUser.gold || 0) : 0;
-  document.getElementById("shopGold").innerText = gold;
-  if (!currentUser) { document.getElementById("shopGrid").innerHTML = "<p style='color:var(--text2)'>Войдите в аккаунт</p>"; return; }
-  let owned = currentUser.ownedItems || [];
-  let eqA = currentUser.equippedAbility || "";
-  let eqS = currentUser.equippedSkin || "";
-  let grid = document.getElementById("shopGrid");
-  grid.innerHTML = "";
-  for (let item of SHOP) {
-    let isOwned = owned.includes(item.id);
-    let isEq = (item.type === "ability" && eqA === item.id) || (item.type === "skin" && eqS === item.id);
-    let div = document.createElement("div");
-    div.className = "shop-card" + (isEq ? " equipped" : "") + (!isOwned && gold < item.price ? " locked" : "");
-    div.innerHTML = `<div class="shop-icon">${item.icon}</div>
-      <div class="shop-name">${item.name}</div>
-      <div class="shop-desc">${item.desc}</div>
-      ${isOwned
-        ? `<button class="btn btn-sm ${isEq ? "btn-success" : ""}" onclick="equipItem('${item.id}','${item.type}')">${isEq ? "✅ Одет" : "Надеть"}</button>`
-        : `<button class="btn btn-sm ${gold < item.price ? "btn-gray" : "btn-gold"}" onclick="buyItem('${item.id}')">💰 ${item.price}</button>`
-      }`;
-    grid.appendChild(div);
-  }
-  renderActiveAbility();
-}
-
-async function buyItem(id) {
-  if (!currentUser) return;
-  let item = SHOP.find(x => x.id === id);
-  if (!item || (currentUser.gold || 0) < item.price) { showNotify("❌ Не хватает голды!"); return; }
-  let owned = [...(currentUser.ownedItems || [])];
-  if (owned.includes(id)) return;
-  owned.push(id);
-  await saveStats({ gold: (currentUser.gold || 0) - item.price, ownedItems: owned });
-  showNotify(`✅ Куплено: ${item.name}`);
-  renderShop();
-}
-
-async function equipItem(id, type) {
-  if (!currentUser) return;
-  if (type === "ability") {
-    await saveStats({ equippedAbility: currentUser.equippedAbility === id ? "" : id });
-  } else {
-    await saveStats({ equippedSkin: currentUser.equippedSkin === id ? "" : id });
-  }
-  renderShop();
-}
-
-function renderActiveAbility() {
-  let ab = currentUser ? (currentUser.equippedAbility || "") : "";
-  let item = SHOP.find(x => x.id === ab);
-  let el = document.getElementById("activeAbilityDisplay");
-  let el2 = document.getElementById("activeAbilityPvpHint");
-  if (item) {
-    if (el) el.innerHTML = `${item.icon} <b>${item.name}</b> — ${item.desc}`;
-    if (el2) el2.innerHTML = `⚡ Способность: ${item.icon} ${item.name}`;
-  } else {
-    if (el) el.innerHTML = "Нет активной способности";
-    if (el2) el2.innerHTML = "";
-  }
-}
-
-// ═══════════════════════════════════════
-// КРАСИВАЯ АНИМАЦИЯ РЕЗУЛЬТАТА
-// ═══════════════════════════════════════
-function showResult({ eloChange, isWin, oldElo, newElo, oldRank, newRank, winStreak, trophyGain, oldLevel, newLevel, oldLvlProg, newLvlProg }) {
-  return new Promise(resolve => {
-    if (isWin) startConfetti();
-
-    let overlay = document.createElement("div");
-    overlay.className = "result-overlay";
-
-    let next = getNextRank(oldElo);
-    let oldPct = 0, newPct = 0;
-    if (next.r) {
-      let rng = next.nxtMin - next.curMin;
-      oldPct = Math.min(100, Math.max(0, ((oldElo - next.curMin) / rng) * 100));
-      newPct = Math.min(100, Math.max(0, ((newElo - next.curMin) / rng) * 100));
-    } else { oldPct = newPct = 100; }
-
-    let levelUp = newLevel > oldLevel;
-    let streakBonus = isWin && winStreak >= 2 ? Math.min(5, winStreak - 1) : 0;
-
-    overlay.innerHTML = `<div class="result-card">
-      <div class="result-header ${isWin ? "win" : "lose"}">
-        <div class="result-verdict">${isWin ? "🏆 ПОБЕДА!" : "💀 ПОРАЖЕНИЕ"}</div>
-        <div class="result-score">${isWin ? "Отличная игра!" : "Попробуй ещё раз"}</div>
-      </div>
-      <div class="result-body">
-        <div class="result-elo-row">
-          <div class="result-elo-num ${isWin ? "pos" : "neg"}">${isWin ? "+" : ""}${eloChange}</div>
-          <div class="result-elo-lbl">ЭЛО</div>
-        </div>
-        ${winStreak >= 2 && isWin ? `<div style="text-align:center"><span class="result-streak">🔥 СТРИК ×${winStreak} +${streakBonus} бонус</span></div>` : ""}
+<div class="container">
+    <div class="maintenance-card">
+        <div class="status-badge">DOMOFON ELITE</div>
         
-        <div class="result-section">
-          <div class="result-section-label">Ранг</div>
-          <div class="result-rank-row">
-            <span class="rank-pill ${oldRank.cls}">${oldRank.icon} ${oldRank.name}</span>
-            <span class="result-rank-arrow">→</span>
-            <span class="rank-pill ${newRank.cls}">${newRank.icon} ${newRank.name}</span>
-          </div>
-          <div class="result-prog-bar"><div class="result-prog-fill" id="rPF" style="width:${oldPct}%"></div></div>
-          <div style="font-size:11px;color:var(--text2);text-align:right;">${newElo} ЭЛО</div>
+        <div class="icon-wrapper">
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
         </div>
 
-        ${trophyGain > 0 ? `
-        <div class="result-lvl-section">
-          <div class="result-lvl-row">
-            <span style="font-size:13px;font-weight:700;color:var(--primary)">🏆 Трофеи</span>
-            <span class="result-trophy-gain">+${trophyGain} 🏆</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:13px;color:var(--text2)">Уровень</span>
-            <div class="result-lvl-num">${oldLevel}${levelUp ? ` → <span style="color:var(--accent);">${newLevel} ⬆️</span>` : ""}</div>
-          </div>
-          <div class="result-prog-lvl"><div class="result-prog-lvl-fill" id="rLF" style="width:${oldLvlProg}%"></div></div>
-          ${levelUp ? `<div style="text-align:center;margin-top:6px;font-weight:800;color:var(--primary);font-size:15px;">🎉 НОВЫЙ УРОВЕНЬ!</div>` : ""}
-        </div>` : ""}
-      </div>
-      <button class="result-continue-btn" id="rContinueBtn">ПРОДОЛЖИТЬ →</button>
-    </div>`;
+        <h1>domofon</h1>
+        <div class="elo-text">UPDATE</div>
+        
+        <p class="description">
+            Мы проводим технические работы по улучшению серверов. Скоро вернемся в строй!
+        </p>
 
-    document.body.appendChild(overlay);
-
-    setTimeout(() => {
-      let f = document.getElementById("rPF"); if (f) f.style.width = newPct + "%";
-      let l = document.getElementById("rLF"); if (l) l.style.width = newLvlProg + "%";
-    }, 150);
-
-    document.getElementById("rContinueBtn").onclick = () => {
-      overlay.remove();
-      stopConfetti();
-      resolve();
-    };
-  });
-}
-
-// ═══════════════════════════════════════
-// КОНФЕТТИ
-// ═══════════════════════════════════════
-let confettiAF = null;
-function startConfetti() {
-  let canvas = document.getElementById("confetti-canvas");
-  canvas.style.display = "block";
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  let ctx = canvas.getContext("2d");
-  let particles = [];
-  let colors = ["#1e2b6e","#ff5722","#fbbf24","#22c55e","#3b82f6","#ec4899","#8b5cf6"];
-  for (let i = 0; i < 120; i++) {
-    particles.push({
-      x: Math.random() * canvas.width, y: -10 - Math.random() * 200,
-      w: 8 + Math.random() * 8, h: 4 + Math.random() * 6,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      rot: Math.random() * Math.PI * 2, rotV: (Math.random() - 0.5) * 0.2,
-      vx: (Math.random() - 0.5) * 4, vy: 2 + Math.random() * 3
-    });
-  }
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let p of particles) {
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-      ctx.restore();
-      p.x += p.vx; p.y += p.vy; p.rot += p.rotV; p.vy += 0.05;
-    }
-    particles = particles.filter(p => p.y < canvas.height + 20);
-    if (particles.length > 0) confettiAF = requestAnimationFrame(draw);
-    else canvas.style.display = "none";
-  }
-  draw();
-}
-function stopConfetti() {
-  if (confettiAF) cancelAnimationFrame(confettiAF);
-  document.getElementById("confetti-canvas").style.display = "none";
-}
-
-// ═══════════════════════════════════════
-// БОЙ С БОТОМ
-// ═══════════════════════════════════════
-function getDiff(elo) {
-  return { timeMs: Math.max(550, 2100 - elo / 2.5), size: Math.max(42, 78 - elo / 80) };
-}
-
-function startBotArena() {
-  if (!currentUser) return;
-  let round = 0, pW = 0, bW = 0;
-  let ability = currentUser.equippedAbility || "";
-  let skin = currentUser.equippedSkin || "";
-  let skinColors = { skinRed:"radial-gradient(circle,#ff1111,#880000)", skinBlue:"radial-gradient(circle,#1166ff,#003399)", skinGold:"radial-gradient(circle,#ffd700,#aa8800)", skinRainbow:"conic-gradient(red,orange,yellow,green,blue,violet,red)" };
-  let targetColor = skinColors[skin] || "radial-gradient(circle,#ff3366,#cc0033)";
-
-  function nextRound() {
-    if (round >= 10) { endBattle(pW, bW); return; }
-    round++;
-    let ov = document.createElement("div"); ov.className = "aim-overlay";
-    let gd = document.createElement("div"); gd.className = "aim-game";
-    let st = document.createElement("div"); st.className = "aim-stats";
-    st.innerHTML = `🎯 ${round}/10 &nbsp;|&nbsp; ${pW}:${bW}`;
-    gd.appendChild(st);
-    let ws = currentUser.winStreak || 0;
-    if (ws >= 2) {
-      let wb = document.createElement("div"); wb.className = "aim-streak";
-      wb.innerText = `🔥 ×${ws}`; gd.appendChild(wb);
-    }
-    ov.appendChild(gd); document.body.appendChild(ov);
-    let diff = getDiff(currentUser.elo || 0);
-    let tgt = document.createElement("div"); tgt.className = "target-dot";
-    tgt.style.cssText = `width:${diff.size}px;height:${diff.size}px;font-size:${diff.size-12}px;background:${targetColor};box-shadow:0 0 18px rgba(255,50,50,0.7);`;
-    tgt.innerText = "🎯";
-    let repos = () => {
-      tgt.style.left = Math.random() * (gd.clientWidth - diff.size - 20) + "px";
-      tgt.style.top = Math.random() * (gd.clientHeight - diff.size - 80) + "px";
-    };
-    repos(); gd.appendChild(tgt);
-    let bigUsed = false, autoT = null;
-    if (ability === "bigButtons") {
-      let bb = document.createElement("button");
-      bb.innerText = "🔍 Увеличить"; bb.className = "btn btn-gold";
-      bb.style.cssText = "position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:20;";
-      bb.onclick = () => {
-        if (bigUsed) return; bigUsed = true;
-        let orig = diff.size;
-        tgt.style.width = (orig * 2) + "px"; tgt.style.height = (orig * 2) + "px";
-        bb.disabled = true;
-        setTimeout(() => { tgt.style.width = orig + "px"; tgt.style.height = orig + "px"; }, 2000);
-      };
-      gd.appendChild(bb);
-    }
-    if (ability === "autoClick") {
-      autoT = setTimeout(() => { clearTimeout(timer); pW++; document.body.removeChild(ov); nextRound(); }, 1000);
-    }
-    let timer = setTimeout(() => { if (autoT) clearTimeout(autoT); bW++; document.body.removeChild(ov); nextRound(); }, diff.timeMs);
-    tgt.onclick = e => { e.stopPropagation(); if (autoT) clearTimeout(autoT); clearTimeout(timer); pW++; document.body.removeChild(ov); nextRound(); };
-  }
-
-  async function endBattle(pScore, bScore) {
-    let isWin = pScore > bScore;
-    let oldElo = currentUser.elo || 0;
-    let oldStreak = currentUser.winStreak || 0;
-    let newStreak = isWin ? Math.min(20, oldStreak + 1) : 0;
-    let eloChange = calcEloChange(oldElo, isWin, oldStreak);
-    let newElo = Math.max(0, oldElo + eloChange);
-    if (eloChange < 0 && oldElo >= 5000 && newElo < 1000) newElo = 1000;
-    let oldLvl = calcLevel(currentUser.trophies || 0);
-    // Трофеи за победу (только за победу над ботом)
-    let trophyGain = isWin ? Math.floor(Math.max(5, 10 * getRank(oldElo).gain)) : 0;
-    let newTrophies = (currentUser.trophies || 0) + trophyGain;
-    let newLvl = calcLevel(newTrophies);
-    let newGold = (currentUser.gold || 0) + (isWin ? 1 : 0);
-    let oldRank = getRank(oldElo), newRank = getRank(newElo);
-    await saveStats({
-      elo: newElo, wins: (currentUser.wins||0)+(isWin?1:0),
-      losses: (currentUser.losses||0)+(isWin?0:1),
-      seasonWins: (currentUser.seasonWins||0)+(isWin?1:0),
-      seasonLosses: (currentUser.seasonLosses||0)+(isWin?0:1),
-      maxEloEver: Math.max(currentUser.maxEloEver||0, newElo),
-      trophies: newTrophies, gold: newGold, winStreak: newStreak
-    });
-    await showResult({
-      eloChange, isWin, oldElo, newElo, oldRank, newRank, winStreak: newStreak,
-      trophyGain, oldLevel: oldLvl.level, newLevel: newLvl.level,
-      oldLvlProg: oldLvl.progress, newLvlProg: newLvl.progress
-    });
-    loadLeaderboards();
-    document.getElementById("botBattleStatus").innerHTML = `🏁 Результат: ${pScore}:${bScore} — <b>${isWin ? "ПОБЕДА 🏆" : "ПОРАЖЕНИЕ 💀"}</b>`;
-  }
-  nextRound();
-}
-
-// ═══════════════════════════════════════
-// ОНЛАЙН — кто первый 10 тапов
-// ═══════════════════════════════════════
-let onlineMatchRef = null, onlineGameRef = null, onlineGameId = null;
-let onlineListener = null;
-
-async function searchOnline() {
-  if (!currentUser) { showNotify("Войдите в аккаунт!"); return; }
-  // Очистка старого
-  if (onlineMatchRef) { onlineMatchRef.off(); onlineMatchRef = null; }
-  document.getElementById("onlineStatus").innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="spinner" style="width:20px;height:20px;border-width:3px;"></div>
-      Поиск соперника...
-      <button class="btn btn-danger btn-sm" id="cancelSearchBtn">Отмена</button>
-    </div>`;
-  document.getElementById("cancelSearchBtn").onclick = cancelOnlineSearch;
-
-  let myRef = db.ref(`matchmaking/${currentUser.username}`);
-  await myRef.set({ elo: currentUser.elo || 0, status: "search", ts: Date.now() });
-  myRef.onDisconnect().remove();
-
-  let found = false;
-  onlineMatchRef = db.ref('matchmaking');
-  onlineListener = onlineMatchRef.on('value', async snap => {
-    if (found) return;
-    let all = snap.val() || {};
-    let now = Date.now();
-    let opp = Object.keys(all).find(k =>
-      k !== currentUser.username &&
-      all[k].status === "search" &&
-      (now - (all[k].ts || 0)) < 30000
-    );
-    if (opp) {
-      found = true;
-      onlineMatchRef.off(); onlineMatchRef = null;
-      await myRef.remove();
-      await db.ref(`matchmaking/${opp}`).remove();
-      let gid = "g_" + Date.now() + "_" + Math.random().toString(36).substr(2,5);
-      onlineGameId = gid;
-      onlineGameRef = db.ref(`games/${gid}`);
-      let amHost = currentUser.username < opp; // детерминированно — кто host
-      await onlineGameRef.set({
-        p1: amHost ? currentUser.username : opp,
-        p2: amHost ? opp : currentUser.username,
-        p1taps: 0, p2taps: 0, status: "active", ts: Date.now()
-      });
-      startOnlineTapGame(gid, currentUser.username, opp);
-    }
-  });
-
-  setTimeout(() => {
-    if (!found) { cancelOnlineSearch(); document.getElementById("onlineStatus").innerText = "❌ Соперник не найден. Попробуйте ещё раз."; }
-  }, 25000);
-}
-
-function cancelOnlineSearch() {
-  if (onlineMatchRef) { onlineMatchRef.off(); onlineMatchRef = null; }
-  db.ref(`matchmaking/${currentUser?.username}`).remove();
-  document.getElementById("onlineStatus").innerText = "";
-}
-
-function startOnlineTapGame(gid, myName, oppName) {
-  let maxTaps = 10;
-  // Показываем игровой экран
-  let ov = document.createElement("div"); ov.className = "online-overlay";
-  ov.innerHTML = `
-    <div class="online-header">
-      <div class="online-title">⚔️ ДУЭЛЬ</div>
-      <div class="online-sub">Кто первый наберёт ${maxTaps} тапов!</div>
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>Прогресс обновления</span>
+                <span>65%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
     </div>
-    <div class="online-arena">
-      <div class="tap-zone mine">
-        <div class="tap-player">👤 ${myName} (ТЫ)</div>
-        <div class="tap-score mine-score" id="ot_myScore">0</div>
-        <div class="tap-progress-wrap">
-          <div class="tap-progress"><div class="tap-progress-fill" id="ot_myProg" style="width:0%;background:linear-gradient(90deg,#3b82f6,#1e2b6e);"></div></div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-value">404</div>
+            <div class="stat-label">СТАТУС КОД</div>
         </div>
-        <button class="tap-button" id="ot_tapBtn">👊 ТАП</button>
-      </div>
-      <div class="tap-vs">VS</div>
-      <div class="tap-zone theirs">
-        <div class="tap-player">👤 ${oppName}</div>
-        <div class="tap-score their-score" id="ot_oppScore">0</div>
-        <div class="tap-progress-wrap">
-          <div class="tap-progress"><div class="tap-progress-fill" id="ot_oppProg" style="width:0%;background:linear-gradient(90deg,#ef4444,#991b1b);"></div></div>
+        <div class="stat-box">
+            <div class="stat-value">~2Ч</div>
+            <div class="stat-label">ОЖИДАНИЕ</div>
         </div>
-        <div style="color:#64748b;font-size:14px;margin-top:8px;">Тапает...</div>
-      </div>
     </div>
-    <div class="online-status-bar" id="ot_statusBar">Игра началась!</div>`;
-  document.body.appendChild(ov);
+</div>
 
-  let myTaps = 0, oppTaps = 0, gameOver = false;
-  let gRef = db.ref(`games/${gid}`);
-  let myField = myName < oppName ? "p1taps" : "p2taps";
-  let oppField = myName < oppName ? "p2taps" : "p1taps";
-
-  // Слушаем Firebase в реальном времени
-  let gameListener = gRef.on('value', snap => {
-    if (!snap.exists()) return;
-    let d = snap.val();
-    oppTaps = d[oppField] || 0;
-    myTaps = d[myField] || 0;
-    document.getElementById("ot_myScore").innerText = myTaps;
-    document.getElementById("ot_oppScore").innerText = oppTaps;
-    document.getElementById("ot_myProg").style.width = (myTaps / maxTaps * 100) + "%";
-    document.getElementById("ot_oppProg").style.width = (oppTaps / maxTaps * 100) + "%";
-
-    if (!gameOver) {
-      if (myTaps >= maxTaps || oppTaps >= maxTaps || d.status === "done") {
-        gameOver = true;
-        gRef.off();
-        let isWin = myTaps >= maxTaps && (myTaps > oppTaps || oppTaps < maxTaps);
-        if (myTaps >= maxTaps && oppTaps >= maxTaps) isWin = myTaps >= oppTaps; // кто первее
-        // Записываем done если мы первые
-        if (myTaps >= maxTaps) gRef.update({ status: "done", winner: myName });
-        setTimeout(() => {
-          ov.remove();
-          endOnlineGame(isWin, myTaps, oppTaps);
-        }, 600);
-      }
-    }
-  });
-
-  // Кнопка тап
-  document.getElementById("ot_tapBtn").addEventListener("click", async () => {
-    if (gameOver) return;
-    myTaps++;
-    document.getElementById("ot_myScore").innerText = myTaps;
-    document.getElementById("ot_myProg").style.width = (myTaps / maxTaps * 100) + "%";
-    // Анимация кнопки
-    let btn = document.getElementById("ot_tapBtn");
-    btn.style.transform = "scale(0.88)";
-    setTimeout(() => { if (btn) btn.style.transform = ""; }, 80);
-    // Запись в Firebase
-    await gRef.update({ [myField]: myTaps });
-    if (myTaps >= maxTaps && !gameOver) {
-      gameOver = true;
-      gRef.off();
-      await gRef.update({ status: "done", winner: myName });
-      setTimeout(() => { ov.remove(); endOnlineGame(true, myTaps, oppTaps); }, 400);
-    }
-  });
-}
-
-async function endOnlineGame(isWin, myTaps, oppTaps) {
-  if (!currentUser) return;
-  let oldElo = currentUser.elo || 0;
-  let oldStreak = currentUser.winStreak || 0;
-  let newStreak = isWin ? Math.min(20, oldStreak + 1) : 0;
-  let eloChange = calcEloChange(oldElo, isWin, oldStreak);
-  let newElo = Math.max(0, oldElo + eloChange);
-  let oldLvl = calcLevel(currentUser.trophies || 0);
-  let trophyGain = isWin ? Math.floor(Math.max(5, 10 * getRank(oldElo).gain)) : 0;
-  let newTrophies = (currentUser.trophies || 0) + trophyGain;
-  let newLvl = calcLevel(newTrophies);
-  let newGold = (currentUser.gold || 0) + (isWin ? 1 : 0);
-  let oldRank = getRank(oldElo), newRank = getRank(newElo);
-  await saveStats({
-    elo: newElo, wins: (currentUser.wins||0)+(isWin?1:0),
-    losses: (currentUser.losses||0)+(isWin?0:1),
-    seasonWins: (currentUser.seasonWins||0)+(isWin?1:0),
-    seasonLosses: (currentUser.seasonLosses||0)+(isWin?0:1),
-    maxEloEver: Math.max(currentUser.maxEloEver||0, newElo),
-    trophies: newTrophies, gold: newGold, winStreak: newStreak
-  });
-  await showResult({
-    eloChange, isWin, oldElo, newElo, oldRank, newRank, winStreak: newStreak,
-    trophyGain, oldLevel: oldLvl.level, newLevel: newLvl.level,
-    oldLvlProg: oldLvl.progress, newLvlProg: newLvl.progress
-  });
-  document.getElementById("onlineStatus").innerHTML = `🏁 <b>${isWin ? "ПОБЕДА 🏆" : "ПОРАЖЕНИЕ 💀"}</b> — ${myTaps}:${oppTaps} тапов`;
-  loadLeaderboards();
-}
-
-// ═══════════════════════════════════════
-// ТОПЫ
-// ═══════════════════════════════════════
-async function loadLeaderboards() {
-  let [usersSnap, clansSnap] = await Promise.all([db.ref('users').once('value'), db.ref('clans').once('value')]);
-  let users = usersSnap.val() || {};
-  let clans = clansSnap.val() || {};
-
-  function clanTag(clanName) {
-    if (!clanName || !clans[clanName]) return "";
-    return `<span style="color:#94a3b8;font-size:12px;font-weight:700;">[${clans[clanName].tag||clanName.substr(0,4)}]</span> `;
-  }
-  function avEl(d, size=32) {
-    let src = d.avatar || "https://via.placeholder.com/" + size + "?text=👤";
-    return `<img src="${src}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;border:2px solid var(--border);vertical-align:middle;margin-right:6px;">`;
-  }
-
-  // Сезонный топ
-  let seasonArr = Object.entries(users)
-    .filter(([,d]) => !d.banned)
-    .map(([n,d]) => ({ n, elo: d.elo||0, clan: d.clan||"", av: d.avatar||"" }))
-    .sort((a,b) => b.elo - a.elo);
-
-  let sHtml = `<table><thead><tr><th>#</th><th>Игрок</th><th>Клан</th><th>Ранг</th><th>ЭЛО</th></tr></thead><tbody>`;
-  const medals = ["🥇","🥈","🥉"];
-  seasonArr.slice(0,15).forEach((p,i) => {
-    sHtml += `<tr onclick="openPlayerModal('${p.n}')">
-      <td style="font-weight:800;color:var(--text2);font-size:13px;">${i<3?medals[i]:i+1}</td>
-      <td>${avEl(p)}${clanTag(p.clan)}<b>${p.n}</b></td>
-      <td style="font-size:12px;color:var(--text2);">${clans[p.clan]?.tag ? "["+clans[p.clan].tag+"]" : p.clan}</td>
-      <td>${rankPill(p.elo)}</td>
-      <td><b>${p.elo}</b></td></tr>`;
-  });
-  sHtml += "</tbody></table>";
-  document.getElementById("seasonTop").innerHTML = sHtml;
-
-  // Топ всех времён
-  let allArr = Object.entries(users)
-    .filter(([,d]) => !d.banned)
-    .map(([n,d]) => ({ n, mx: d.maxEloEver||0, clan: d.clan||"", av: d.avatar||"" }))
-    .sort((a,b) => b.mx - a.mx);
-  let aHtml = `<table><thead><tr><th>#</th><th>Игрок</th><th>Ранг</th><th>Макс ЭЛО</th></tr></thead><tbody>`;
-  allArr.slice(0,15).forEach((p,i) => {
-    aHtml += `<tr onclick="openPlayerModal('${p.n}')">
-      <td style="font-weight:800;color:var(--text2);font-size:13px;">${i<3?medals[i]:i+1}</td>
-      <td>${avEl(p)}${clanTag(p.clan)}<b>${p.n}</b></td>
-      <td>${rankPill(p.mx)}</td>
-      <td><b>${p.mx}</b></td></tr>`;
-  });
-  aHtml += "</tbody></table>";
-  document.getElementById("alltimeTop").innerHTML = aHtml;
-
-  // Топ кланов
-  let cScores = {};
-  for (let [,d] of Object.entries(users)) {
-    if (!d.banned && d.clan) {
-      if (!cScores[d.clan]) cScores[d.clan] = { total: 0, members: 0 };
-      cScores[d.clan].total += d.elo || 0;
-      cScores[d.clan].members++;
-    }
-  }
-  let cArr = Object.entries(cScores)
-    .map(([name, d]) => ({ name, ...d, tag: clans[name]?.tag || name.substr(0,4), leader: clans[name]?.leader || "?" }))
-    .sort((a,b) => b.total - a.total);
-  let cHtml = "";
-  cArr.slice(0,10).forEach((c,i) => {
-    cHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f8fafc;border-radius:16px;margin:6px 0;border:1px solid var(--border);">
-      <div><span style="font-weight:800;font-size:15px;">${i<3?medals[i]:i+1} </span><b>[${c.tag}] ${c.name}</b> <span style="color:var(--text2);font-size:12px;">(${c.members} чел.)</span></div>
-      <div style="font-weight:800;color:var(--primary);">⚡ ${c.total}</div></div>`;
-  });
-  document.getElementById("clanTop").innerHTML = cArr.length ? cHtml : "<p style='color:var(--text2)'>Нет кланов</p>";
-}
-
-// ═══════════════════════════════════════
-// КЛАНЫ
-// ═══════════════════════════════════════
-async function loadClans() {
-  let snap = await db.ref('clans').once('value');
-  let clans = snap.val() || {};
-  let html = "";
-  for (let [name, d] of Object.entries(clans)) {
-    let memberCount = (d.members || [d.leader]).length;
-    let tag = d.tag || name.substr(0,4);
-    html += `<div style="background:#f8fafc;border-radius:18px;padding:14px 16px;margin:8px 0;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-      <div><b style="font-size:15px;">[${tag}] ${name}</b><div style="font-size:12px;color:var(--text2);margin-top:2px;">👑 ${d.leader} · ${memberCount} участников</div></div>
-      ${currentUser && currentUser.clan !== name
-        ? `<button class="btn btn-sm joinClanBtn" data-clan="${name}">➕ Вступить</button>`
-        : (currentUser && currentUser.clan === name ? `<span style="color:var(--green);font-weight:700;">✅ Мой клан</span>` : "")
-      }</div>`;
-  }
-  document.getElementById("clanList").innerHTML = html || "<p style='color:var(--text2)'>Нет кланов</p>";
-  document.querySelectorAll(".joinClanBtn").forEach(btn => {
-    btn.onclick = async () => {
-      if (!currentUser) return;
-      if (currentUser.clan) { showNotify("Сначала покиньте текущий клан!"); return; }
-      let cData = (await db.ref(`clans/${btn.dataset.clan}`).once('value')).val();
-      let members = cData.members || [cData.leader];
-      if (!members.includes(currentUser.username)) members.push(currentUser.username);
-      await db.ref(`clans/${btn.dataset.clan}/members`).set(members);
-      await saveStats({ clan: btn.dataset.clan });
-      loadClans(); showMyClan();
-    };
-  });
-  showMyClan();
-}
-
-async function showMyClan() {
-  if (!currentUser || !currentUser.clan) { document.getElementById("myClanCard").style.display = "none"; return; }
-  let snap = await db.ref(`clans/${currentUser.clan}`).once('value');
-  let d = snap.val();
-  if (!d) { document.getElementById("myClanCard").style.display = "none"; return; }
-  document.getElementById("myClanCard").style.display = "block";
-  let tag = d.tag || currentUser.clan.substr(0,4);
-  let isLeader = d.leader === currentUser.username;
-  document.getElementById("myClanTitle").innerText = `🏰 [${tag}] ${currentUser.clan}`;
-  document.getElementById("myClanRankDisplay").innerHTML = isLeader
-    ? `<span class="rank-pill" style="background:linear-gradient(135deg,#ffd700,#ffa500);color:#1a1a1a;">👑 Лидер</span>`
-    : `<span class="rank-pill" style="background:linear-gradient(135deg,#94a3b8,#64748b);color:white;">⚔️ Участник</span>`;
-  let members = d.members || [d.leader];
-  let html = "";
-  // Общее ЭЛО клана
-  let totalElo = 0;
-  for (let m of members) {
-    let uSnap = await db.ref(`users/${m}`).once('value');
-    let uData = uSnap.val() || {};
-    totalElo += uData.elo || 0;
-    let r = getRank(uData.elo || 0);
-    let av = uData.avatar || "https://via.placeholder.com/40?text=👤";
-    html += `<div class="member-row">
-      <img src="${av}" class="avatar av40">
-      <div class="member-info">
-        <div class="member-name">${m === d.leader ? "👑 " : ""}${m}</div>
-        <div class="member-sub">${rankPill(uData.elo||0)} · ${uData.elo||0} ЭЛО · 🏆${uData.trophies||0}</div>
-      </div>
-    </div>`;
-  }
-  document.getElementById("clanMembersList").innerHTML =
-    `<div style="margin-bottom:10px;font-size:13px;color:var(--text2);">👥 ${members.length} участников · ⚡ Итого: <b>${totalElo} ЭЛО</b></div>` + html;
-}
-
-// ═══════════════════════════════════════
-// ДРУЗЬЯ
-// ═══════════════════════════════════════
-async function loadFriends() {
-  if (!currentUser) { document.getElementById("friendsList").innerHTML = "<p style='color:var(--text2)'>Войдите в аккаунт</p>"; return; }
-  let snap = await db.ref(`users/${currentUser.username}`).once('value');
-  let d = snap.val() || {};
-  currentUser.friends = d.friends || [];
-  currentUser.friendRequests = d.friendRequests || [];
-
-  // Запросы
-  let rHtml = "";
-  if ((currentUser.friendRequests || []).length > 0) {
-    rHtml = `<div style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">📬 Входящие запросы</div>`;
-    for (let fr of currentUser.friendRequests) {
-      rHtml += `<div class="friend-req-row">
-        <span style="font-weight:700;">👤 ${fr}</span>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-success btn-sm" onclick="acceptFriend('${fr}')">✅</button>
-          <button class="btn btn-danger btn-sm" onclick="declineFriend('${fr}')">❌</button>
-        </div></div>`;
-    }
-    rHtml += "<hr style='border:none;border-top:1px solid var(--border);margin:12px 0;'>";
-  }
-  document.getElementById("friendRequestsSection").innerHTML = rHtml;
-
-  let fHtml = `<div style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">👥 Друзья</div>`;
-  if (!(currentUser.friends || []).length) fHtml += "<p style='color:var(--text2);font-size:14px;'>Пока нет друзей</p>";
-  for (let fr of (currentUser.friends || [])) {
-    let us = await db.ref(`users/${fr}`).once('value');
-    let ud = us.val() || {};
-    let av = ud.avatar || "https://via.placeholder.com/40?text=👤";
-    fHtml += `<div class="friend-row">
-      <img src="${av}" class="avatar av40">
-      <div style="flex:1"><div style="font-weight:700;">${fr}</div><div style="font-size:12px;color:var(--text2);">${rankPill(ud.elo||0)} · ${ud.elo||0} ЭЛО</div></div>
-      <button class="btn btn-sm" onclick="openPlayerModal('${fr}')">👁</button>
-    </div>`;
-  }
-  document.getElementById("friendsList").innerHTML = fHtml;
-}
-
-async function sendFriendRequest() {
-  if (!currentUser) { showNotify("Войдите!"); return; }
-  let target = document.getElementById("friendReqInput").value.trim();
-  if (!target || target === currentUser.username) { showNotify("Введите корректный ник"); return; }
-  let snap = await db.ref(`users/${target}`).once('value');
-  if (!snap.exists()) { showNotify("Игрок не найден!"); return; }
-  let td = snap.val();
-  let reqs = td.friendRequests || [];
-  if (reqs.includes(currentUser.username)) { showNotify("Запрос уже отправлен!"); return; }
-  if ((td.friends || []).includes(currentUser.username)) { showNotify("Уже в друзьях!"); return; }
-  reqs.push(currentUser.username);
-  await db.ref(`users/${target}/friendRequests`).set(reqs);
-  document.getElementById("friendReqInput").value = "";
-  showNotify(`✅ Запрос отправлен ${target}`);
-}
-
-async function acceptFriend(from) {
-  if (!currentUser) return;
-  let myF = [...(currentUser.friends || [])];
-  if (!myF.includes(from)) myF.push(from);
-  let myR = (currentUser.friendRequests || []).filter(r => r !== from);
-  let hisSnap = await db.ref(`users/${from}`).once('value');
-  let hisFriends = hisSnap.val()?.friends || [];
-  if (!hisFriends.includes(currentUser.username)) hisFriends.push(currentUser.username);
-  await db.ref(`users/${from}/friends`).set(hisFriends);
-  await saveStats({ friends: myF, friendRequests: myR });
-  showNotify(`✅ ${from} в друзьях!`);
-  loadFriends();
-}
-
-async function declineFriend(from) {
-  if (!currentUser) return;
-  await saveStats({ friendRequests: (currentUser.friendRequests || []).filter(r => r !== from) });
-  loadFriends();
-}
-
-// ═══════════════════════════════════════
-// ПОПАП ИГРОКА
-// ═══════════════════════════════════════
-async function openPlayerModal(name) {
-  let snap = await db.ref(`users/${name}`).once('value');
-  let d = snap.val() || {};
-  document.getElementById("modalAvatar").src = d.avatar || "https://via.placeholder.com/56?text=👤";
-  document.getElementById("modalName").innerText = name;
-  document.getElementById("modalRankBadge").innerHTML = rankPill(d.elo || 0);
-  document.getElementById("modalClan").innerText = d.clan ? `🏰 ${d.clan}` : "";
-  document.getElementById("modalElo").innerText = d.elo || 0;
-  let lvl = calcLevel(d.trophies || 0);
-  document.getElementById("modalLevel").innerText = lvl.level;
-  let total = (d.wins||0) + (d.losses||0);
-  document.getElementById("modalWr").innerText = total ? Math.round((d.wins||0)/total*100)+"%" : "0%";
-  document.getElementById("modalTrophies").innerText = d.trophies || 0;
-  let ws = d.winStreak || 0;
-  document.getElementById("modalStreak").innerText = ws >= 2 ? `🔥 Винстрик ×${ws}` : "";
-  let addBtn = document.getElementById("modalAddFriendBtn");
-  addBtn.style.display = (currentUser && name !== currentUser.username) ? "block" : "none";
-  addBtn.onclick = () => { document.getElementById("friendReqInput").value = name; sendFriendRequest(); closeModal(); };
-  document.getElementById("playerModalOverlay").style.display = "flex";
-}
-function closeModal() { document.getElementById("playerModalOverlay").style.display = "none"; }
-
-// ═══════════════════════════════════════
-// СЕЗОН
-// ═══════════════════════════════════════
-async function initSeason() {
-  let snap = await db.ref('global/season').once('value');
-  let data = snap.val();
-  if (data && data.endTime && Date.now() < data.endTime) {
-    seasonEnd = data.endTime;
-  } else {
-    await forceSeasonReset();
-  }
-  updateCountdown();
-  if (seasonEnd && seasonEnd - Date.now() < 3600000 && seasonEnd - Date.now() > 0)
-    showNotify("⚠️ Сезон заканчивается менее чем через час!");
-}
-
-async function forceSeasonReset() {
-  let snap = await db.ref('global/season').once('value');
-  let data = snap.val();
-  let newNum = (data?.number || 0) + 1;
-  let end = Date.now() + 5 * 24 * 3600 * 1000;
-  await db.ref('global/season').set({ number: newNum, endTime: end });
-  seasonEnd = end;
-  let users = await db.ref('users').once('value');
-  let updates = {};
-  for (let [name, val] of Object.entries(users.val() || {})) {
-    let oldElo = val.elo || 0;
-    updates[`users/${name}/trophies`] = (val.trophies || 0) + Math.floor(oldElo / 1.8);
-    updates[`users/${name}/elo`] = 0;
-    updates[`users/${name}/seasonWins`] = 0;
-    updates[`users/${name}/seasonLosses`] = 0;
-    if (oldElo > (val.maxEloEver || 0)) updates[`users/${name}/maxEloEver`] = oldElo;
-  }
-  await db.ref().update(updates);
-  if (currentUser) {
-    let fr = (await db.ref(`users/${currentUser.username}`).once('value')).val();
-    currentUser = { ...currentUser, ...fr, username: currentUser.username };
-    renderProfile();
-  }
-  showNotify("🔄 Новый сезон! ЭЛО → Трофеи");
-}
-
-function updateCountdown() {
-  let diff = Math.max(0, seasonEnd - Date.now());
-  let d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000);
-  let el = document.getElementById("seasonCountdown");
-  if (el) el.innerText = diff > 0 ? `${d}д ${h}ч` : "Завершается...";
-}
-setInterval(updateCountdown, 60000);
-setInterval(async () => { if (seasonEnd && Date.now() >= seasonEnd && currentUser) await forceSeasonReset(); }, 60000);
-
-// ═══════════════════════════════════════
-// АДМИНКА
-// ═══════════════════════════════════════
-async function checkAdmin() {
-  if (!currentUser) return false;
-  if (currentUser.username === "qwenix") return true;
-  let snap = await db.ref(`admins/${currentUser.username}`).once('value');
-  return snap.exists();
-}
-
-async function loadAdmins() {
-  let snap = await db.ref('admins').once('value');
-  let admins = snap.val() || {};
-  let html = "";
-  for (let [nick] of Object.entries(admins)) {
-    html += `<div class="admin-user-row"><span style="font-weight:700;">🔑 ${nick}</span></div>`;
-  }
-  document.getElementById("adminsList").innerHTML = html || "<p style='color:var(--text2)'>Нет администраторов</p>";
-  loadAdminUsers();
-}
-
-let adminUsersCache = {};
-async function loadAdminUsers(filter = "") {
-  let snap = await db.ref('users').once('value');
-  let users = snap.val() || {};
-  adminUsersCache = users;
-  renderAdminUsers(filter);
-}
-
-function renderAdminUsers(filter = "") {
-  let users = adminUsersCache;
-  let html = "";
-  for (let [name, d] of Object.entries(users)) {
-    if (filter && !name.toLowerCase().includes(filter.toLowerCase())) continue;
-    let banned = d.banned;
-    let av = d.avatar || "https://via.placeholder.com/40?text=👤";
-    html += `<div class="admin-user-row">
-      <img src="${av}" class="avatar av40">
-      <div style="flex:1">
-        <div style="font-weight:700;font-size:14px;">${banned ? "🚫 " : ""}${name}</div>
-        <div style="font-size:12px;color:var(--text2);">${rankPill(d.elo||0)} · ЭЛО ${d.elo||0} · Победы ${d.wins||0}${banned ? ` · <span style="color:var(--red);">Бан: ${d.banReason||""}</span>` : ""}</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        ${banned
-          ? `<button class="btn btn-success btn-sm" onclick="unbanUser('${name}')">✅ Разбан</button>`
-          : `<button class="btn btn-danger btn-sm" onclick="banUser('${name}')">🚫 Бан</button>`
-        }
-        <button class="btn btn-gray btn-sm" onclick="openPlayerModal('${name}')">👁</button>
-      </div>
-    </div>`;
-  }
-  document.getElementById("adminUsersList").innerHTML = html || "<p style='color:var(--text2)'>Нет игроков</p>";
-}
-
-async function banUser(name) {
-  if (name === currentUser?.username) { showNotify("Нельзя забанить себя!"); return; }
-  let reason = prompt(`Причина бана для ${name}:`);
-  if (reason === null) return;
-  await db.ref(`users/${name}`).update({ banned: true, banReason: reason || "нарушение правил" });
-  showNotify(`🚫 ${name} заблокирован`);
-  loadAdminUsers(document.getElementById("adminSearch").value);
-}
-
-async function unbanUser(name) {
-  await db.ref(`users/${name}`).update({ banned: false, banReason: null });
-  showNotify(`✅ ${name} разблокирован`);
-  loadAdminUsers(document.getElementById("adminSearch").value);
-}
-
-document.getElementById("adminSearch").oninput = e => renderAdminUsers(e.target.value);
-
-// ═══════════════════════════════════════
-// УВЕДОМЛЕНИЯ
-// ═══════════════════════════════════════
-function showNotify(msg, ms = 3500) {
-  let el = document.createElement("div"); el.className = "notify";
-  el.innerText = msg; document.body.appendChild(el);
-  setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity 0.3s"; setTimeout(() => el.remove(), 300); }, ms);
-}
-
-// ═══════════════════════════════════════
-// АВТО-ВХОД
-// ═══════════════════════════════════════
-async function autoLogin() {
-  let saved = localStorage.getItem("domofon_user");
-  if (!saved) return;
-  try {
-    let { username, password } = JSON.parse(saved);
-    let data = await doLogin(username, password);
-    currentUser = { username, password, ...data };
-    let fresh = (await db.ref(`users/${username}`).once('value')).val() || {};
-    currentUser = { ...currentUser, ...fresh, username };
-    afterLogin();
-  } catch(e) { localStorage.removeItem("domofon_user"); }
-}
-
-async function afterLogin() {
-  document.getElementById("authCard").style.display = "none";
-  document.getElementById("profileInfo").style.display = "block";
-  if (await checkAdmin()) {
-    document.getElementById("forceSeasonEndBtn").style.display = "block";
-    document.getElementById("adminTabBtn").style.display = "block";
-    // Добавить qwenix в admins
-    if (currentUser.username === "qwenix") {
-      let adm = await db.ref('admins/qwenix').once('value');
-      if (!adm.exists()) await db.ref('admins/qwenix').set({ addedAt: Date.now() });
-    }
-  }
-  renderProfile(); renderShop(); initSeason(); loadLeaderboards();
-}
-
-// ═══════════════════════════════════════
-// СОБЫТИЯ
-// ═══════════════════════════════════════
-document.getElementById("doLogin").onclick = async () => {
-  let u = document.getElementById("loginUser").value.trim();
-  let p = document.getElementById("loginPass").value;
-  let msg = document.getElementById("authMsg");
-  if (!u || !p) { msg.innerText = "Заполните все поля!"; return; }
-  try {
-    let data = await doLogin(u, p);
-    currentUser = { username: u, password: p, ...data };
-    let fresh = (await db.ref(`users/${u}`).once('value')).val() || {};
-    currentUser = { ...currentUser, ...fresh, username: u };
-    localStorage.setItem("domofon_user", JSON.stringify({ username: u, password: p }));
-    afterLogin();
-  } catch(e) { msg.innerText = e.message; }
-};
-
-document.getElementById("doRegister").onclick = async () => {
-  let u = document.getElementById("loginUser").value.trim();
-  let p = document.getElementById("loginPass").value;
-  let msg = document.getElementById("authMsg");
-  if (!u || !p) { msg.innerText = "Заполните все поля!"; return; }
-  if (p.length < 4) { msg.innerText = "Пароль минимум 4 символа!"; return; }
-  try { await doRegister(u, p); showNotify("✅ Аккаунт создан! Войдите."); msg.innerText = ""; }
-  catch(e) { msg.innerText = e.message; }
-};
-
-document.getElementById("logoutBtnSide").onclick = () => {
-  currentUser = null;
-  localStorage.removeItem("domofon_user");
-  document.getElementById("authCard").style.display = "block";
-  document.getElementById("profileInfo").style.display = "none";
-  document.getElementById("forceSeasonEndBtn").style.display = "none";
-  document.getElementById("adminTabBtn").style.display = "none";
-};
-
-document.getElementById("startBotAimBtn").onclick = () => { if (currentUser) startBotArena(); else showNotify("Войдите в аккаунт!"); };
-document.getElementById("searchOnlineBtn").onclick = searchOnline;
-document.getElementById("refreshClans").onclick = loadClans;
-document.getElementById("sendFriendReqBtn").onclick = sendFriendRequest;
-
-document.getElementById("leaveClanBtn").addEventListener("click", async () => {
-  if (!currentUser?.clan) return;
-  let cSnap = await db.ref(`clans/${currentUser.clan}`).once('value');
-  let cData = cSnap.val();
-  if (cData) {
-    let members = (cData.members || [cData.leader]).filter(m => m !== currentUser.username);
-    if (cData.leader === currentUser.username && members.length > 0)
-      await db.ref(`clans/${currentUser.clan}`).update({ leader: members[0], members });
-    else if (members.length === 0)
-      await db.ref(`clans/${currentUser.clan}`).remove();
-    else
-      await db.ref(`clans/${currentUser.clan}/members`).set(members);
-  }
-  await saveStats({ clan: "" });
-  loadClans(); showNotify("Вы покинули клан");
-});
-
-document.getElementById("createClanBtn").onclick = async () => {
-  if (!currentUser) { showNotify("Войдите!"); return; }
-  if (currentUser.clan) { showNotify("Сначала покиньте текущий клан!"); return; }
-  let cname = document.getElementById("clanName").value.trim();
-  let ctag = document.getElementById("clanPrefix").value.trim().toUpperCase().substr(0,5);
-  if (!cname) { showNotify("Введите название!"); return; }
-  let ex = await db.ref(`clans/${cname}`).once('value');
-  if (ex.exists()) { showNotify("Клан уже существует!"); return; }
-  await db.ref(`clans/${cname}`).set({ leader: currentUser.username, members: [currentUser.username], tag: ctag || cname.substr(0,4).toUpperCase(), createdAt: Date.now() });
-  await saveStats({ clan: cname });
-  loadClans(); showNotify(`🏰 Клан [${ctag||cname.substr(0,4)}] ${cname} создан!`);
-};
-
-document.getElementById("forceSeasonEndBtn").onclick = async () => {
-  if (await checkAdmin()) { await forceSeasonReset(); loadLeaderboards(); }
-};
-
-document.getElementById("uploadAvatarBtnSide").onclick = () => document.getElementById("avatarFileInput").click();
-document.getElementById("avatarFileInput").onchange = e => {
-  let file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 600000) { showNotify("Файл слишком большой! Макс 600кб"); return; }
-  let fr = new FileReader();
-  fr.onload = async ev => { await saveStats({ avatar: ev.target.result }); renderProfile(); showNotify("✅ Аватар обновлён!"); };
-  fr.readAsDataURL(file);
-};
-
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active-pane"));
-    document.getElementById(btn.dataset.tab).classList.add("active-pane");
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    if (btn.dataset.tab === "leaderboards") loadLeaderboards();
-    if (btn.dataset.tab === "clans") loadClans();
-    if (btn.dataset.tab === "friends") loadFriends();
-    if (btn.dataset.tab === "shop") renderShop();
-    if (btn.dataset.tab === "admin") loadAdmins();
-  };
-});
-
-autoLogin();
-initSeason();
-</script>
 </body>
 </html>
