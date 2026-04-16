@@ -10,26 +10,21 @@
             --card-gradient: linear-gradient(180deg, #2e5bff 0%, #1a39b5 100%);
             --text-gray: #8e99b7;
             --accent-red: #ff4b4b;
+            --tg-blue: #24A1DE;
         }
 
-        /* Анимация пульсации щита */
         @keyframes shieldPulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Плавное появление всей страницы */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            0% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(255,255,255,0)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(255,255,255,0.4)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(255,255,255,0)); }
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -40,103 +35,92 @@
             min-height: 100vh;
             color: white;
             padding: 20px;
-            animation: fadeIn 0.8s ease-in;
         }
 
         .container {
             width: 100%;
             max-width: 400px;
+            text-align: center;
         }
 
-        /* Основная карточка */
+        /* Главный блок */
         .status-card {
             background: var(--card-gradient);
             border-radius: 40px;
-            padding: 45px 25px;
-            text-align: center;
-            box-shadow: 0 15px 40px rgba(26, 57, 181, 0.25);
-            margin-bottom: 20px;
-        }
-
-        .badge-alert {
-            background: var(--accent-red);
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
-            display: inline-block;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            padding: 40px 25px;
+            box-shadow: 0 15px 40px rgba(26, 57, 181, 0.2);
+            margin-bottom: 15px;
         }
 
         .shield-icon {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             animation: shieldPulse 2s infinite ease-in-out;
         }
 
-        .main-title {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 10px;
-            line-height: 1.2;
-        }
+        .main-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+        .sub-title { font-size: 14px; opacity: 0.8; line-height: 1.5; }
 
-        .sub-title {
-            font-size: 14px;
-            opacity: 0.85;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-
-        /* Информационные блоки */
-        .stats-row {
+        /* Интерактивные нижние карточки */
+        .action-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .stat-item {
+        .action-item {
             background: white;
-            padding: 22px;
-            border-radius: 25px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-        }
-
-        .stat-val {
-            display: block;
-            font-size: 22px;
-            font-weight: 900;
-            color: #1a39b5;
-        }
-
-        .stat-lbl {
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--text-gray);
-            text-transform: uppercase;
-            margin-top: 4px;
-        }
-
-        .footer-btn {
-            background: #e2e8f0;
-            color: #64748b;
-            width: 100%;
             padding: 18px;
             border-radius: 25px;
-            text-align: center;
-            margin-top: 20px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            border: 1px solid transparent;
+        }
+
+        .action-item:active {
+            transform: scale(0.95);
+            background: #f0f4ff;
+            border-color: #2e5bff;
+        }
+
+        .action-val { display: block; font-size: 20px; font-weight: 900; color: #1a39b5; }
+        .action-lbl { font-size: 10px; font-weight: 700; color: var(--text-gray); text-transform: uppercase; }
+
+        /* Кнопка Телеграм */
+        .tg-button {
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: #1a39b5;
             font-weight: 800;
-            font-size: 14px;
-            text-transform: uppercase;
+            font-size: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .tg-button:active { transform: scale(0.98); }
+        .tg-button svg { fill: var(--tg-blue); }
+
+        /* Текст благодарности */
+        .thanks-text {
+            color: var(--text-gray);
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -144,34 +128,36 @@
 
 <div class="container">
     <div class="status-card">
-        <div class="badge-alert">Внимание</div>
-        
         <div class="shield-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
         </div>
-
         <h1 class="main-title">Domofon PVP</h1>
-        <p style="font-size: 18px; font-weight: 700; margin-bottom: 15px;">Технический перерыв</p>
-        
         <p class="sub-title">
-            Сервера ддосят. Сейчас мы восстанавливаем датабазу и доступ. Пожалуйста, подождите.
+            Сервера под DDoS-атакой. Восстанавливаем базу данных и доступ. Скоро всё заработает!
         </p>
     </div>
 
-    <div class="stats-row">
-        <div class="stat-item">
-            <span class="stat-val">OFFLINE</span>
-            <span class="stat-label">СТАТУС</span>
+    <div class="action-grid">
+        <div class="action-item">
+            <span class="action-val">DDoS</span>
+            <span class="action-lbl">ПРИЧИНА</span>
         </div>
-        <div class="stat-item">
-            <span class="stat-val">DB FIX</span>
-            <span class="stat-label">ЗАДАЧА</span>
+        <div class="action-item">
+            <span class="action-val">FIXING</span>
+            <span class="action-lbl">СТАТУС</span>
         </div>
     </div>
 
-    <div class="footer-btn">Обновить страницу</div>
+    <a href="https://t.me/DomofonPVP" class="tg-button" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161l-1.87 8.812c-.14.621-.51.772-1.03.481l-2.85-2.1c-.276-.23-.51-.35-.76-.35-.42 0-.64.24-.97.55l-1.1 1.04c-.16.15-.3.28-.59.28-.27 0-.44-.14-.58-.4l-1.42-4.66c-.1-.31-.02-.56.32-.69l9.14-3.52c.41-.16.79.1.66.72z"></path>
+        </svg>
+        НОВОСТИ ПРОЕКТА
+    </a>
+
+    <p class="thanks-text">Спасибо за ожидание!</p>
 </div>
 
 </body>
