@@ -380,6 +380,9 @@ tbody tr:hover td{background:var(--primary-ll);}
 .shimmer{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
   background-size:200% 100%;animation:shimmer 1.5s infinite;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+/* ===== DOMOFON RECODE VISUAL PACK ===== */
+:root{--primary:#111820;--primary-d:#111820;--primary-l:#eef4f8;--primary-ll:#f7fbfd;--accent:#ef4444;--accent-d:#dc2626;--gold:#f4b63f;--green:#10b981;--red:#ef4444;--bg:#f7f9fb;--card:#fff;--border:#dbe3ea;--border2:#c7d3dd;--text:#151b23;--text2:#667085;--text3:#98a2b3;--shadow:0 14px 42px rgba(20,30,44,.10);--shadow2:0 18px 52px rgba(20,30,44,.14);--shadow3:0 28px 80px rgba(20,30,44,.18);--radius:8px;--radius-sm:8px;--radius-lg:8px;--sidebar:286px}
+*{letter-spacing:0!important}.sidebar{padding:16px;background:#fff}.logo-wrap{border:1px solid var(--border);border-radius:8px;padding:16px;background:#fafffd}.logo{background:none;color:var(--text);font-size:22px}.logo:before{display:none}.logo-img{width:30px;height:30px;object-fit:contain;border-radius:6px;flex:0 0 auto}.tab-btn{border-radius:8px;padding:12px 14px}.tab-btn.active{background:#111820;box-shadow:none}.card{border-radius:8px;border:1px solid var(--border);box-shadow:var(--shadow);background:#fff}.card:hover{box-shadow:var(--shadow2)}.btn{border-radius:8px;background:#111820;box-shadow:none}.btn:hover{box-shadow:none;filter:brightness(1.06)}.btn-gold{background:#f4b63f;color:#261900}.btn-success{background:#10b981}.btn-danger{background:#ef4444}.btn-gray,.btn-outline{background:#eef4f8;color:#1f2937;border:0}.stat-box,.shop-card,.party-member,.table-wrap,.list-row,.modal-content{border-radius:8px!important}.shop-card{background:#fbfdff;border:1px solid var(--border)}.shop-card:hover{transform:translateY(-2px);border-color:#111820}.chat-bubble{border-radius:8px;background:#fbfdff}.chat-msg.own .chat-bubble{background:#111820;border-color:#111820}.chat-load-more{margin:0 auto 10px;display:flex}.page-title{font-size:28px}.main-content{background:linear-gradient(180deg,#f7f9fb 0,#fff 100%)}input[type=text],input[type=password],textarea{border-radius:8px;border:1px solid var(--border);background:#fff}.captcha-box{border:1px solid var(--border);border-radius:8px;background:#fbfdff;padding:12px;margin:0 0 12px}.captcha-question{font-weight:900;color:var(--text)}@media(max-width:760px){.main-content{padding:14px 12px 96px}.card{padding:16px}.page-title{font-size:22px}.chat-wrap{height:calc(100dvh - 164px);min-height:360px}.btn{min-height:42px}.shop-grid{grid-template-columns:1fr 1fr}.party-code{font-size:24px;letter-spacing:4px}}
 </style>
 </head>
 <body>
@@ -392,7 +395,7 @@ tbody tr:hover td{background:var(--primary-ll);}
   <div class="logo-wrap">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div class="logo">🎯 DOMOFON</div>
+        <div class="logo"><img class="logo-img" src="logo.png" alt="DOMOFON" onerror="this.style.display='none'"><span>DOMOFON</span></div>
         <div class="logo-sub">PvP Platform v2.0</div>
       </div>
       <button class="hamburger" onclick="closeSidebar()" style="display:block;color:var(--text3);">✕</button>
@@ -444,6 +447,10 @@ tbody tr:hover td{background:var(--primary-ll);}
         <div class="card-title">🔐 Вход / Регистрация</div>
         <input type="text" id="loginUser" placeholder="Никнейм (2-20 символов)" style="margin-bottom:10px;" maxlength="20" autocomplete="off" spellcheck="false">
         <input type="password" id="loginPass" placeholder="Пароль (мин 4 символа)" style="margin-bottom:14px;" maxlength="60" autocomplete="off">
+        <div class="captcha-box" id="captchaBox">
+          <div class="captcha-question">Капча: <b id="captchaQuestion">--</b></div>
+          <input type="text" id="captchaInput" placeholder="Ответ" inputmode="numeric" autocomplete="off" style="margin-top:8px;">
+        </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           <button class="btn" id="doLogin">🚀 Войти</button>
           <button class="btn btn-gold" id="doRegister">✨ Регистрация</button>
@@ -459,7 +466,7 @@ tbody tr:hover td{background:var(--primary-ll);}
                 <img id="profAvatarImg" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">
               </div>
               <button class="btn btn-gray btn-sm" id="uploadAvatarBtnSide" style="margin-top:8px;">📷</button>
-              <input type="file" id="avatarFileInput" style="display:none" accept="image/*">
+              <input type="file" id="avatarFileInput" style="display:none">
             </div>
             <div style="flex:1;min-width:200px;">
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
@@ -718,18 +725,54 @@ tbody tr:hover td{background:var(--primary-ll);}
 (function(){
   const _a='https://';const _b='qwenixpvp';const _c='-default-rtdb';const _d='.firebaseio.com/';
   const _cfg={databaseURL:_a+_b+_c+_d};
-  firebase.initializeApp(_cfg);
-  window._db=firebase.database();
+  if(!window.firebase||!firebase.initializeApp||!firebase.database){
+    window._db=null;
+    window._firebaseInitError='Не удалось загрузить Firebase. Проверьте интернет и перезагрузите страницу.';
+    return;
+  }
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(_cfg);
+    window._db=firebase.database();
+  }catch(e){
+    window._db=null;
+    window._firebaseInitError='Не удалось подключиться к базе данных: '+(e.message||e);
+    return;
+  }
   // Integrity check
   window._db.ref('.info/connected').on('value',s=>{
     if(s.val()===true){
       window._db.ref('_integrity/check').once('value').then(r=>{
-        if(!r.exists())window._db.ref('_integrity/check').set({v:1,ts:Date.now()});
-      });
+        if(!r.exists())return window._db.ref('_integrity/check').set({v:1,ts:Date.now()});
+      }).catch(()=>{});
     }
   });
 })();
 const db = window._db;
+
+function ensureDb(show=true){
+  if(db)return true;
+  if(show){
+    const msg=document.getElementById('authMsg');
+    if(msg)msg.textContent=window._firebaseInitError||'База данных недоступна. Попробуйте обновить страницу.';
+  }
+  return false;
+}
+
+function formatAppError(e){
+  const msg=(e&&e.message)?e.message:String(e||'Неизвестная ошибка');
+  if((e&&e.code==='PERMISSION_DENIED')||/permission_denied|permission denied/i.test(msg)){
+    return 'Firebase отклонил запрос. Проверь правила Realtime Database: для регистрации нужна запись в users.';
+  }
+  if(/network|offline|failed to fetch|disconnected/i.test(msg)){
+    return 'Нет соединения с Firebase. Проверь интернет и попробуй ещё раз.';
+  }
+  return msg;
+}
+
+async function safeSecurityPush(path,data){
+  if(!db)return;
+  try{await db.ref(path).push(data);}catch(e){console.warn('Security log skipped:',e);}
+}
 
 // ══════════════════════════════════════════
 // SECURITY MODULE
@@ -758,7 +801,13 @@ const Security = (() => {
     if(nick.length<2)return'Ник слишком короткий (мин 2)';
     if(nick.length>20)return'Ник слишком длинный (макс 20)';
     if(containsScript(nick))return'HACK_ATTEMPT';
-    if(!/^[a-zA-Zа-яА-ЯёЁ0-9_\-\.]+$/.test(nick))return'Только буквы, цифры, _ - .';
+    if(/[.#$/[\]]/.test(nick))return'Ник не должен содержать . # $ / [ ]';
+    if(!/^[a-zA-Zа-яА-ЯёЁ0-9_-]+$/.test(nick))return'Только буквы, цифры, _ и -';
+    return null;
+  }
+  function validateDbKey(value,label='Название'){
+    if(!value)return label+' не заполнено';
+    if(/[.#$/[\]]/.test(value))return label+' не должно содержать . # $ / [ ]';
     return null;
   }
   function checkRateLimit(){
@@ -778,7 +827,7 @@ const Security = (() => {
       return(h>>>0).toString(36);
     }catch{return'unknown';}
   }
-  return{esc,containsScript,validateNick,checkRateLimit,getBrowserFP};
+  return{esc,containsScript,validateNick,validateDbKey,checkRateLimit,getBrowserFP};
 })();
 
 // ══════════════════════════════════════════
@@ -786,6 +835,7 @@ const Security = (() => {
 // ══════════════════════════════════════════
 let currentUser = null;
 let seasonEnd = 0;
+let seasonTimerId = null;
 
 const RANKS = [
   {min:0,    name:"Bronze 1",         cls:"rb-b1",icon:"🥉",loss:10,  gain:1.2},
@@ -869,6 +919,9 @@ function calcLevel(trophies){
   let inLvl=trophies-lvl*PL;
   return{level:lvl,progress:(inLvl/PL)*100,toNext:PL-inLvl};
 }
+function calcTrophyGain(isWin){
+  return isWin?200:0;
+}
 
 // ══════════════════════════════════════════
 // HASH (simple for backward compat)
@@ -895,39 +948,31 @@ const ALLOWED_FIELDS=["elo","trophies","wins","losses","seasonWins","seasonLosse
   "friends","friendRequests","partyId"];
 
 async function doRegister(u,p){
+  if(!ensureDb())throw new Error(window._firebaseInitError||'База данных недоступна');
   u=u.trim();
   // Проверка ника на скрипты
   const nickErr=Security.validateNick(u);
   if(nickErr){
-    if(nickErr==='HACK_ATTEMPT'){
-      // Автобан попытки
-      await db.ref(`_security/hackAttempts`).push({nick:u,ts:Date.now(),fp:Security.getBrowserFP()});
-      throw new Error('🚫 Обнаружена попытка инъекции. Действие заблокировано.');
-    }
-    throw new Error(nickErr);
+    throw new Error(nickErr==='HACK_ATTEMPT'?'Недопустимый никнейм':nickErr);
   }
   if(p.length<4)throw new Error('Пароль минимум 4 символа');
   const ref=db.ref(`users/${u}`);
   if((await ref.once('value')).exists())throw new Error('Никнейм занят');
-  const fp=Security.getBrowserFP();
-  // Антибот: проверяем количество регистраций с этого fingerprint за 24ч
-  const fpRef=db.ref(`_security/fingerprints/${fp}`);
-  const fpSnap=await fpRef.once('value');
-  const fpData=fpSnap.val()||{count:0,ts:Date.now()};
-  if(Date.now()-fpData.ts<86400000&&fpData.count>=5){
-    throw new Error('🚫 Слишком много аккаунтов с одного устройства. Попробуйте позже.');
-  }
-  await fpRef.set({count:(fpData.count||0)+1,ts:fpData.ts||Date.now(),lastNick:u});
-  await ref.set({
+  const newUser={
     pwHash:hashStr(p),elo:0,trophies:0,wins:0,losses:0,
     seasonWins:0,seasonLosses:0,maxEloEver:0,avatar:'',clan:'',gold:0,
     winStreak:0,ownedItems:[],equippedAbility:'',equippedSkin:'',
-    friends:[],friendRequests:[],createdAt:Date.now(),fp:fp
-  });
+    friends:[],friendRequests:[],createdAt:Date.now(),fp:'captcha'
+  };
+  await ref.set(newUser);
+  return newUser;
 }
 
 async function doLogin(u,p){
+  if(!ensureDb())throw new Error(window._firebaseInitError||'База данных недоступна');
   u=u.trim();
+  const nickErr=Security.validateNick(u);
+  if(nickErr)throw new Error(nickErr==='HACK_ATTEMPT'?'Недопустимый никнейм':nickErr);
   if(!Security.checkRateLimit())throw new Error('⏱️ Слишком много попыток. Подождите 1 минуту.');
   const snap=await db.ref(`users/${u}`).once('value');
   if(!snap.exists())throw new Error('Аккаунт не найден');
@@ -942,7 +987,7 @@ async function doLogin(u,p){
 }
 
 async function saveStats(fields){
-  if(!currentUser)return;
+  if(!currentUser||!ensureDb(false))return;
   let upd={};
   for(let k of ALLOWED_FIELDS)if(fields[k]!==undefined){upd[k]=fields[k];currentUser[k]=fields[k];}
   await db.ref(`users/${currentUser.username}`).update(upd);
@@ -986,7 +1031,13 @@ function renderProfile(){
   document.getElementById('levelNext').textContent=lvl.toNext?lvl.toNext+' трофеев':'MAX';
   // Avatar
   const wrap=document.getElementById('profAvatarWrap');
-  const img=document.getElementById('profAvatarImg');
+  let img=document.getElementById('profAvatarImg');
+  if(!img){
+    img=document.createElement('img');
+    img.id='profAvatarImg';
+    img.alt='';
+    img.style.cssText='display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;';
+  }
   wrap.style.background=avColor(u.username);
   wrap.textContent='';
   if(u.avatar){
@@ -1128,8 +1179,7 @@ function showResult({eloChange,isWin,oldElo,newElo,oldRank,newRank,winStreak,tro
             <span style="font-size:13px;font-weight:700;">🏆 Трофеи</span>
             <span style="background:var(--green);color:#fff;padding:2px 12px;border-radius:20px;font-weight:800;font-size:13px;">+${trophyGain}</span>
           </div>
-          <div style="font-size:13px;color:var(--text2);">Уровень: <b>${oldLevel}${levelUp?` → <span style="color:var(--primary);">${newLevel} ⬆️</span>`:''}` : ''}
-          </b></div>
+          <div style="font-size:13px;color:var(--text2);">Уровень: <b>${oldLevel}${levelUp?` → <span style="color:var(--primary);">${newLevel} ⬆️</span>`:''}</b></div>
           ${levelUp?'<div style="text-align:center;margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🎉 НОВЫЙ УРОВЕНЬ!</div>':''}
         </div>`:''}
       </div>
@@ -1327,7 +1377,7 @@ function startBotArena(partyContext=null){
     
     const newElo=Math.max(0,oldElo+eloChange);
     const oldLvl=calcLevel(currentUser.trophies||0);
-    const trophyGain=isWin?Math.floor(Math.max(5,10*getRank(oldElo).gain)):0;
+    const trophyGain=calcTrophyGain(isWin);
     const newTrophies=(currentUser.trophies||0)+trophyGain;
     const newLvl=calcLevel(newTrophies);
     const newGold=(currentUser.gold||0)+(isWin?1:0);
@@ -1370,11 +1420,13 @@ function startBotArena(partyContext=null){
 // ══════════════════════════════════════════
 // ONLINE PvP (improved sync)
 // ══════════════════════════════════════════
-let onlineMatchRef=null,onlineGameRef=null,onlineGameId=null,onlineListener=null;
+let onlineMatchRef=null,onlineGameRef=null,onlineGameId=null,onlineListener=null,onlineSearchName=null;
 
 async function searchOnline(){
   if(!currentUser){showNotify('Войдите в аккаунт!','err');return;}
-  if(onlineMatchRef){onlineMatchRef.off();onlineMatchRef=null;}
+  if(!ensureDb())return;
+  try{
+  if(onlineMatchRef){onlineMatchRef.off();onlineMatchRef=null;onlineListener=null;}
   document.getElementById('onlineStatus').innerHTML=`
     <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
       <div class="spinner" style="width:24px;height:24px;border-width:3px;flex-shrink:0;"></div>
@@ -1383,19 +1435,24 @@ async function searchOnline(){
     </div>`;
   document.getElementById('cancelSearchBtn').onclick=cancelOnlineSearch;
   const myRef=db.ref(`matchmaking/${currentUser.username}`);
+  onlineSearchName=currentUser.username;
   await myRef.set({elo:currentUser.elo||0,status:'search',ts:Date.now(),rank:getRank(currentUser.elo||0).name});
   myRef.onDisconnect().remove();
   let found=false;
   onlineMatchRef=db.ref('matchmaking');
   onlineListener=onlineMatchRef.on('value',async snap=>{
-    if(found)return;
+    if(found||!currentUser)return;
     const all=snap.val()||{};
     const now=Date.now();
     const opp=Object.keys(all).find(k=>
       k!==currentUser.username&&all[k].status==='search'&&(now-(all[k].ts||0))<30000
     );
     if(opp){
-      found=true;onlineMatchRef.off();onlineMatchRef=null;
+      found=true;
+      if(onlineMatchRef){
+        if(onlineListener)onlineMatchRef.off('value',onlineListener);else onlineMatchRef.off();
+      }
+      onlineMatchRef=null;onlineListener=null;onlineSearchName=null;
       await myRef.remove();await db.ref(`matchmaking/${opp}`).remove();
       const gid='g_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
       onlineGameId=gid;onlineGameRef=db.ref(`games/${gid}`);
@@ -1409,12 +1466,20 @@ async function searchOnline(){
     }
   });
   setTimeout(()=>{if(!found){cancelOnlineSearch();document.getElementById('onlineStatus').textContent='❌ Соперник не найден. Попробуйте ещё раз.';}},25000);
+  }catch(e){
+    cancelOnlineSearch();
+    showNotify(formatAppError(e),'err');
+  }
 }
 
 function cancelOnlineSearch(){
-  if(onlineMatchRef){onlineMatchRef.off();onlineMatchRef=null;}
-  if(onlineListener&&onlineMatchRef){onlineMatchRef.off(onlineListener);}
-  db.ref(`matchmaking/${currentUser?.username}`).remove();
+  if(onlineMatchRef){
+    if(onlineListener)onlineMatchRef.off('value',onlineListener);else onlineMatchRef.off();
+    onlineMatchRef=null;onlineListener=null;
+  }
+  const name=onlineSearchName||currentUser?.username;
+  onlineSearchName=null;
+  if(name&&ensureDb(false))db.ref(`matchmaking/${name}`).remove();
   document.getElementById('onlineStatus').textContent='';
 }
 
@@ -1447,11 +1512,12 @@ function startOnlineTapGame(gid,myName,oppName){
   <div class="game-status" id="ot_status">Удачи! 🎮</div>`;
   document.body.appendChild(ov);
   
-  let gameListener=null;
+  let gameListener=null,lastActivity=Date.now();
   // Real-time listener for opponent taps
   gameListener=gRef.on('value',snap=>{
     if(gameOver)return;
     const d=snap.val();if(!d)return;
+    lastActivity=Date.now();
     // Abandonment detection
     if(d.status==='abandoned'){
       gameOver=true;gRef.off('value',gameListener);
@@ -1484,6 +1550,7 @@ function startOnlineTapGame(gid,myName,oppName){
   
   document.getElementById('ot_tapBtn').addEventListener('click',async()=>{
     if(gameOver)return;
+    lastActivity=Date.now();
     myTaps++;
     const myScoreEl=document.getElementById('ot_myScore');
     const myProgEl=document.getElementById('ot_myProg');
@@ -1504,7 +1571,6 @@ function startOnlineTapGame(gid,myName,oppName){
   });
   
   // Timeout: if no activity for 30s, abandon
-  let lastActivity=Date.now();
   const activityCheck=setInterval(()=>{
     if(gameOver){clearInterval(activityCheck);return;}
     if(Date.now()-lastActivity>30000){
@@ -1512,7 +1578,6 @@ function startOnlineTapGame(gid,myName,oppName){
       if(!gameOver){gameOver=true;gRef.off('value',gameListener);ov.remove();
         showNotify('⏱️ Время вышло','warn');}
     }
-    lastActivity=Date.now();
   },5000);
 }
 
@@ -1524,7 +1589,7 @@ async function endOnlineGame(isWin,myTaps,oppTaps,myName,oppName){
   const eloChange=calcEloChange(oldElo,isWin,oldStreak);
   const newElo=Math.max(0,oldElo+eloChange);
   const oldLvl=calcLevel(currentUser.trophies||0);
-  const trophyGain=isWin?Math.floor(Math.max(5,10*getRank(oldElo).gain)):0;
+  const trophyGain=calcTrophyGain(isWin);
   const newTrophies=(currentUser.trophies||0)+trophyGain;
   const newLvl=calcLevel(newTrophies);
   const newGold=(currentUser.gold||0)+(isWin?1:0);
@@ -1673,7 +1738,6 @@ function initChat(){
     }
     chatEl.scrollTop=chatEl.scrollHeight;
     // Listen for new messages
-    const query=lastChatMsgKey?db.ref('chat/messages').orderByKey().startAfter(lastChatMsgKey):db.ref('chat/messages').limitToLast(1);
     db.ref('chat/messages').limitToLast(200).on('child_added',ds=>{
       const msg=ds.val();const key=ds.key;
       if(lastChatMsgKey&&key<=lastChatMsgKey)return;
@@ -1715,13 +1779,6 @@ async function sendChatMsg(){
   const input=document.getElementById('chatInput');
   let text=input.value.trim();
   if(!text)return;
-  // Sanitize
-  if(Security.containsScript(text)){
-    // Auto-ban attempt
-    await db.ref(`users/${currentUser.username}`).update({banned:true,banReason:'Попытка XSS в чате'});
-    showNotify('🚫 Обнаружена попытка взлома. Аккаунт заблокирован.','err');
-    currentUser=null;localStorage.removeItem('domofon_user');return;
-  }
   if(text.length>300)text=text.substr(0,300);
   input.value='';
   await db.ref('chat/messages').push({
@@ -1899,6 +1956,8 @@ async function sendFriendRequest(){
   if(!currentUser){showNotify('Войдите!','err');return;}
   const target=document.getElementById('friendReqInput').value.trim();
   if(!target){showNotify('Введите никнейм','warn');return;}
+  const targetErr=Security.validateNick(target);
+  if(targetErr){showNotify(targetErr==='HACK_ATTEMPT'?'Недопустимый никнейм':targetErr,'warn');return;}
   if(target===currentUser.username){showNotify('Нельзя добавить себя','err');return;}
   const snap=await db.ref(`users/${target}`).once('value');
   if(!snap.exists()){showNotify('Игрок не найден','err');return;}
@@ -1952,8 +2011,15 @@ async function openPlayerModal(username){
   const d=snap.val();
   const modal=document.getElementById('playerModalOverlay');
   const avWrap=document.getElementById('modalAvatarWrap');
-  const avImg=document.getElementById('modalAvatarImg');
+  let avImg=document.getElementById('modalAvatarImg');
+  if(!avImg){
+    avImg=document.createElement('img');
+    avImg.id='modalAvatarImg';
+    avImg.alt='';
+    avImg.style.cssText='display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;';
+  }
   avWrap.style.background=avColor(username);
+  avWrap.textContent='';
   if(d.avatar){avImg.src=d.avatar;avImg.style.display='block';avWrap.appendChild(avImg);}
   else{avImg.style.display='none';avWrap.textContent=avLetter(username);}
   document.getElementById('modalName').textContent=username;
@@ -1978,7 +2044,7 @@ function closeModal(){document.getElementById('playerModalOverlay').style.displa
 // ADMIN
 // ══════════════════════════════════════════
 async function checkAdmin(){
-  if(!currentUser)return false;
+  if(!currentUser||!ensureDb(false))return false;
   const snap=await db.ref(`admins/${currentUser.username}`).once('value');
   return snap.exists();
 }
@@ -2043,14 +2109,23 @@ async function adminEditElo(username,currentElo){
 // SEASON SYSTEM
 // ══════════════════════════════════════════
 async function initSeason(){
-  const snap=await db.ref('season').once('value');
-  const d=snap.val()||{};
-  if(!d.end||Date.now()>d.end){
+  if(!ensureDb(false))return;
+  let d={};
+  try{
+    const snap=await db.ref('season').once('value');
+    d=snap.val()||{};
+  }catch(e){
+    console.warn('Season read skipped:',e);
+  }
+  if(!d.end){
     seasonEnd=Date.now()+30*24*3600*1000;
-    if(!d.end)await db.ref('season').set({end:seasonEnd,started:Date.now()});
+    await db.ref('season').set({end:seasonEnd,started:Date.now()}).catch(e=>console.warn('Season write skipped:',e));
+  }else if(Date.now()>d.end){
+    await resetSeason(false);
   }else{seasonEnd=d.end;}
   updateSeasonTimer();
-  setInterval(updateSeasonTimer,60000);
+  if(seasonTimerId)clearInterval(seasonTimerId);
+  seasonTimerId=setInterval(updateSeasonTimer,60000);
 }
 
 function updateSeasonTimer(){
@@ -2061,8 +2136,8 @@ function updateSeasonTimer(){
   if(el)el.textContent=`${days}д ${hours}ч`;
 }
 
-async function forceSeasonReset(){
-  if(!await checkAdmin())return;
+async function resetSeason(requireAdmin=true){
+  if(requireAdmin&&!await checkAdmin())return;
   // Archive top players
   const snap=await db.ref('users').once('value');
   const users=snap.val()||{};
@@ -2072,12 +2147,27 @@ async function forceSeasonReset(){
   // Reset seasonal stats
   const updates={};
   for(const[name]of Object.entries(users)){
-    updates[`users/${name}/seasonWins`]=0;updates[`users/${name}/seasonLosses`]=0;
+    updates[`users/${name}/elo`]=0;
+    updates[`users/${name}/seasonWins`]=0;
+    updates[`users/${name}/seasonLosses`]=0;
+    updates[`users/${name}/winStreak`]=0;
   }
   await db.ref().update(updates);
   seasonEnd=Date.now()+30*24*3600*1000;
   await db.ref('season').set({end:seasonEnd,started:Date.now()});
+  if(currentUser){
+    currentUser.elo=0;
+    currentUser.seasonWins=0;
+    currentUser.seasonLosses=0;
+    currentUser.winStreak=0;
+    renderProfile();
+    updateSideMini();
+  }
   showNotify('🏆 Сезон завершён! Начинается новый сезон.','ok');
+}
+
+async function forceSeasonReset(){
+  await resetSeason(true);
 }
 
 // ══════════════════════════════════════════
@@ -2088,6 +2178,11 @@ function showNotify(msg,type='info',ms=3500){
   el.textContent=msg;document.body.appendChild(el);
   setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.3s';setTimeout(()=>el.remove(),300);},ms);
 }
+
+window.addEventListener('unhandledrejection',e=>{
+  e.preventDefault();
+  showNotify(formatAppError(e.reason),'err');
+});
 
 // ══════════════════════════════════════════
 // NAVIGATION
@@ -2129,18 +2224,23 @@ async function afterLogin(){
   document.getElementById('profileInfo').style.display='block';
   document.getElementById('sidebarUserMini').style.display='block';
   updateSideMini();
-  if(await checkAdmin()){
-    document.getElementById('forceSeasonEndBtn').style.display='inline-flex';
-    document.getElementById('adminTabBtn').style.display='flex';
-    if(currentUser.username==='qwenix'){
-      const adm=await db.ref('admins/qwenix').once('value');
-      if(!adm.exists())await db.ref('admins/qwenix').set({addedAt:Date.now()});
+  try{
+    if(await checkAdmin()){
+      document.getElementById('forceSeasonEndBtn').style.display='inline-flex';
+      document.getElementById('adminTabBtn').style.display='flex';
+      if(currentUser.username==='qwenix'){
+        const adm=await db.ref('admins/qwenix').once('value');
+        if(!adm.exists())await db.ref('admins/qwenix').set({addedAt:Date.now()}).catch(()=>{});
+      }
     }
-  }
-  renderProfile();renderShop();initSeason();loadLeaderboards();
+  }catch(e){console.warn('Admin check skipped:',e);}
+  renderProfile();renderShop();
+  initSeason().catch(e=>console.warn('Season init skipped:',e));
+  loadLeaderboards().catch(e=>console.warn('Leaderboards skipped:',e));
 }
 
 async function autoLogin(){
+  if(!ensureDb(false))return;
   const saved=localStorage.getItem('domofon_user');if(!saved)return;
   try{
     const{username,password}=JSON.parse(saved);
@@ -2155,18 +2255,46 @@ async function autoLogin(){
 // ══════════════════════════════════════════
 // EVENT LISTENERS
 // ══════════════════════════════════════════
+function setAuthBusy(isBusy){
+  document.getElementById('doLogin').disabled=isBusy;
+  document.getElementById('doRegister').disabled=isBusy;
+}
+
+let captchaAnswer='';
+function resetCaptcha(){
+  const a=2+Math.floor(Math.random()*8);
+  const b=2+Math.floor(Math.random()*8);
+  captchaAnswer=String(a+b);
+  const q=document.getElementById('captchaQuestion');
+  const input=document.getElementById('captchaInput');
+  if(q)q.textContent=`${a} + ${b} = ?`;
+  if(input)input.value='';
+}
+function checkCaptcha(msg){
+  const input=document.getElementById('captchaInput');
+  if(!input)return true;
+  if(input.value.trim()!==captchaAnswer){
+    msg.textContent='Неверная капча';
+    resetCaptcha();
+    return false;
+  }
+  return true;
+}
+resetCaptcha();
+
 document.getElementById('doLogin').onclick=async()=>{
   const u=document.getElementById('loginUser').value.trim();
   const p=document.getElementById('loginPass').value;
   const msg=document.getElementById('authMsg');
   if(!u||!p){msg.textContent='Заполните все поля!';return;}
+  if(!checkCaptcha(msg))return;
   const nickErr=Security.validateNick(u);
   if(nickErr&&nickErr!=='HACK_ATTEMPT'){msg.textContent=nickErr;return;}
   if(nickErr==='HACK_ATTEMPT'){
-    await db.ref('_security/hackAttempts').push({nick:u,ts:Date.now(),fp:Security.getBrowserFP()});
-    msg.textContent='🚫 Обнаружена попытка инъекции.';return;
+    msg.textContent='Недопустимый никнейм';return;
   }
   try{
+    setAuthBusy(true);
     msg.textContent='⏳ Входим...';
     const data=await doLogin(u,p);
     currentUser={username:u,password:p,...data};
@@ -2174,7 +2302,8 @@ document.getElementById('doLogin').onclick=async()=>{
     currentUser={...currentUser,...fresh,username:u};
     localStorage.setItem('domofon_user',JSON.stringify({username:u,password:p}));
     msg.textContent='';afterLogin();
-  }catch(e){msg.textContent=e.message;}
+  }catch(e){msg.textContent=formatAppError(e);}
+  finally{setAuthBusy(false);resetCaptcha();}
 };
 
 document.getElementById('doRegister').onclick=async()=>{
@@ -2182,13 +2311,24 @@ document.getElementById('doRegister').onclick=async()=>{
   const p=document.getElementById('loginPass').value;
   const msg=document.getElementById('authMsg');
   if(!u||!p){msg.textContent='Заполните все поля!';return;}
+  if(!checkCaptcha(msg))return;
   try{
+    setAuthBusy(true);
     msg.textContent='⏳ Регистрируем...';
-    await doRegister(u,p);
-    showNotify('✅ Аккаунт создан! Войдите.','ok');
-    msg.textContent='';document.getElementById('loginPass').value='';
-  }catch(e){msg.textContent=e.message;}
+    const data=await doRegister(u,p);
+    currentUser={username:u,password:p,...data};
+    localStorage.setItem('domofon_user',JSON.stringify({username:u,password:p}));
+    showNotify('✅ Аккаунт создан!','ok');
+    msg.textContent='';afterLogin();
+  }catch(e){msg.textContent=formatAppError(e);}
+  finally{setAuthBusy(false);resetCaptcha();}
 };
+
+['loginUser','loginPass'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{
+    if(e.key==='Enter')document.getElementById('doLogin').click();
+  });
+});
 
 document.getElementById('logoutBtnSide').onclick=()=>{
   currentUser=null;localStorage.removeItem('domofon_user');
@@ -2234,6 +2374,8 @@ document.getElementById('createClanBtn').onclick=async()=>{
   const cname=document.getElementById('clanName').value.trim();
   const ctag=document.getElementById('clanPrefix').value.trim().toUpperCase().substr(0,5);
   if(!cname){showNotify('Введите название!','warn');return;}
+  const clanErr=Security.validateDbKey(cname,'Название клана');
+  if(clanErr){showNotify(clanErr,'warn');return;}
   if(Security.containsScript(cname)||Security.containsScript(ctag)){showNotify('🚫 Запрещённые символы','err');return;}
   const ex=await db.ref(`clans/${cname}`).once('value');
   if(ex.exists()){showNotify('Клан уже существует!','warn');return;}
@@ -2244,9 +2386,34 @@ document.getElementById('createClanBtn').onclick=async()=>{
 document.getElementById('uploadAvatarBtnSide').onclick=()=>document.getElementById('avatarFileInput').click();
 document.getElementById('avatarFileInput').onchange=e=>{
   const file=e.target.files[0];if(!file)return;
-  if(file.size>800000){showNotify('Файл слишком большой! Макс 800кб','err');return;}
   const fr=new FileReader();
-  fr.onload=async ev=>{await saveStats({avatar:ev.target.result});renderProfile();showNotify('✅ Аватар обновлён!','ok');};
+  fr.onload=ev=>{
+    const raw=ev.target.result;
+    const img=new Image();
+    img.onload=async()=>{
+      let avatar=raw;
+      if(file.size>800000||raw.length>950000){
+        const maxSide=512;
+        const scale=Math.min(1,maxSide/Math.max(img.width,img.height));
+        const canvas=document.createElement('canvas');
+        canvas.width=Math.max(1,Math.round(img.width*scale));
+        canvas.height=Math.max(1,Math.round(img.height*scale));
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        avatar=canvas.toDataURL('image/jpeg',0.86);
+      }
+      await saveStats({avatar});
+      renderProfile();
+      updateSideMini();
+      showNotify(file.size>800000?'✅ Аватар сжат и загружен!':'✅ Аватар обновлён!','ok');
+      e.target.value='';
+    };
+    img.onerror=()=>{
+      showNotify('Файл не похож на картинку. Выбери PNG, JPG, WEBP, GIF, BMP или SVG.','err');
+      e.target.value='';
+    };
+    img.src=raw;
+  };
   fr.readAsDataURL(file);
 };
 
@@ -2261,33 +2428,20 @@ document.querySelectorAll('.tab-btn,.bnav-btn').forEach(btn=>{
 document.getElementById('partyCodeInput').oninput=function(){this.value=this.value.toUpperCase();};
 
 // ══════════════════════════════════════════
-// ANTI-EXPLOIT MONITOR
-// ══════════════════════════════════════════
-// Monitor for JS injection in page
-const _origEval=window.eval;
-window.eval=function(code){
-  if(currentUser){
-    db.ref(`_security/evalAttempts`).push({user:currentUser.username,ts:Date.now(),code:String(code).substr(0,100)});
-    db.ref(`users/${currentUser.username}`).update({banned:true,banReason:'JS eval() injection attempt'});
-    currentUser=null;localStorage.removeItem('domofon_user');
-    showNotify('🚫 Попытка взлома обнаружена. Аккаунт заблокирован.','err');
-  }
-  return _origEval.apply(this,arguments);
-};
-
-// Detect devtools (basic)
-let devtoolsOpen=false;
-setInterval(()=>{
-  const t=performance.now();
-  debugger;
-  if(performance.now()-t>100&&!devtoolsOpen){devtoolsOpen=true;}
-},3000);
-
-// ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
-autoLogin();
-initSeason();
+if(ensureDb()){
+  autoLogin();
+  initSeason().catch(e=>console.warn('Season init skipped:',e));
+}else{
+  setAuthBusy(true);
+}
 </script>
+
 </body>
 </html>
+
+
+
+
+
