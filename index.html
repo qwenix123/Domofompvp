@@ -1,208 +1,2447 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domofon | Глобальное Обновление</title>
-    <style>
-        :root {
-            --dark-space: #05070a;
-            --neon-blue: #00d2ff;
-            --deep-purple: #3a1c71;
-            --gold: #ffaf7b;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+<title>DOMOFON PvP</title>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<style>
+:root {
+  --primary:#6366f1;--primary-d:#4f46e5;--primary-l:#eef2ff;--primary-ll:#f5f3ff;
+  --accent:#f43f5e;--accent-d:#e11d48;--gold:#f59e0b;--green:#10b981;--red:#ef4444;
+  --bg:#f1f5f9;--card:#ffffff;--border:rgba(0,0,0,0.07);--border2:rgba(99,102,241,0.2);
+  --text:#0f172a;--text2:#64748b;--text3:#94a3b8;
+  --shadow:0 2px 16px rgba(0,0,0,0.06);--shadow2:0 8px 32px rgba(0,0,0,0.1);--shadow3:0 20px 60px rgba(0,0,0,0.15);
+  --radius:20px;--radius-sm:12px;--radius-lg:28px;
+  --sidebar:260px;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;}
+body{display:flex;flex-direction:column;}
 
-        @keyframes bgRotate {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
+/* ═══════════════════ SIDEBAR ═══════════════════ */
+.sidebar{position:fixed;left:0;top:0;width:var(--sidebar);height:100vh;background:var(--card);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;
+  box-shadow:var(--shadow2);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);}
+.logo-wrap{padding:24px 20px 20px;border-bottom:1px solid var(--border);}
+.logo{font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px;}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:3px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;}
+.nav{flex:1;padding:10px;overflow-y:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-section{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:8px 14px 4px;}
+.tab-btn{display:flex;align-items:center;gap:10px;background:transparent;border:none;padding:11px 14px;
+  text-align:left;font-size:13.5px;font-weight:600;color:var(--text2);cursor:pointer;transition:all 0.18s;
+  margin:2px 0;border-radius:14px;width:100%;position:relative;}
+.tab-btn .icon{font-size:18px;width:22px;text-align:center;flex-shrink:0;}
+.tab-btn:hover{background:var(--primary-l);color:var(--primary);}
+.tab-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;box-shadow:0 4px 14px rgba(99,102,241,0.4);}
+.tab-btn .badge{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;min-width:18px;text-align:center;}
+.sidebar-bottom{padding:14px;border-top:1px solid var(--border);}
+.tg-btn{display:flex;align-items:center;gap:8px;background:var(--primary-l);padding:11px 14px;
+  border-radius:14px;text-decoration:none;color:var(--primary);font-weight:700;font-size:13px;transition:all 0.18s;}
+.tg-btn:hover{background:var(--primary);color:#fff;}
+.user-mini{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;
+  background:var(--bg);margin-bottom:8px;cursor:pointer;transition:all 0.18s;}
+.user-mini:hover{background:var(--primary-l);}
+.user-mini-name{font-size:13px;font-weight:700;color:var(--text);}
+.user-mini-sub{font-size:11px;color:var(--text3);}
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
+/* ═══════════════════ MAIN ═══════════════════ */
+.main-wrap{margin-left:var(--sidebar);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.main-content{flex:1;overflow-y:auto;padding:24px 28px 100px;scroll-behavior:smooth;}
+.main-content::-webkit-scrollbar{width:6px;}
+.main-content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+.tab-pane{display:none;}
+.tab-pane.active-pane{display:block;animation:pageIn 0.25s cubic-bezier(0.4,0,0.2,1);}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
+/* ═══════════════════ PAGE HEADER ═══════════════════ */
+.page-header{margin-bottom:22px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.page-title{font-size:24px;font-weight:900;color:var(--text);letter-spacing:-0.5px;}
+.page-sub{font-size:13px;color:var(--text2);margin-top:3px;}
+.page-actions{display:flex;gap:8px;align-items:center;}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Trebuchet MS', sans-serif;
-        }
+/* ═══════════════════ CARDS ═══════════════════ */
+.card{background:var(--card);border-radius:var(--radius);padding:22px;margin-bottom:16px;
+  box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;}
+.card:hover{box-shadow:var(--shadow2);transition:box-shadow 0.3s;}
+.card-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-badge{font-size:11px;font-weight:700;color:var(--text3);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border);}
+.card-accent{border-left:3px solid var(--primary);}
 
-        body {
-            background-color: var(--dark-space);
-            background-image: radial-gradient(circle at center, #1a2a44 0%, #05070a 100%);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            overflow: hidden;
-        }
+/* ═══════════════════ INPUTS ═══════════════════ */
+input[type=text],input[type=password],textarea{width:100%;padding:12px 18px;border-radius:40px;
+  border:2px solid var(--border);background:#fafafa;font-size:14px;color:var(--text);outline:none;
+  transition:all 0.2s;font-family:inherit;}
+input:focus,textarea:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(99,102,241,0.12);}
+textarea{border-radius:16px;resize:none;padding:14px 18px;}
 
-        /* Эффект сканирования (как на старых мониторах) */
-        body::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 4px, 3px 100%;
-            pointer-events: none;
-        }
+/* ═══════════════════ BUTTONS ═══════════════════ */
+.btn{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;border:none;
+  padding:11px 24px;border-radius:40px;font-weight:700;cursor:pointer;transition:all 0.18s;
+  font-size:14px;display:inline-flex;align-items:center;gap:7px;font-family:inherit;letter-spacing:0.2px;}
+.btn:hover{box-shadow:0 4px 16px rgba(99,102,241,0.4);transform:translateY(-1px);}
+.btn:active{transform:scale(0.96);}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626);}
+.btn-danger:hover{box-shadow:0 4px 16px rgba(239,68,68,0.4);}
+.btn-success{background:linear-gradient(135deg,#10b981,#059669);}
+.btn-success:hover{box-shadow:0 4px 16px rgba(16,185,129,0.4);}
+.btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);}
+.btn-gold:hover{box-shadow:0 4px 16px rgba(245,158,11,0.4);}
+.btn-gray{background:linear-gradient(135deg,#94a3b8,#64748b);}
+.btn-gray:hover{box-shadow:0 4px 16px rgba(100,116,139,0.4);}
+.btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary);}
+.btn-outline:hover{background:var(--primary);color:#fff;}
+.btn-sm{padding:8px 18px;font-size:12.5px;}
+.btn-xs{padding:6px 14px;font-size:11.5px;}
+.btn-full{width:100%;justify-content:center;}
+.btn-icon{padding:10px;border-radius:50%;width:40px;height:40px;justify-content:center;}
 
-        .container {
-            width: 90%;
-            max-width: 420px;
-            z-index: 10;
-        }
+/* ═══════════════════ AVATAR ═══════════════════ */
+.av-wrap{border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-weight:900;color:#fff;letter-spacing:0;overflow:hidden;border:2px solid var(--border);}
+.av-wrap img{width:100%;height:100%;object-fit:cover;}
 
-        /* Главный блок с неоновым свечением */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border-radius: 35px;
-            padding: 40px 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0, 210, 255, 0.1);
-            position: relative;
-        }
+/* ═══════════════════ RANK BADGES ═══════════════════ */
+.rank-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:30px;
+  font-weight:700;font-size:12px;white-space:nowrap;}
+.rb-b1{background:linear-gradient(135deg,#cd7f32,#a0522d);color:#fff;}
+.rb-b2{background:linear-gradient(135deg,#b8733a,#7a3b1e);color:#fff;}
+.rb-b3{background:linear-gradient(135deg,#a05c2d,#5e2a0e);color:#fff;}
+.rb-s1{background:linear-gradient(135deg,#b0b8c8,#7a8a9a);color:#fff;}
+.rb-s2{background:linear-gradient(135deg,#909aaa,#5a6a7a);color:#fff;}
+.rb-s3{background:linear-gradient(135deg,#707a8a,#3a4a5a);color:#fff;}
+.rb-g1{background:linear-gradient(135deg,#ffd700,#ffa500);color:#333;}
+.rb-g2{background:linear-gradient(135deg,#ffb300,#e67e00);color:#fff;}
+.rb-g3{background:linear-gradient(135deg,#ff9500,#d46000);color:#fff;}
+.rb-r{background:linear-gradient(135deg,#ff4500,#b00000);color:#fff;}
+.rb-sy{background:linear-gradient(135deg,#9b59b6,#5e2a8a);color:#fff;}
+.rb-el{background:linear-gradient(135deg,#00bfff,#0055cc);color:#fff;}
+.rb-lg{background:linear-gradient(135deg,#ffe066,#ff4d00);color:#1a1a1a;box-shadow:0 0 12px rgba(255,200,0,0.5);}
 
-        .header-status {
-            color: var(--neon-blue);
-            font-size: 12px;
-            font-weight: 900;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            animation: blink 1.5s infinite;
-        }
+/* ═══════════════════ PROGRESS ═══════════════════ */
+.prog-wrap{width:100%;height:8px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin:5px 0;}
+.prog-fill{height:100%;border-radius:20px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1);}
+.prog-elo{background:linear-gradient(90deg,#f59e0b,#f43f5e);}
+.prog-lvl{background:linear-gradient(90deg,#6366f1,#8b5cf6);}
+.prog-hp{background:linear-gradient(90deg,#10b981,#059669);}
 
-        .main-title {
-            font-size: 45px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -2px;
-            line-height: 0.9;
-            margin-bottom: 10px;
-        }
+/* ═══════════════════ STAT GRID ═══════════════════ */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.stat-box{background:var(--bg);border-radius:var(--radius-sm);padding:14px;text-align:center;border:1px solid var(--border);}
+.stat-val{font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.5px;}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:3px;font-weight:600;}
 
-        .highlight {
-            background: linear-gradient(90deg, #ffaf7b, #d76d77, #3a1c71);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 60px;
-        }
+/* ═══════════════════ TABLE ═══════════════════ */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{padding:10px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:700;
+  text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid var(--border);}
+td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:background 0.15s;cursor:pointer;}
+tbody tr:hover td{background:var(--primary-ll);}
 
-        .info-text {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.7);
-            margin: 25px 0;
-            line-height: 1.6;
-        }
+/* ═══════════════════ SHOP ═══════════════════ */
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:14px;}
+.shop-card{background:var(--bg);border-radius:var(--radius);padding:18px 14px;text-align:center;
+  border:2px solid var(--border);transition:all 0.2s;position:relative;cursor:default;}
+.shop-card:hover{border-color:var(--primary);transform:translateY(-3px);box-shadow:var(--shadow2);}
+.shop-card.equipped{border-color:var(--green);background:#f0fdf8;}
+.shop-card.locked{opacity:0.6;}
+.shop-icon{font-size:38px;margin-bottom:8px;display:block;}
+.shop-name{font-weight:800;font-size:13.5px;margin-bottom:4px;}
+.shop-desc{font-size:11.5px;color:var(--text2);margin-bottom:10px;line-height:1.5;}
+.shop-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;
+  color:var(--text3);margin-bottom:6px;}
+.gold-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#fbbf24,#f59e0b);
+  color:#fff;padding:3px 12px;border-radius:30px;font-weight:800;font-size:13px;}
 
-        /* Индикатор процесса */
-        .loader-box {
-            margin: 30px 0;
-        }
+/* ═══════════════════ NOTIFICATIONS ═══════════════════ */
+.notify{position:fixed;top:20px;right:20px;background:var(--primary);color:#fff;
+  padding:12px 20px;border-radius:16px;z-index:9999;font-weight:600;font-size:14px;
+  box-shadow:var(--shadow3);max-width:320px;word-break:break-word;
+  animation:notifyIn 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+.notify.err{background:var(--red);}
+.notify.ok{background:var(--green);}
+.notify.warn{background:var(--gold);}
+@keyframes notifyIn{from{transform:translateX(120%) scale(0.8);opacity:0;}to{transform:translateX(0) scale(1);opacity:1;}}
 
-        .loader-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            margin-bottom: 10px;
-            color: var(--neon-blue);
-            font-weight: bold;
-        }
+/* ═══════════════════ RESULT OVERLAY ═══════════════════ */
+.result-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:4000;
+  display:flex;justify-content:center;align-items:center;backdrop-filter:blur(8px);padding:16px;}
+.result-card{background:#fff;border-radius:var(--radius-lg);overflow:hidden;
+  width:100%;max-width:420px;animation:resultIn 0.4s cubic-bezier(0.34,1.4,0.64,1);
+  box-shadow:var(--shadow3);}
+@keyframes resultIn{from{transform:scale(0.8) translateY(40px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+.result-header{padding:28px;text-align:center;}
+.result-header.win{background:linear-gradient(135deg,#065f46,#10b981);}
+.result-header.lose{background:linear-gradient(135deg,#7f1d1d,#ef4444);}
+.result-header.draw{background:linear-gradient(135deg,#334155,#94a3b8);}
+.result-verdict{font-size:28px;font-weight:900;color:#fff;letter-spacing:1px;}
+.result-score{font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px;font-weight:600;}
+.result-body{padding:22px 24px;}
+.result-elo-row{display:flex;justify-content:center;align-items:baseline;gap:6px;margin:8px 0;}
+.result-elo-num{font-size:52px;font-weight:900;line-height:1;}
+.result-elo-num.pos{color:var(--green);}
+.result-elo-num.neg{color:var(--red);}
+.result-elo-lbl{font-size:16px;font-weight:700;color:var(--text2);}
+.result-streak{background:linear-gradient(135deg,#ff8c00,#ff4500);color:#fff;border-radius:30px;
+  padding:6px 18px;font-weight:800;font-size:14px;display:inline-block;margin:6px 0;}
+.result-rank-row{display:flex;align-items:center;gap:10px;background:var(--bg);
+  border-radius:14px;padding:12px 16px;border:1px solid var(--border);margin:8px 0;}
+.result-rank-arrow{font-size:16px;color:var(--text3);}
+.result-prog-bar{width:100%;height:10px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin:6px 0;}
+.result-prog-fill{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:20px;transition:width 1s ease-out;}
+.result-section-label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+.result-continue-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--primary),var(--primary-d));
+  color:#fff;font-size:15px;font-weight:800;border:none;cursor:pointer;transition:0.15s;letter-spacing:0.5px;}
+.result-continue-btn:hover{filter:brightness(1.1);}
 
-        .bar-container {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
+/* ═══════════════════ ONLINE GAME ═══════════════════ */
+.game-overlay{position:fixed;inset:0;background:#0a0e1e;z-index:2000;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;padding:16px;}
+.game-header{color:#fff;text-align:center;padding:0 0 16px;}
+.game-title{font-size:18px;font-weight:800;}
+.game-sub{font-size:13px;color:#94a3b8;margin-top:2px;}
+.tap-arena{display:flex;gap:16px;align-items:stretch;width:100%;max-width:700px;flex-wrap:wrap;}
+.tap-zone{background:#111827;border-radius:var(--radius);padding:20px;border:2px solid #374151;
+  flex:1;min-width:240px;text-align:center;position:relative;transition:border-color 0.3s;}
+.tap-zone.mine{border-color:var(--primary);}
+.tap-zone.theirs{border-color:#dc2626;}
+.tap-zone.leading{border-color:#10b981;box-shadow:0 0 20px rgba(16,185,129,0.3);}
+.tap-player-info{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;}
+.tap-player-name{font-size:13px;font-weight:700;color:#94a3b8;}
+.tap-score{font-size:72px;font-weight:900;color:#fff;line-height:1;margin:8px 0;transition:transform 0.1s;}
+.tap-score.bump{transform:scale(1.15);}
+.tap-score.mine-c{color:#818cf8;}
+.tap-score.their-c{color:#f87171;}
+.tap-bar{width:100%;height:10px;background:#1f2937;border-radius:20px;overflow:hidden;margin:8px 0;}
+.tap-bar-fill{height:100%;border-radius:20px;transition:width 0.15s;}
+.tap-bar-mine{background:linear-gradient(90deg,#6366f1,#8b5cf6);}
+.tap-bar-their{background:linear-gradient(90deg,#ef4444,#dc2626);}
+.tap-btn-main{width:100%;padding:18px;font-size:18px;font-weight:900;
+  background:linear-gradient(135deg,var(--primary),var(--primary-d));border:none;
+  border-radius:16px;color:#fff;cursor:pointer;transition:all 0.1s;
+  user-select:none;-webkit-user-select:none;margin-top:10px;letter-spacing:0.5px;}
+.tap-btn-main:active{transform:scale(0.9);background:linear-gradient(135deg,#4f46e5,#3730a3);}
+.tap-vs{font-size:22px;font-weight:900;color:#fff;display:flex;align-items:center;align-self:center;}
+.game-status{color:#94a3b8;font-size:14px;text-align:center;padding:10px;font-weight:600;}
+.spinner{width:44px;height:44px;border:4px solid #374151;border-top-color:var(--primary);
+  border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.online-wait{text-align:center;color:#fff;padding:40px 20px;}
+.online-wait h3{font-size:18px;font-weight:700;margin-bottom:6px;}
+.online-wait p{font-size:14px;color:#94a3b8;}
 
-        .bar-value {
-            height: 100%;
-            width: 75%;
-            background: var(--neon-blue);
-            box-shadow: 0 0 20px var(--neon-blue);
-            position: relative;
-        }
+/* ═══════════════════ BOT GAME ═══════════════════ */
+.aim-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;
+  display:flex;justify-content:center;align-items:center;backdrop-filter:blur(10px);}
+.aim-game{background:#0a0e1e;border-radius:var(--radius-lg);width:min(95vw,600px);
+  height:min(90vh,500px);position:relative;overflow:hidden;border:2px solid var(--primary);
+  box-shadow:0 0 40px rgba(99,102,241,0.3);}
+.target-dot{position:absolute;border-radius:50%;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:transform 0.1s;user-select:none;-webkit-user-select:none;}
+.target-dot:hover{transform:scale(1.05);}
+.target-dot:active{transform:scale(0.9);}
+.aim-hud-tl{position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.8);padding:8px 16px;
+  border-radius:30px;color:#0f0;font-weight:700;font-size:14px;z-index:10;font-family:monospace;
+  backdrop-filter:blur(4px);border:1px solid rgba(0,255,0,0.2);}
+.aim-hud-tr{position:absolute;top:16px;right:16px;background:rgba(255,140,0,0.9);
+  padding:7px 14px;border-radius:30px;color:#fff;font-weight:800;font-size:13px;z-index:10;}
+.aim-ability-btn{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:20;}
+.aim-countdown{position:absolute;bottom:16px;right:16px;font-family:monospace;font-size:14px;
+  font-weight:800;color:#f43f5e;background:rgba(0,0,0,0.8);padding:6px 14px;border-radius:30px;
+  border:1px solid rgba(244,63,94,0.3);}
+.aim-round-flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:48px;font-weight:900;color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.5);
+  animation:flashOut 0.6s ease forwards;pointer-events:none;z-index:50;}
+@keyframes flashOut{0%{opacity:1;transform:scale(1.2);}100%{opacity:0;transform:scale(0.8);}}
 
-        /* Сетка с информацией */
-        .footer-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
+/* ═══════════════════ PARTY ═══════════════════ */
+.party-members{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;}
+.party-member{background:var(--bg);border-radius:var(--radius-sm);padding:14px;flex:1;
+  min-width:140px;text-align:center;border:2px solid var(--border);transition:all 0.2s;}
+.party-member.ready{border-color:var(--green);background:#f0fdf8;}
+.party-member.done-win{border-color:var(--green);background:#d1fae5;}
+.party-member.done-lose{border-color:var(--red);background:#fee2e2;}
+.party-code{font-family:monospace;font-size:28px;font-weight:900;letter-spacing:6px;
+  color:var(--primary);background:var(--primary-l);padding:12px 20px;border-radius:14px;
+  display:inline-block;margin:10px 0;border:2px solid var(--border2);}
 
-        .info-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+/* ═══════════════════ CHAT ═══════════════════ */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 200px);min-height:400px;}
+.chat-messages{flex:1;overflow-y:auto;padding:10px 0;scroll-behavior:smooth;}
+.chat-messages::-webkit-scrollbar{width:4px;}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+.chat-msg{display:flex;gap:10px;padding:6px 0;animation:msgIn 0.2s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.chat-msg.own{flex-direction:row-reverse;}
+.chat-bubble{max-width:70%;background:var(--bg);border-radius:18px;padding:10px 14px;
+  border:1px solid var(--border);position:relative;}
+.chat-msg.own .chat-bubble{background:var(--primary);color:#fff;border-color:var(--primary-d);}
+.chat-msg-name{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:3px;}
+.chat-msg.own .chat-msg-name{color:rgba(255,255,255,0.7);}
+.chat-msg-text{font-size:14px;line-height:1.5;word-break:break-word;}
+.chat-msg-time{font-size:10px;color:var(--text3);margin-top:3px;text-align:right;}
+.chat-msg.own .chat-msg-time{color:rgba(255,255,255,0.6);}
+.chat-input-row{display:flex;gap:10px;padding:12px 0 0;border-top:1px solid var(--border);margin-top:8px;}
+.chat-input-row input{border-radius:40px;flex:1;}
+.chat-date-divider{text-align:center;font-size:11px;color:var(--text3);font-weight:600;
+  padding:6px 0;margin:4px 0;}
 
-        .val {
-            display: block;
-            font-size: 20px;
-            font-weight: 900;
-            color: white;
-        }
+/* ═══════════════════ FRIENDS & CLANS ═══════════════════ */
+.list-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);
+  border-radius:var(--radius-sm);margin:6px 0;border:1px solid var(--border);transition:all 0.18s;}
+.list-row:hover{border-color:var(--primary);background:var(--primary-ll);}
+.list-row-info{flex:1;min-width:0;}
+.list-row-name{font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.list-row-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.list-row.req{background:#fffbeb;border-color:#fde68a;}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;
+  box-shadow:0 0 6px rgba(16,185,129,0.6);flex-shrink:0;}
 
-        .lbl {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+/* ═══════════════════ MODAL ═══════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:5000;
+  display:flex;justify-content:center;align-items:center;backdrop-filter:blur(6px);padding:16px;}
+.modal-card{background:#fff;border-radius:var(--radius-lg);padding:28px;
+  width:100%;max-width:420px;animation:resultIn 0.3s ease;box-shadow:var(--shadow3);}
+.modal-header{text-align:center;margin-bottom:16px;}
+.modal-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+.modal-stat{background:var(--bg);border-radius:var(--radius-sm);padding:12px;text-align:center;}
+.modal-stat-val{font-size:22px;font-weight:900;color:var(--text);}
+.modal-stat-lbl{font-size:11px;color:var(--text3);margin-top:2px;font-weight:600;}
 
-    </style>
+/* ═══════════════════ ADMIN ═══════════════════ */
+.admin-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);
+  border-radius:var(--radius-sm);margin:6px 0;border:1px solid var(--border);}
+
+/* ═══════════════════ CONFETTI ═══════════════════ */
+#confetti-canvas{position:fixed;inset:0;z-index:4500;pointer-events:none;display:none;}
+
+/* ═══════════════════ COUNTDOWN ═══════════════════ */
+.countdown{font-family:monospace;font-size:15px;font-weight:800;color:var(--accent);
+  background:rgba(244,63,94,0.1);padding:4px 14px;border-radius:30px;display:inline-block;
+  border:1px solid rgba(244,63,94,0.2);}
+
+/* ═══════════════════ MOBILE BOTTOM NAV ═══════════════════ */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:58px;background:#fff;
+  border-top:1px solid var(--border);z-index:300;box-shadow:0 -4px 20px rgba(0,0,0,0.08);}
+.bottom-nav-inner{display:flex;height:100%;}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;background:transparent;border:none;cursor:pointer;color:var(--text3);
+  font-size:9px;font-weight:700;transition:all 0.15s;padding:6px 0;}
+.bnav-btn.active{color:var(--primary);}
+.bnav-btn .bicon{font-size:20px;transition:transform 0.2s;}
+.bnav-btn.active .bicon{transform:scale(1.2);}
+
+/* ═══════════════════ RESPONSIVE ═══════════════════ */
+@media(max-width:768px){
+  :root{--sidebar:0px;}
+  .sidebar{transform:translateX(-100%);width:260px;}
+  .sidebar.open{transform:translateX(0);}
+  .main-wrap{margin-left:0!important;}
+  .main-content{padding:16px 14px 80px;}
+  .bottom-nav{display:flex;}
+  .page-title{font-size:20px;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .shop-grid{grid-template-columns:repeat(2,1fr);}
+  .tap-arena{flex-direction:column;}
+  .tap-vs{display:none;}
+  .result-card{max-width:100%;}
+  .chat-wrap{height:calc(100vh - 180px);}
+}
+@media(max-width:400px){
+  .shop-grid{grid-template-columns:1fr 1fr;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ═══════════════════ MISC ═══════════════════ */
+.divider{height:1px;background:var(--border);margin:12px 0;}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--bg);
+  border:1px solid var(--border);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;color:var(--text2);}
+.flex-center{display:flex;align-items:center;justify-content:center;}
+.gap-8{gap:8px;}
+.gap-10{gap:10px;}
+.wrap{flex-wrap:wrap;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-state .empty-icon{font-size:40px;margin-bottom:10px;}
+.empty-state p{font-size:14px;font-weight:600;}
+.verified{color:var(--primary);font-size:14px;}
+.hamburger{display:none;background:none;border:none;font-size:22px;cursor:pointer;padding:8px;}
+@media(max-width:768px){.hamburger{display:block;}}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;backdrop-filter:blur(4px);}
+.mobile-overlay.show{display:block;}
+.party-elo-hint{font-size:12px;color:var(--text2);background:var(--primary-ll);padding:10px 14px;
+  border-radius:12px;border-left:3px solid var(--primary);margin-top:10px;line-height:1.6;}
+.shimmer{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+/* ===== DOMOFON RECODE VISUAL PACK ===== */
+:root{--primary:#111820;--primary-d:#111820;--primary-l:#eef4f8;--primary-ll:#f7fbfd;--accent:#ef4444;--accent-d:#dc2626;--gold:#f4b63f;--green:#10b981;--red:#ef4444;--bg:#f7f9fb;--card:#fff;--border:#dbe3ea;--border2:#c7d3dd;--text:#151b23;--text2:#667085;--text3:#98a2b3;--shadow:0 14px 42px rgba(20,30,44,.10);--shadow2:0 18px 52px rgba(20,30,44,.14);--shadow3:0 28px 80px rgba(20,30,44,.18);--radius:8px;--radius-sm:8px;--radius-lg:8px;--sidebar:286px}
+*{letter-spacing:0!important}.sidebar{padding:16px;background:#fff}.logo-wrap{border:1px solid var(--border);border-radius:8px;padding:16px;background:#fafffd}.logo{background:none;color:var(--text);font-size:22px}.logo:before{display:none}.logo-img{width:30px;height:30px;object-fit:contain;border-radius:6px;flex:0 0 auto}.tab-btn{border-radius:8px;padding:12px 14px}.tab-btn.active{background:#111820;box-shadow:none}.card{border-radius:8px;border:1px solid var(--border);box-shadow:var(--shadow);background:#fff}.card:hover{box-shadow:var(--shadow2)}.btn{border-radius:8px;background:#111820;box-shadow:none}.btn:hover{box-shadow:none;filter:brightness(1.06)}.btn-gold{background:#f4b63f;color:#261900}.btn-success{background:#10b981}.btn-danger{background:#ef4444}.btn-gray,.btn-outline{background:#eef4f8;color:#1f2937;border:0}.stat-box,.shop-card,.party-member,.table-wrap,.list-row,.modal-content{border-radius:8px!important}.shop-card{background:#fbfdff;border:1px solid var(--border)}.shop-card:hover{transform:translateY(-2px);border-color:#111820}.chat-bubble{border-radius:8px;background:#fbfdff}.chat-msg.own .chat-bubble{background:#111820;border-color:#111820}.chat-load-more{margin:0 auto 10px;display:flex}.page-title{font-size:28px}.main-content{background:linear-gradient(180deg,#f7f9fb 0,#fff 100%)}input[type=text],input[type=password],textarea{border-radius:8px;border:1px solid var(--border);background:#fff}.captcha-box{border:1px solid var(--border);border-radius:8px;background:#fbfdff;padding:12px;margin:0 0 12px}.captcha-question{font-weight:900;color:var(--text)}@media(max-width:760px){.main-content{padding:14px 12px 96px}.card{padding:16px}.page-title{font-size:22px}.chat-wrap{height:calc(100dvh - 164px);min-height:360px}.btn{min-height:42px}.shop-grid{grid-template-columns:1fr 1fr}.party-code{font-size:24px;letter-spacing:4px}}
+</style>
 </head>
 <body>
 
-<div class="container">
-    <div class="glass-panel">
-        <div class="header-status">Система в режиме обслуживания</div>
-        
-        <h1 class="main-title">DOMOFON<br><span class="highlight">РЕКОД</span></h1>
-        
-        <p class="info-text">
-            Мы полностью переписываем проект с нуля. <br>
-            <strong>Старая версия отключена.</strong> <br>
-            В данный момент переносим базу данных и настраиваем новый функционал.
-        </p>
+<!-- Mobile overlay -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
 
-        <div class="loader-box">
-            <div class="loader-label">
-                <span>Ожидание выхода 2.0</span>
-                <span>75%</span>
-            </div>
-            <div class="bar-container">
-                <div class="bar-value"></div>
-            </div>
-        </div>
-
-        <div class="footer-info">
-            <div class="info-card">
-                <span class="val">СКОРО</span>
-                <span class="lbl">ЗАПУСК</span>
-            </div>
-            <div class="info-card">
-                <span class="val">NEW UI</span>
-                <span class="lbl">ДИЗАЙН</span>
-            </div>
-        </div>
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="logo-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="logo"><img class="logo-img" src="logo.png" alt="DOMOFON" onerror="this.style.display='none'"><span>DOMOFON</span></div>
+        <div class="logo-sub">PvP Platform v2.0</div>
+      </div>
+      <button class="hamburger" onclick="closeSidebar()" style="display:block;color:var(--text3);">✕</button>
     </div>
+  </div>
+  <div id="sidebarUserMini" style="display:none;padding:10px;border-bottom:1px solid var(--border);">
+    <div class="user-mini" onclick="switchTab('profile')">
+      <div id="sideAvatar" class="av-wrap" style="width:36px;height:36px;font-size:14px;background:var(--primary);"></div>
+      <div>
+        <div class="user-mini-name" id="sideUsername">—</div>
+        <div class="user-mini-sub" id="sideElo">ЭЛО: 0</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Игрок</div>
+    <button class="tab-btn active" data-tab="profile"><span class="icon">👤</span><span class="label">Профиль</span></button>
+    <button class="tab-btn" data-tab="shop"><span class="icon">🛍️</span><span class="label">Магазин</span></button>
+    <div class="nav-section">Игра</div>
+    <button class="tab-btn" data-tab="pvp"><span class="icon">🤖</span><span class="label">Бот-арена</span></button>
+    <button class="tab-btn" data-tab="online"><span class="icon">🌍</span><span class="label">Онлайн дуэль</span></button>
+    <button class="tab-btn" data-tab="party"><span class="icon">👥</span><span class="label">Пати</span></button>
+    <div class="nav-section">Сообщество</div>
+    <button class="tab-btn" data-tab="chat"><span class="icon">💬</span><span class="label">Чат</span><span class="badge" id="chatBadge" style="display:none;">!</span></button>
+    <button class="tab-btn" data-tab="leaderboards"><span class="icon">🏆</span><span class="label">Топы</span></button>
+    <button class="tab-btn" data-tab="clans"><span class="icon">🏰</span><span class="label">Кланы</span></button>
+    <button class="tab-btn" data-tab="friends"><span class="icon">🤝</span><span class="label">Друзья</span><span class="badge" id="friendBadge" style="display:none;"></span></button>
+    <button class="tab-btn" data-tab="admin" id="adminTabBtn" style="display:none;"><span class="icon">🔑</span><span class="label">Админ</span></button>
+  </nav>
+  <div class="sidebar-bottom">
+    <a href="https://t.me/snarashenie" target="_blank" class="tg-btn">📱 <span>TG Support</span></a>
+  </div>
 </div>
+
+<!-- MAIN -->
+<div class="main-wrap" id="mainWrap">
+  <div class="main-content" id="mainContent">
+
+    <!-- ═══ ПРОФИЛЬ ═══ -->
+    <div id="profile" class="tab-pane active-pane">
+      <div class="page-header">
+        <div><div class="page-title">👤 Профиль</div></div>
+        <div class="page-actions">
+          <button class="hamburger" onclick="openSidebar()">☰</button>
+        </div>
+      </div>
+      <!-- AUTH -->
+      <div class="card" id="authCard">
+        <div class="card-title">🔐 Вход / Регистрация</div>
+        <input type="text" id="loginUser" placeholder="Никнейм (2-20 символов)" style="margin-bottom:10px;" maxlength="20" autocomplete="off" spellcheck="false">
+        <input type="password" id="loginPass" placeholder="Пароль (мин 4 символа)" style="margin-bottom:14px;" maxlength="60" autocomplete="off">
+        <div class="captcha-box" id="captchaBox">
+          <div class="captcha-question">Капча: <b id="captchaQuestion">--</b></div>
+          <input type="text" id="captchaInput" placeholder="Ответ" inputmode="numeric" autocomplete="off" style="margin-top:8px;">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn" id="doLogin">🚀 Войти</button>
+          <button class="btn btn-gold" id="doRegister">✨ Регистрация</button>
+        </div>
+        <div id="authMsg" style="color:var(--red);margin-top:10px;font-size:13px;font-weight:600;"></div>
+      </div>
+      <!-- PROFILE INFO -->
+      <div id="profileInfo" style="display:none;">
+        <div class="card">
+          <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="text-align:center;flex-shrink:0;">
+              <div id="profAvatarWrap" class="av-wrap" style="width:80px;height:80px;font-size:32px;background:var(--primary);margin:0 auto;">
+                <img id="profAvatarImg" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">
+              </div>
+              <button class="btn btn-gray btn-sm" id="uploadAvatarBtnSide" style="margin-top:8px;">📷</button>
+              <input type="file" id="avatarFileInput" style="display:none">
+            </div>
+            <div style="flex:1;min-width:200px;">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                <h2 id="profName" style="font-size:22px;font-weight:900;">---</h2>
+                <span id="profClanTag" style="font-size:12px;color:var(--text3);font-weight:700;"></span>
+                <span id="profVerified" class="verified" style="display:none;" title="Verified">✓</span>
+              </div>
+              <div id="profRankBadge" style="margin-bottom:10px;"></div>
+              <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">ЭЛО → Следующий ранг</div>
+              <div class="prog-wrap"><div class="prog-fill prog-elo" id="rankProgressFill" style="width:0%"></div></div>
+              <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">До следующего ранга: <b id="rankProgressText">--</b></div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:14px;font-weight:600;">
+                <span>🏆 ЭЛО: <b id="profElo">0</b></span>
+                <span>🔥 Стрик: <b id="profStreak">0</b></span>
+                <span>💰 Голда: <span id="profGold" class="gold-badge">0</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="stat-grid" style="margin-top:16px;">
+            <div class="stat-box"><div class="stat-val" id="profLevel">0</div><div class="stat-lbl">Уровень</div></div>
+            <div class="stat-box"><div class="stat-val" id="profWins">0</div><div class="stat-lbl">Победы</div></div>
+            <div class="stat-box"><div class="stat-val" id="profWr">0%</div><div class="stat-lbl">Винрейт</div></div>
+            <div class="stat-box"><div class="stat-val" id="profTrophies">0</div><div class="stat-lbl">🏆 Трофеи</div></div>
+            <div class="stat-box"><div class="stat-val" id="profSeasonW">0</div><div class="stat-lbl">Сезон побед</div></div>
+            <div class="stat-box"><div class="stat-val" id="profSeasonL">0</div><div class="stat-lbl">Сезон пор.</div></div>
+          </div>
+          <div style="margin-top:12px;">
+            <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Прогресс уровня</div>
+            <div class="prog-wrap"><div class="prog-fill prog-lvl" id="levelProgress" style="width:0%"></div></div>
+            <div style="font-size:12px;color:var(--text2);">До след. уровня: <b id="levelNext">--</b></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-gray btn-sm" id="logoutBtnSide">🚪 Выйти</button>
+            <button class="btn btn-danger btn-sm" id="forceSeasonEndBtn" style="display:none;">⚠️ Завершить сезон</button>
+          </div>
+        </div>
+        <div class="card card-accent">
+          <div class="card-title">⚡ Активная способность</div>
+          <div id="activeAbilityDisplay" style="color:var(--text2);font-size:14px;">Нет активной способности</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ МАГАЗИН ═══ -->
+    <div id="shop" class="tab-pane">
+      <div class="page-header">
+        <div><div class="page-title">🛍️ Магазин</div><div class="page-sub">Голда: <span id="shopGold" class="gold-badge">0</span> · +1 за победу</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ Способности <span class="card-badge">Активные</span></div>
+        <div class="shop-grid" id="shopAbilities"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎨 Скины прицела <span class="card-badge">Косметика</span></div>
+        <div class="shop-grid" id="shopSkins"></div>
+      </div>
+    </div>
+
+    <!-- ═══ PVP БОТ ═══ -->
+    <div id="pvp" class="tab-pane">
+      <div class="page-header"><div class="page-title">🤖 Бот-арена</div><div class="page-sub">10 раундов против бота</div></div>
+      <div class="card">
+        <div class="card-title">🎯 Бой с ботом</div>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:12px;">Нажимай по цели быстрее бота! 10 раундов — кто больше выиграет.</p>
+        <div id="activeAbilityPvpHint" style="font-size:13px;color:var(--primary);margin-bottom:10px;font-weight:600;"></div>
+        <button class="btn" id="startBotAimBtn" style="background:linear-gradient(135deg,#f43f5e,#e11d48);">🔥 Начать бой</button>
+        <div id="botBattleStatus" style="margin-top:14px;font-size:14px;color:var(--text2);"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Последний результат</div>
+        <div id="botLastResult" class="empty-state"><div class="empty-icon">🎯</div><p>Сыграй первый бой</p></div>
+      </div>
+    </div>
+
+    <!-- ═══ ОНЛАЙН ═══ -->
+    <div id="online" class="tab-pane">
+      <div class="page-header"><div class="page-title">🌍 Онлайн дуэль</div><div class="page-sub">PvP против реального игрока</div></div>
+      <div class="card">
+        <div class="card-title">🔍 Поиск соперника</div>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:12px;">Кто первый наберёт <b>10 тапов</b> — победит! Синхронизация в реальном времени.</p>
+        <button class="btn" id="searchOnlineBtn">🎮 Найти соперника</button>
+        <div id="onlineStatus" style="margin-top:12px;font-size:14px;color:var(--text2);"></div>
+      </div>
+    </div>
+
+    <!-- ═══ ПАТИ ═══ -->
+    <div id="party" class="tab-pane">
+      <div class="page-header"><div class="page-title">👥 Пати</div><div class="page-sub">Играй с другом и пуши ЭЛО вместе</div></div>
+      <div class="party-elo-hint">
+        🏆 <b>Оба победили</b> → каждый получает <b>×2 ЭЛО</b><br>
+        ⚔️ <b>Один победил</b> → каждый получает стандартное ЭЛО<br>
+        💀 <b>Оба проиграли</b> → стандартный минус ЭЛО
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="card-title">🚀 Создать пати</div>
+        <button class="btn" id="createPartyBtn">✨ Создать пати</button>
+        <div id="partyCreateInfo" style="display:none;margin-top:14px;">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">Поделись кодом с другом:</div>
+          <div class="party-code" id="partyCodeDisplay">------</div>
+          <div id="partyMembersWrap" style="margin-top:14px;">
+            <div class="card-title">Участники</div>
+            <div class="party-members" id="partyMembersList"></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-success" id="startPartyBattleBtn" disabled>🔥 Начать бой!</button>
+            <button class="btn btn-danger btn-sm" id="leavePartyBtn">Покинуть</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔗 Вступить в пати</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input type="text" id="partyCodeInput" placeholder="Введи код (6 символов)" maxlength="6" style="flex:1;text-transform:uppercase;letter-spacing:4px;font-weight:700;" autocomplete="off">
+          <button class="btn btn-gold btn-sm" id="joinPartyBtn">Вступить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ЧАТ ═══ -->
+    <div id="chat" class="tab-pane">
+      <div class="page-header"><div class="page-title">💬 Общий чат</div><div class="page-sub">Общайся с игроками</div></div>
+      <div class="card" style="height:calc(100vh - 200px);display:flex;flex-direction:column;min-height:400px;">
+        <div class="chat-messages" id="chatMessages">
+          <div class="empty-state"><div class="empty-icon">💬</div><p>Загрузка сообщений...</p></div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Напиши сообщение..." maxlength="300" autocomplete="off">
+          <button class="btn btn-sm" id="sendChatBtn">Отправить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ТОПЫ ═══ -->
+    <div id="leaderboards" class="tab-pane">
+      <div class="page-header">
+        <div><div class="page-title">🏆 Топы</div><div class="page-sub">Сезон: <span id="seasonCountdown" class="countdown">--</span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📆 Топ сезона</div>
+        <div class="table-wrap"><div id="seasonTop">Загрузка...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏅 Топ всех времён</div>
+        <div class="table-wrap"><div id="alltimeTop">Загрузка...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏰 Топ кланов</div>
+        <div id="clanTop">Загрузка...</div>
+      </div>
+    </div>
+
+    <!-- ═══ КЛАНЫ ═══ -->
+    <div id="clans" class="tab-pane">
+      <div class="page-header"><div class="page-title">🏰 Кланы</div></div>
+      <div class="card">
+        <div class="card-title">Создать клан</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input type="text" id="clanName" placeholder="Название клана" style="flex:2;min-width:130px;" maxlength="20">
+          <input type="text" id="clanPrefix" placeholder="Тег (до 5)" style="flex:1;min-width:90px;" maxlength="5">
+          <button class="btn btn-sm" id="createClanBtn">Создать</button>
+          <button class="btn btn-gray btn-sm" id="refreshClans">🔄</button>
+        </div>
+      </div>
+      <div class="card" id="myClanCard" style="display:none;">
+        <div class="card-title" id="myClanTitle">👥 Мой клан</div>
+        <div id="myClanRankDisplay" style="margin-bottom:12px;"></div>
+        <div id="clanMembersList"></div>
+        <div style="margin-top:12px;">
+          <button class="btn btn-danger btn-sm" id="leaveClanBtn">Покинуть клан</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Все кланы</div>
+        <div id="clanList">Загрузка...</div>
+      </div>
+    </div>
+
+    <!-- ═══ ДРУЗЬЯ ═══ -->
+    <div id="friends" class="tab-pane">
+      <div class="page-header"><div class="page-title">🤝 Друзья</div></div>
+      <div class="card">
+        <div class="card-title">Добавить друга</div>
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="friendReqInput" placeholder="Никнейм игрока" maxlength="20" style="flex:1;">
+          <button class="btn btn-sm" id="sendFriendReqBtn">➕ Запрос</button>
+        </div>
+      </div>
+      <div class="card">
+        <div id="friendRequestsSection"></div>
+        <div id="friendsList"></div>
+      </div>
+    </div>
+
+    <!-- ═══ АДМИН ═══ -->
+    <div id="admin" class="tab-pane">
+      <div class="page-header"><div class="page-title">🔑 Админ-панель</div></div>
+      <div class="card">
+        <div class="card-title">👑 Администраторы</div>
+        <div id="adminsList"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">👤 Все игроки</div>
+        <input type="text" id="adminSearch" placeholder="Поиск игрока..." style="max-width:300px;margin-bottom:12px;">
+        <div id="adminUsersList"></div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /main-wrap -->
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-btn active" data-tab="profile"><span class="bicon">👤</span>Профиль</button>
+    <button class="bnav-btn" data-tab="pvp"><span class="bicon">🤖</span>Бот</button>
+    <button class="bnav-btn" data-tab="online"><span class="bicon">🌍</span>PvP</button>
+    <button class="bnav-btn" data-tab="party"><span class="bicon">👥</span>Пати</button>
+    <button class="bnav-btn" data-tab="chat"><span class="bicon">💬</span>Чат</button>
+    <button class="bnav-btn" data-tab="leaderboards"><span class="bicon">🏆</span>Топы</button>
+  </div>
+</nav>
+
+<!-- CONFETTI -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- PLAYER MODAL -->
+<div id="playerModalOverlay" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div id="modalAvatarWrap" class="av-wrap" style="width:64px;height:64px;font-size:24px;margin:0 auto 8px;background:var(--primary);">
+        <img id="modalAvatarImg" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">
+      </div>
+      <h2 id="modalName" style="font-size:20px;font-weight:900;"></h2>
+      <div id="modalRankBadge" style="margin:6px 0;"></div>
+      <div id="modalClan" style="color:var(--text3);font-size:13px;"></div>
+    </div>
+    <div class="modal-stat-grid">
+      <div class="modal-stat"><div class="modal-stat-val" id="modalElo">0</div><div class="modal-stat-lbl">ЭЛО</div></div>
+      <div class="modal-stat"><div class="modal-stat-val" id="modalLevel">0</div><div class="modal-stat-lbl">Уровень</div></div>
+      <div class="modal-stat"><div class="modal-stat-val" id="modalWr">0%</div><div class="modal-stat-lbl">Винрейт</div></div>
+      <div class="modal-stat"><div class="modal-stat-val" id="modalTrophies">0</div><div class="modal-stat-lbl">Трофеи</div></div>
+    </div>
+    <div id="modalStreak" style="text-align:center;margin:8px 0;font-weight:700;color:#ff8c00;"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn btn-sm" style="flex:1;" id="modalAddFriendBtn">➕ Добавить</button>
+      <button class="btn btn-gray btn-sm" style="flex:1;" onclick="closeModal()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════╗
+// ║              DOMOFON PvP — SERVER ENGINE             ║
+// ╚══════════════════════════════════════════════════════╝
+// Server binding — do not modify
+(function(){
+  const _a='https://';const _b='qwenixpvp';const _c='-default-rtdb';const _d='.firebaseio.com/';
+  const _cfg={databaseURL:_a+_b+_c+_d};
+  if(!window.firebase||!firebase.initializeApp||!firebase.database){
+    window._db=null;
+    window._firebaseInitError='Не удалось загрузить Firebase. Проверьте интернет и перезагрузите страницу.';
+    return;
+  }
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(_cfg);
+    window._db=firebase.database();
+  }catch(e){
+    window._db=null;
+    window._firebaseInitError='Не удалось подключиться к базе данных: '+(e.message||e);
+    return;
+  }
+  // Integrity check
+  window._db.ref('.info/connected').on('value',s=>{
+    if(s.val()===true){
+      window._db.ref('_integrity/check').once('value').then(r=>{
+        if(!r.exists())return window._db.ref('_integrity/check').set({v:1,ts:Date.now()});
+      }).catch(()=>{});
+    }
+  });
+})();
+const db = window._db;
+
+function ensureDb(show=true){
+  if(db)return true;
+  if(show){
+    const msg=document.getElementById('authMsg');
+    if(msg)msg.textContent=window._firebaseInitError||'База данных недоступна. Попробуйте обновить страницу.';
+  }
+  return false;
+}
+
+function formatAppError(e){
+  const msg=(e&&e.message)?e.message:String(e||'Неизвестная ошибка');
+  if((e&&e.code==='PERMISSION_DENIED')||/permission_denied|permission denied/i.test(msg)){
+    return 'Firebase отклонил запрос. Проверь правила Realtime Database: для регистрации нужна запись в users.';
+  }
+  if(/network|offline|failed to fetch|disconnected/i.test(msg)){
+    return 'Нет соединения с Firebase. Проверь интернет и попробуй ещё раз.';
+  }
+  return msg;
+}
+
+async function safeSecurityPush(path,data){
+  if(!db)return;
+  try{await db.ref(path).push(data);}catch(e){console.warn('Security log skipped:',e);}
+}
+
+// ══════════════════════════════════════════
+// SECURITY MODULE
+// ══════════════════════════════════════════
+const Security = (() => {
+  const BANNED_PATTERNS = [
+    /<script/i, /<\/script>/i, /javascript:/i, /on\w+\s*=/i,
+    /<iframe/i, /<img/i, /eval\s*\(/i, /alert\s*\(/i, /document\./i,
+    /window\./i, /\.cookie/i, /innerHTML/i, /outerHTML/i, /fetch\s*\(/i,
+    /XMLHttpRequest/i, /src\s*=/i, /href\s*=/i, /<[a-z]/i
+  ];
+  let loginAttempts = 0, lastAttemptTime = 0;
+  const MAX_ATTEMPTS = 8, LOCK_TIME = 60000;
+
+  function esc(s){
+    if(!s)return'';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/`/g,'&#96;');
+  }
+  function containsScript(s){
+    return BANNED_PATTERNS.some(p=>p.test(s));
+  }
+  function validateNick(nick){
+    if(!nick)return'Введите никнейм';
+    nick=nick.trim();
+    if(nick.length<2)return'Ник слишком короткий (мин 2)';
+    if(nick.length>20)return'Ник слишком длинный (макс 20)';
+    if(containsScript(nick))return'HACK_ATTEMPT';
+    if(/[.#$/[\]]/.test(nick))return'Ник не должен содержать . # $ / [ ]';
+    if(!/^[a-zA-Zа-яА-ЯёЁ0-9_-]+$/.test(nick))return'Только буквы, цифры, _ и -';
+    return null;
+  }
+  function validateDbKey(value,label='Название'){
+    if(!value)return label+' не заполнено';
+    if(/[.#$/[\]]/.test(value))return label+' не должно содержать . # $ / [ ]';
+    return null;
+  }
+  function checkRateLimit(){
+    const now=Date.now();
+    if(now-lastAttemptTime>LOCK_TIME){loginAttempts=0;}
+    loginAttempts++;lastAttemptTime=now;
+    if(loginAttempts>MAX_ATTEMPTS)return false;
+    return true;
+  }
+  function getBrowserFP(){
+    try{
+      const d=[navigator.userAgent,navigator.language||'',screen.width+'x'+screen.height,
+        new Date().getTimezoneOffset(),navigator.hardwareConcurrency||0,navigator.platform||'',
+        navigator.maxTouchPoints||0].join('|');
+      let h=5381;
+      for(let i=0;i<d.length;i++)h=((h<<5)+h)+d.charCodeAt(i)|0;
+      return(h>>>0).toString(36);
+    }catch{return'unknown';}
+  }
+  return{esc,containsScript,validateNick,validateDbKey,checkRateLimit,getBrowserFP};
+})();
+
+// ══════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════
+let currentUser = null;
+let seasonEnd = 0;
+let seasonTimerId = null;
+
+const RANKS = [
+  {min:0,    name:"Bronze 1",         cls:"rb-b1",icon:"🥉",loss:10,  gain:1.2},
+  {min:250,  name:"Bronze 2",         cls:"rb-b2",icon:"🥉",loss:16,  gain:1.0},
+  {min:350,  name:"Bronze 3",         cls:"rb-b3",icon:"🥉",loss:22,  gain:0.9},
+  {min:500,  name:"Silver 1",         cls:"rb-s1",icon:"🥈",loss:30,  gain:0.82},
+  {min:750,  name:"Silver 2",         cls:"rb-s2",icon:"🥈",loss:38,  gain:0.74},
+  {min:950,  name:"Silver 3",         cls:"rb-s3",icon:"🥈",loss:46,  gain:0.68},
+  {min:1000, name:"Domofon Gold I",   cls:"rb-g1",icon:"🥇",loss:55,  gain:0.6},
+  {min:1300, name:"Domofon Gold II",  cls:"rb-g2",icon:"🥇",loss:65,  gain:0.55},
+  {min:1400, name:"Domofon Gold III", cls:"rb-g3",icon:"🥇",loss:75,  gain:0.5},
+  {min:2000, name:"Rampager",         cls:"rb-r",  icon:"💀",loss:90,  gain:0.44},
+  {min:2500, name:"sырНый soys",      cls:"rb-sy", icon:"🧀",loss:110, gain:0.4},
+  {min:3000, name:"Domofon Elite",    cls:"rb-el", icon:"💎",loss:135, gain:0.36},
+  {min:5000, name:"The Legend",       cls:"rb-lg", icon:"👑",loss:170, gain:0.32},
+  {min:10000,name:"АБСОЛЮТ",          cls:"rb-lg", icon:"🔮",loss:200, gain:0.28}
+];
+
+const SHOP_ABILITIES = [
+  {id:"bigButtons",  name:"Увеличитель",    desc:"Цель ×2 на 2 сек (1 раз за бой)",              icon:"🔍",price:100},
+  {id:"autoClick",   name:"Авто-клик",      desc:"Через 1 сек авто-клик по цели",                 icon:"⚡",price:150},
+  {id:"slowTime",    name:"Замедление",     desc:"Уменьшает скорость бота на 30%",                icon:"⏱️",price:200},
+  {id:"shield",      name:"Щит",            desc:"Нейтрализует 1 проигранный раунд за бой",       icon:"🛡️",price:250},
+  {id:"freeze",      name:"Заморозка",      desc:"Замораживает цель на 1.5 сек (1 раз за бой)",   icon:"❄️",price:300},
+  {id:"magnet",      name:"Магнит",         desc:"Цель перемещается ближе к центру",              icon:"🧲",price:150},
+  {id:"berserker",   name:"Берсерк",        desc:"Каждая победа в раунде даёт +10% скорости",    icon:"🪓",price:220},
+  {id:"radar",       name:"Радар",          desc:"Мигает следующая позиция цели",                 icon:"📡",price:130}
+];
+
+const SHOP_SKINS = [
+  {id:"skinRed",     name:"Красный",        desc:"Огненный стиль прицела",        icon:"🔴",price:80},
+  {id:"skinBlue",    name:"Синий",          desc:"Ледяной стиль прицела",         icon:"🔵",price:80},
+  {id:"skinGold",    name:"Золотой",        desc:"Эксклюзивный золотой прицел",   icon:"⭐",price:300},
+  {id:"skinRainbow", name:"Радуга",         desc:"Переливающийся радужный стиль", icon:"🌈",price:200},
+  {id:"skinGhost",   name:"Призрак",        desc:"Полупрозрачный призрачный вид", icon:"👻",price:150},
+  {id:"skinNeon",    name:"Неон",           desc:"Яркий неоновый зелёный",        icon:"💚",price:250},
+  {id:"skinFire",    name:"Огонь",          desc:"Огненная пульсация",            icon:"🔥",price:350},
+  {id:"skinIce",     name:"Лёд",            desc:"Ледяной кристалл",              icon:"🧊",price:200},
+  {id:"skinDark",    name:"Тёмный",         desc:"Тёмный матовый стиль",          icon:"🌑",price:180},
+  {id:"skinCyber",   name:"Кибер",          desc:"Киберпанк-стиль",               icon:"🤖",price:400},
+  {id:"skinEmerald", name:"Изумруд",        desc:"Сверкающий изумрудный",         icon:"💎",price:300},
+  {id:"skinCrimson", name:"Кримзон",        desc:"Глубокий тёмно-красный",        icon:"🌹",price:280}
+];
+
+const SKIN_STYLES = {
+  skinRed:"radial-gradient(circle,#ff3030,#990000)",
+  skinBlue:"radial-gradient(circle,#3060ff,#001f99)",
+  skinGold:"radial-gradient(circle,#ffd700,#aa8800)",
+  skinRainbow:"conic-gradient(red,orange,yellow,green,blue,violet,red)",
+  skinGhost:"radial-gradient(circle,rgba(255,255,255,0.9),rgba(200,200,200,0.7))",
+  skinNeon:"radial-gradient(circle,#00ff88,#007744)",
+  skinFire:"radial-gradient(circle,#ffaa00,#ff4400,#cc0000)",
+  skinIce:"radial-gradient(circle,#aaddff,#0077cc)",
+  skinDark:"radial-gradient(circle,#444,#111)",
+  skinCyber:"radial-gradient(circle,#cc00ff,#6600cc)",
+  skinEmerald:"radial-gradient(circle,#00ff99,#006633)",
+  skinCrimson:"radial-gradient(circle,#cc0033,#660016)"
+};
+
+// ══════════════════════════════════════════
+// RANK / ELO UTILS
+// ══════════════════════════════════════════
+function getRank(elo){let r=RANKS[0];for(let x of RANKS)if(elo>=x.min)r=x;return r;}
+function getNextRank(elo){
+  for(let i=0;i<RANKS.length-1;i++)
+    if(elo>=RANKS[i].min&&elo<RANKS[i+1].min)
+      return{r:RANKS[i+1],needed:RANKS[i+1].min-elo,curMin:RANKS[i].min,nxtMin:RANKS[i+1].min};
+  return{r:null,needed:0,curMin:RANKS[RANKS.length-1].min,nxtMin:RANKS[RANKS.length-1].min};
+}
+function rankPill(elo){let r=getRank(elo);return`<span class="rank-pill ${r.cls}">${r.icon} ${r.name}</span>`;}
+function calcEloChange(elo,isWin,streak){
+  // После 10к — +1 без стрика
+  if(elo>=10000){return isWin?1:-Math.max(20,getRank(elo).loss);}
+  let r=getRank(elo);
+  if(isWin){let base=Math.max(5,Math.floor(22*r.gain));let bonus=Math.min(5,Math.max(0,streak-1));return base+bonus;}
+  return -r.loss;
+}
+function calcLevel(trophies){
+  const PL=200;let lvl=Math.floor(trophies/PL);
+  if(lvl>50)return{level:50,progress:100,toNext:0};
+  let inLvl=trophies-lvl*PL;
+  return{level:lvl,progress:(inLvl/PL)*100,toNext:PL-inLvl};
+}
+function calcTrophyGain(isWin){
+  return isWin?200:0;
+}
+
+// ══════════════════════════════════════════
+// HASH (simple for backward compat)
+// ══════════════════════════════════════════
+function hashStr(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h)+s.charCodeAt(i)|0;return(h>>>0).toString(36);}
+
+// ══════════════════════════════════════════
+// AVATAR ELEMENT
+// ══════════════════════════════════════════
+const AV_COLORS=['#6366f1','#f43f5e','#10b981','#f59e0b','#3b82f6','#8b5cf6','#ec4899','#06b6d4'];
+function avColor(name){return AV_COLORS[(name||'A').toUpperCase().charCodeAt(0)%AV_COLORS.length];}
+function avLetter(name){return(name||'?')[0].toUpperCase();}
+function avatarHTML(name,url,size=40,extraStyle=''){
+  const fs=Math.max(12,Math.floor(size/2.8));
+  if(url)return`<div class="av-wrap" style="width:${size}px;height:${size}px;${extraStyle}"><img src="${Security.esc(url)}" style="width:100%;height:100%;object-fit:cover;" alt=""></div>`;
+  return`<div class="av-wrap" style="width:${size}px;height:${size}px;background:${avColor(name)};font-size:${fs}px;${extraStyle}">${avLetter(name)}</div>`;
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+const ALLOWED_FIELDS=["elo","trophies","wins","losses","seasonWins","seasonLosses",
+  "maxEloEver","avatar","clan","gold","winStreak","ownedItems","equippedAbility","equippedSkin",
+  "friends","friendRequests","partyId"];
+
+async function doRegister(u,p){
+  if(!ensureDb())throw new Error(window._firebaseInitError||'База данных недоступна');
+  u=u.trim();
+  // Проверка ника на скрипты
+  const nickErr=Security.validateNick(u);
+  if(nickErr){
+    throw new Error(nickErr==='HACK_ATTEMPT'?'Недопустимый никнейм':nickErr);
+  }
+  if(p.length<4)throw new Error('Пароль минимум 4 символа');
+  const ref=db.ref(`users/${u}`);
+  if((await ref.once('value')).exists())throw new Error('Никнейм занят');
+  const newUser={
+    pwHash:hashStr(p),elo:0,trophies:0,wins:0,losses:0,
+    seasonWins:0,seasonLosses:0,maxEloEver:0,avatar:'',clan:'',gold:0,
+    winStreak:0,ownedItems:[],equippedAbility:'',equippedSkin:'',
+    friends:[],friendRequests:[],createdAt:Date.now(),fp:'captcha'
+  };
+  await ref.set(newUser);
+  return newUser;
+}
+
+async function doLogin(u,p){
+  if(!ensureDb())throw new Error(window._firebaseInitError||'База данных недоступна');
+  u=u.trim();
+  const nickErr=Security.validateNick(u);
+  if(nickErr)throw new Error(nickErr==='HACK_ATTEMPT'?'Недопустимый никнейм':nickErr);
+  if(!Security.checkRateLimit())throw new Error('⏱️ Слишком много попыток. Подождите 1 минуту.');
+  const snap=await db.ref(`users/${u}`).once('value');
+  if(!snap.exists())throw new Error('Аккаунт не найден');
+  const d=snap.val();
+  if(d.banned)throw new Error('🚫 Аккаунт заблокирован: '+(d.banReason||'нарушение правил'));
+  if(d.pwHash!==undefined){if(d.pwHash!==hashStr(p))throw new Error('Неверный пароль');}
+  else if(d.password!==undefined){
+    if(d.password!==p)throw new Error('Неверный пароль');
+    await db.ref(`users/${u}`).update({pwHash:hashStr(p),password:null});
+  }else throw new Error('Ошибка аккаунта');
+  return d;
+}
+
+async function saveStats(fields){
+  if(!currentUser||!ensureDb(false))return;
+  let upd={};
+  for(let k of ALLOWED_FIELDS)if(fields[k]!==undefined){upd[k]=fields[k];currentUser[k]=fields[k];}
+  await db.ref(`users/${currentUser.username}`).update(upd);
+  renderProfile();
+  updateSideMini();
+}
+
+// ══════════════════════════════════════════
+// PROFILE RENDER
+// ══════════════════════════════════════════
+function renderProfile(){
+  if(!currentUser)return;
+  const u=currentUser;
+  document.getElementById('profName').textContent=u.username;
+  document.getElementById('profElo').textContent=u.elo||0;
+  document.getElementById('profStreak').textContent='🔥×'+(u.winStreak||0);
+  document.getElementById('profGold').textContent=u.gold||0;
+  document.getElementById('shopGold').textContent=u.gold||0;
+  document.getElementById('profWins').textContent=u.wins||0;
+  document.getElementById('profTrophies').textContent=u.trophies||0;
+  document.getElementById('profSeasonW').textContent=u.seasonWins||0;
+  document.getElementById('profSeasonL').textContent=u.seasonLosses||0;
+  const total=(u.wins||0)+(u.losses||0);
+  document.getElementById('profWr').textContent=total?Math.round((u.wins/total)*100)+'%':'0%';
+  document.getElementById('profRankBadge').innerHTML=rankPill(u.elo||0);
+  document.getElementById('profClanTag').textContent=u.clan?`[${u.clan}]`:'';
+  // Rank progress
+  const next=getNextRank(u.elo||0);
+  if(!next.r){
+    document.getElementById('rankProgressFill').style.width='100%';
+    document.getElementById('rankProgressText').textContent='MAX 🏆';
+  }else{
+    const pct=((u.elo-next.curMin)/(next.nxtMin-next.curMin))*100;
+    document.getElementById('rankProgressFill').style.width=Math.min(100,Math.max(0,pct))+'%';
+    document.getElementById('rankProgressText').textContent=next.needed+' ЭЛО';
+  }
+  // Level progress
+  const lvl=calcLevel(u.trophies||0);
+  document.getElementById('profLevel').textContent=lvl.level;
+  document.getElementById('levelProgress').style.width=lvl.progress+'%';
+  document.getElementById('levelNext').textContent=lvl.toNext?lvl.toNext+' трофеев':'MAX';
+  // Avatar
+  const wrap=document.getElementById('profAvatarWrap');
+  let img=document.getElementById('profAvatarImg');
+  if(!img){
+    img=document.createElement('img');
+    img.id='profAvatarImg';
+    img.alt='';
+    img.style.cssText='display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;';
+  }
+  wrap.style.background=avColor(u.username);
+  wrap.textContent='';
+  if(u.avatar){
+    img.src=u.avatar;img.style.display='block';
+    wrap.appendChild(img);
+  }else{
+    img.style.display='none';
+    wrap.textContent=avLetter(u.username);
+  }
+  renderActiveAbility();
+}
+
+function updateSideMini(){
+  if(!currentUser)return;
+  const u=currentUser;
+  const wrap=document.getElementById('sideAvatar');
+  wrap.style.background=avColor(u.username);
+  if(u.avatar){wrap.innerHTML=`<img src="${Security.esc(u.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;}
+  else{wrap.textContent=avLetter(u.username);}
+  document.getElementById('sideUsername').textContent=u.username;
+  document.getElementById('sideElo').textContent='ЭЛО: '+(u.elo||0)+' · '+getRank(u.elo||0).name;
+}
+
+// ══════════════════════════════════════════
+// SHOP RENDER
+// ══════════════════════════════════════════
+function renderShop(){
+  const gold=currentUser?(currentUser.gold||0):0;
+  document.getElementById('shopGold').textContent=gold;
+  if(!currentUser){
+    ['shopAbilities','shopSkins'].forEach(id=>document.getElementById(id).innerHTML=
+      '<div class="empty-state"><div class="empty-icon">🔐</div><p>Войдите в аккаунт</p></div>');
+    return;
+  }
+  const owned=currentUser.ownedItems||[];
+  const eqA=currentUser.equippedAbility||'';
+  const eqS=currentUser.equippedSkin||'';
+  function renderSection(items,containerId,type){
+    const container=document.getElementById(containerId);
+    container.innerHTML='';
+    for(const item of items){
+      const isOwned=owned.includes(item.id);
+      const isEq=(type==='ability'&&eqA===item.id)||(type==='skin'&&eqS===item.id);
+      const div=document.createElement('div');
+      div.className='shop-card'+(isEq?' equipped':'')+((!isOwned&&gold<item.price)?' locked':'');
+      let btn;
+      if(isOwned){
+        btn=`<button class="btn btn-sm ${isEq?'btn-success':''}" onclick="equipItem('${item.id}','${type}')">${isEq?'✅ Одето':'Надеть'}</button>`;
+      }else{
+        btn=`<button class="btn btn-sm ${gold<item.price?'btn-gray':'btn-gold'}" onclick="buyItem('${item.id}')">💰 ${item.price}</button>`;
+      }
+      div.innerHTML=`<span class="shop-icon">${Security.esc(item.icon)}</span>
+        <div class="shop-type">${type==='ability'?'Способность':'Скин'}</div>
+        <div class="shop-name">${Security.esc(item.name)}</div>
+        <div class="shop-desc">${Security.esc(item.desc)}</div>${btn}`;
+      container.appendChild(div);
+    }
+  }
+  renderSection(SHOP_ABILITIES,'shopAbilities','ability');
+  renderSection(SHOP_SKINS,'shopSkins','skin');
+  renderActiveAbility();
+}
+
+async function buyItem(id){
+  if(!currentUser)return;
+  const all=[...SHOP_ABILITIES,...SHOP_SKINS];
+  const item=all.find(x=>x.id===id);
+  if(!item||(currentUser.gold||0)<item.price){showNotify('❌ Не хватает голды!','err');return;}
+  const owned=[...(currentUser.ownedItems||[])];
+  if(owned.includes(id))return;
+  owned.push(id);
+  await saveStats({gold:(currentUser.gold||0)-item.price,ownedItems:owned});
+  showNotify(`✅ Куплено: ${item.name}`,'ok');
+  renderShop();
+}
+
+async function equipItem(id,type){
+  if(!currentUser)return;
+  if(type==='ability')await saveStats({equippedAbility:currentUser.equippedAbility===id?'':id});
+  else await saveStats({equippedSkin:currentUser.equippedSkin===id?'':id});
+  renderShop();
+}
+
+function renderActiveAbility(){
+  const ab=currentUser?(currentUser.equippedAbility||''):'';
+  const item=SHOP_ABILITIES.find(x=>x.id===ab);
+  const el=document.getElementById('activeAbilityDisplay');
+  const el2=document.getElementById('activeAbilityPvpHint');
+  if(item){
+    if(el)el.innerHTML=`${item.icon} <b>${Security.esc(item.name)}</b> — ${Security.esc(item.desc)}`;
+    if(el2)el2.innerHTML=`⚡ Способность: ${item.icon} ${Security.esc(item.name)}`;
+  }else{
+    if(el)el.textContent='Нет активной способности';
+    if(el2)el2.textContent='';
+  }
+}
+
+// ══════════════════════════════════════════
+// RESULT OVERLAY + CONFETTI
+// ══════════════════════════════════════════
+function showResult({eloChange,isWin,oldElo,newElo,oldRank,newRank,winStreak,trophyGain,oldLevel,newLevel,oldLvlProg,newLvlProg,partyDouble}){
+  return new Promise(resolve=>{
+    if(isWin)startConfetti();
+    const overlay=document.createElement('div');
+    overlay.className='result-overlay';
+    const next=getNextRank(oldElo);
+    let oldPct=0,newPct=0;
+    if(next.r){
+      const rng=next.nxtMin-next.curMin;
+      oldPct=Math.min(100,Math.max(0,((oldElo-next.curMin)/rng)*100));
+      newPct=Math.min(100,Math.max(0,((newElo-next.curMin)/rng)*100));
+    }else{oldPct=newPct=100;}
+    const levelUp=newLevel>oldLevel;
+    const streakBonus=isWin&&winStreak>=2?Math.min(5,winStreak-1):0;
+    overlay.innerHTML=`<div class="result-card">
+      <div class="result-header ${isWin?'win':'lose'}">
+        <div class="result-verdict">${isWin?'🏆 ПОБЕДА!':'💀 ПОРАЖЕНИЕ'}</div>
+        <div class="result-score">${isWin?'Отличная игра!':'Попробуй ещё раз'}</div>
+        ${partyDouble?'<div style="font-size:12px;color:rgba(255,255,255,0.9);margin-top:4px;">🎉 Пати-бонус: ×2 ЭЛО!</div>':''}
+      </div>
+      <div class="result-body">
+        <div class="result-elo-row">
+          <div class="result-elo-num ${isWin?'pos':'neg'}">${isWin?'+':''}${eloChange}</div>
+          <div class="result-elo-lbl">ЭЛО</div>
+        </div>
+        ${winStreak>=2&&isWin?`<div style="text-align:center"><span class="result-streak">🔥 СТРИК ×${winStreak} +${streakBonus} бонус</span></div>`:''}
+        <div style="margin:14px 0;">
+          <div class="result-section-label">Ранг</div>
+          <div class="result-rank-row">
+            <span class="rank-pill ${oldRank.cls}">${oldRank.icon} ${oldRank.name}</span>
+            <span class="result-rank-arrow">→</span>
+            <span class="rank-pill ${newRank.cls}">${newRank.icon} ${newRank.name}</span>
+          </div>
+          <div class="result-prog-bar"><div class="result-prog-fill" id="rPF" style="width:${oldPct}%"></div></div>
+          <div style="font-size:11px;color:var(--text3);text-align:right;">${newElo} ЭЛО</div>
+        </div>
+        ${trophyGain>0?`<div style="background:var(--primary-l);border-radius:14px;padding:12px 16px;margin:10px 0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:13px;font-weight:700;">🏆 Трофеи</span>
+            <span style="background:var(--green);color:#fff;padding:2px 12px;border-radius:20px;font-weight:800;font-size:13px;">+${trophyGain}</span>
+          </div>
+          <div style="font-size:13px;color:var(--text2);">Уровень: <b>${oldLevel}${levelUp?` → <span style="color:var(--primary);">${newLevel} ⬆️</span>`:''}</b></div>
+          ${levelUp?'<div style="text-align:center;margin-top:8px;font-weight:800;color:var(--primary);font-size:14px;">🎉 НОВЫЙ УРОВЕНЬ!</div>':''}
+        </div>`:''}
+      </div>
+      <button class="result-continue-btn" id="rContinueBtn">ПРОДОЛЖИТЬ →</button>
+    </div>`;
+    document.body.appendChild(overlay);
+    setTimeout(()=>{
+      const f=document.getElementById('rPF');if(f)f.style.width=newPct+'%';
+    },150);
+    document.getElementById('rContinueBtn').onclick=()=>{overlay.remove();stopConfetti();resolve();};
+  });
+}
+
+let confettiAF=null;
+function startConfetti(){
+  const canvas=document.getElementById('confetti-canvas');
+  canvas.style.display='block';
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const ctx=canvas.getContext('2d');
+  const colors=['#6366f1','#f43f5e','#fbbf24','#10b981','#3b82f6','#ec4899','#8b5cf6'];
+  const particles=[];
+  for(let i=0;i<150;i++){
+    particles.push({x:Math.random()*canvas.width,y:-10-Math.random()*200,
+      w:6+Math.random()*10,h:4+Math.random()*7,color:colors[Math.floor(Math.random()*colors.length)],
+      rot:Math.random()*Math.PI*2,rotV:(Math.random()-0.5)*0.25,
+      vx:(Math.random()-0.5)*4,vy:2+Math.random()*4,shape:Math.random()>0.5?'rect':'circle'});
+  }
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let p of particles){
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.color;
+      if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,Math.PI*2);ctx.fill();}
+      else{ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);}
+      ctx.restore();
+      p.x+=p.vx;p.y+=p.vy;p.rot+=p.rotV;p.vy+=0.06;
+    }
+    const alive=particles.filter(p=>p.y<canvas.height+30);
+    particles.length=0;particles.push(...alive);
+    if(particles.length>0)confettiAF=requestAnimationFrame(draw);
+    else canvas.style.display='none';
+  }
+  if(confettiAF)cancelAnimationFrame(confettiAF);
+  draw();
+}
+function stopConfetti(){
+  if(confettiAF)cancelAnimationFrame(confettiAF);
+  document.getElementById('confetti-canvas').style.display='none';
+}
+
+// ══════════════════════════════════════════
+// BOT BATTLE
+// ══════════════════════════════════════════
+function getDiff(elo){return{timeMs:Math.max(500,2200-elo/2.2),size:Math.max(40,80-elo/75)};}
+
+function startBotArena(partyContext=null){
+  if(!currentUser){showNotify('Войдите в аккаунт!','err');return;}
+  let round=0,pW=0,bW=0;
+  const ability=currentUser.equippedAbility||'';
+  const skin=currentUser.equippedSkin||'';
+  const targetBg=SKIN_STYLES[skin]||'radial-gradient(circle,#f43f5e,#cc0033)';
+  let speedBoost=1;
+  let shieldUsed=false;
+  
+  function nextRound(){
+    if(round>=10){endBattle(pW,bW);return;}
+    round++;
+    const ov=document.createElement('div');ov.className='aim-overlay';
+    const gd=document.createElement('div');gd.className='aim-game';
+    
+    const hud=document.createElement('div');hud.className='aim-hud-tl';
+    hud.innerHTML=`🎯 ${round}/10 &nbsp;|&nbsp; <span style="color:#0f0;">${pW}</span>:<span style="color:#f87171;">${bW}</span>`;
+    gd.appendChild(hud);
+    
+    if((currentUser.winStreak||0)>=2){
+      const wb=document.createElement('div');wb.className='aim-hud-tr';
+      wb.textContent=`🔥 ×${currentUser.winStreak}`;gd.appendChild(wb);
+    }
+    
+    // Flash round number
+    const flash=document.createElement('div');flash.className='aim-round-flash';
+    flash.textContent=`РАУНД ${round}`;gd.appendChild(flash);
+    setTimeout(()=>{if(flash.parentNode)flash.remove();},700);
+    
+    ov.appendChild(gd);document.body.appendChild(ov);
+    
+    const diff=getDiff(currentUser.elo||0);
+    const adjTime=diff.timeMs/(speedBoost*(ability==='slowTime'?1.3:1));
+    const adjSize=diff.size*(ability==='berserker'?Math.min(1,speedBoost):1);
+    
+    const tgt=document.createElement('div');tgt.className='target-dot';
+    tgt.style.cssText=`width:${adjSize}px;height:${adjSize}px;font-size:${adjSize-14}px;background:${targetBg};box-shadow:0 0 20px rgba(255,50,50,0.6);z-index:10;`;
+    tgt.textContent='🎯';
+    
+    function repos(){
+      const pad=20;
+      tgt.style.left=pad+Math.random()*(gd.clientWidth-adjSize-pad*2)+'px';
+      tgt.style.top=pad+Math.random()*(gd.clientHeight-adjSize-pad*2-40)+'px';
+    }
+    repos();gd.appendChild(tgt);
+    
+    // Timer display
+    const timerEl=document.createElement('div');timerEl.className='aim-countdown';
+    gd.appendChild(timerEl);
+    
+    // Radar ability: pre-flash next position
+    if(ability==='radar'){
+      const ghost=document.createElement('div');
+      ghost.style.cssText=`position:absolute;width:${adjSize}px;height:${adjSize}px;border-radius:50%;border:2px dashed rgba(255,255,255,0.4);opacity:0.5;pointer-events:none;`;
+      const pad=20;
+      ghost.style.left=pad+Math.random()*(gd.clientWidth-adjSize-pad*2)+'px';
+      ghost.style.top=pad+Math.random()*(gd.clientHeight-adjSize-pad*2-40)+'px';
+      gd.appendChild(ghost);
+    }
+    
+    let bigUsed=false,freezeUsed=false,autoT=null;
+    let timeLeft=adjTime;
+    const timerInterval=setInterval(()=>{
+      timeLeft-=100;
+      timerEl.textContent=`⏱ ${(timeLeft/1000).toFixed(1)}s`;
+      if(timeLeft<1000)timerEl.style.color='#f43f5e';
+    },100);
+    
+    // Big button ability
+    if(ability==='bigButtons'){
+      const bb=document.createElement('button');
+      bb.textContent='🔍 Увеличить';bb.className='btn btn-gold btn-sm aim-ability-btn';
+      bb.onclick=()=>{
+        if(bigUsed)return;bigUsed=true;
+        tgt.style.width=(adjSize*2)+'px';tgt.style.height=(adjSize*2)+'px';
+        bb.disabled=true;
+        setTimeout(()=>{tgt.style.width=adjSize+'px';tgt.style.height=adjSize+'px';},2000);
+      };
+      gd.appendChild(bb);
+    }
+    // Freeze ability
+    if(ability==='freeze'){
+      const fb=document.createElement('button');
+      fb.textContent='❄️ Заморозить';fb.className='btn btn-sm aim-ability-btn';
+      fb.style.background='linear-gradient(135deg,#0ea5e9,#0284c7)';
+      fb.onclick=()=>{
+        if(freezeUsed)return;freezeUsed=true;
+        clearTimeout(timer);
+        tgt.style.opacity='0.5';tgt.style.pointerEvents='none';
+        fb.disabled=true;
+        setTimeout(()=>{
+          tgt.style.opacity='1';tgt.style.pointerEvents='auto';
+          timer=setTimeout(()=>{
+            clearInterval(timerInterval);
+            if(ability==='shield'&&!shieldUsed){shieldUsed=true;clearInterval(timerInterval);ov.remove();nextRound();}
+            else{bW++;clearInterval(timerInterval);ov.remove();nextRound();}
+          },adjTime/3);
+        },1500);
+      };
+      gd.appendChild(fb);
+    }
+    // Magnet ability: target drifts to center
+    if(ability==='magnet'){
+      setTimeout(()=>{
+        tgt.style.transition='left 1s ease, top 1s ease';
+        tgt.style.left=(gd.clientWidth/2-adjSize/2)+'px';
+        tgt.style.top=(gd.clientHeight/2-adjSize/2)+'px';
+      },500);
+    }
+    // Autoclick
+    if(ability==='autoClick'){
+      autoT=setTimeout(()=>{clearInterval(timerInterval);clearTimeout(timer);pW++;if(ability==='berserker')speedBoost=Math.min(2,speedBoost+0.1);ov.remove();nextRound();},1000);
+    }
+    let timer=setTimeout(()=>{
+      if(autoT)clearTimeout(autoT);
+      clearInterval(timerInterval);
+      if(ability==='shield'&&!shieldUsed){shieldUsed=true;ov.remove();nextRound();}
+      else{bW++;ov.remove();nextRound();}
+    },adjTime);
+    
+    tgt.onclick=e=>{
+      e.stopPropagation();
+      if(autoT)clearTimeout(autoT);
+      clearTimeout(timer);clearInterval(timerInterval);
+      pW++;
+      if(ability==='berserker')speedBoost=Math.min(2,speedBoost+0.1);
+      ov.remove();nextRound();
+    };
+  }
+  
+  async function endBattle(pScore,bScore){
+    const isWin=pScore>bScore;
+    const oldElo=currentUser.elo||0;
+    const oldStreak=currentUser.winStreak||0;
+    const newStreak=isWin?Math.min(20,oldStreak+1):0;
+    let eloChange=calcEloChange(oldElo,isWin,oldStreak);
+    
+    // Party double ELO
+    let partyDouble=false;
+    if(partyContext&&partyContext.partnerResult==='win'&&isWin){eloChange*=2;partyDouble=true;}
+    
+    const newElo=Math.max(0,oldElo+eloChange);
+    const oldLvl=calcLevel(currentUser.trophies||0);
+    const trophyGain=calcTrophyGain(isWin);
+    const newTrophies=(currentUser.trophies||0)+trophyGain;
+    const newLvl=calcLevel(newTrophies);
+    const newGold=(currentUser.gold||0)+(isWin?1:0);
+    const oldRank=getRank(oldElo),newRank=getRank(newElo);
+    
+    await saveStats({
+      elo:newElo,wins:(currentUser.wins||0)+(isWin?1:0),
+      losses:(currentUser.losses||0)+(isWin?0:1),
+      seasonWins:(currentUser.seasonWins||0)+(isWin?1:0),
+      seasonLosses:(currentUser.seasonLosses||0)+(isWin?0:1),
+      maxEloEver:Math.max(currentUser.maxEloEver||0,newElo),
+      trophies:newTrophies,gold:newGold,winStreak:newStreak
+    });
+    
+    // If in party, report result
+    if(partyContext&&partyContext.partyId){
+      await db.ref(`parties/${partyContext.partyId}/members/${currentUser.username}`).update({
+        done:true,result:isWin?'win':'lose',score:pScore
+      });
+    }
+    
+    await showResult({eloChange,isWin,oldElo,newElo,oldRank,newRank,winStreak:newStreak,
+      trophyGain,oldLevel:oldLvl.level,newLevel:newLvl.level,
+      oldLvlProg:oldLvl.progress,newLvlProg:newLvl.progress,partyDouble});
+    
+    document.getElementById('botLastResult').innerHTML=
+      `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:24px;">${isWin?'🏆':'💀'}</span>
+        <div>
+          <div style="font-weight:800;font-size:16px;">${isWin?'ПОБЕДА':'ПОРАЖЕНИЕ'}</div>
+          <div style="color:var(--text2);font-size:13px;">${pScore}:${bScore} раундов · ${isWin?'+'+eloChange:eloChange} ЭЛО</div>
+        </div>
+      </div>`;
+    loadLeaderboards();
+  }
+  
+  nextRound();
+}
+
+// ══════════════════════════════════════════
+// ONLINE PvP (improved sync)
+// ══════════════════════════════════════════
+let onlineMatchRef=null,onlineGameRef=null,onlineGameId=null,onlineListener=null,onlineSearchName=null;
+
+async function searchOnline(){
+  if(!currentUser){showNotify('Войдите в аккаунт!','err');return;}
+  if(!ensureDb())return;
+  try{
+  if(onlineMatchRef){onlineMatchRef.off();onlineMatchRef=null;onlineListener=null;}
+  document.getElementById('onlineStatus').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+      <div class="spinner" style="width:24px;height:24px;border-width:3px;flex-shrink:0;"></div>
+      <span style="font-weight:600;color:var(--text2);">Поиск соперника...</span>
+      <button class="btn btn-danger btn-sm" id="cancelSearchBtn">Отмена</button>
+    </div>`;
+  document.getElementById('cancelSearchBtn').onclick=cancelOnlineSearch;
+  const myRef=db.ref(`matchmaking/${currentUser.username}`);
+  onlineSearchName=currentUser.username;
+  await myRef.set({elo:currentUser.elo||0,status:'search',ts:Date.now(),rank:getRank(currentUser.elo||0).name});
+  myRef.onDisconnect().remove();
+  let found=false;
+  onlineMatchRef=db.ref('matchmaking');
+  onlineListener=onlineMatchRef.on('value',async snap=>{
+    if(found||!currentUser)return;
+    const all=snap.val()||{};
+    const now=Date.now();
+    const opp=Object.keys(all).find(k=>
+      k!==currentUser.username&&all[k].status==='search'&&(now-(all[k].ts||0))<30000
+    );
+    if(opp){
+      found=true;
+      if(onlineMatchRef){
+        if(onlineListener)onlineMatchRef.off('value',onlineListener);else onlineMatchRef.off();
+      }
+      onlineMatchRef=null;onlineListener=null;onlineSearchName=null;
+      await myRef.remove();await db.ref(`matchmaking/${opp}`).remove();
+      const gid='g_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
+      onlineGameId=gid;onlineGameRef=db.ref(`games/${gid}`);
+      const amHost=currentUser.username<opp;
+      await onlineGameRef.set({
+        p1:amHost?currentUser.username:opp,p2:amHost?opp:currentUser.username,
+        p1taps:0,p2taps:0,status:'active',ts:Date.now(),maxTaps:10
+      });
+      onlineGameRef.onDisconnect().update({status:'abandoned'});
+      startOnlineTapGame(gid,currentUser.username,opp);
+    }
+  });
+  setTimeout(()=>{if(!found){cancelOnlineSearch();document.getElementById('onlineStatus').textContent='❌ Соперник не найден. Попробуйте ещё раз.';}},25000);
+  }catch(e){
+    cancelOnlineSearch();
+    showNotify(formatAppError(e),'err');
+  }
+}
+
+function cancelOnlineSearch(){
+  if(onlineMatchRef){
+    if(onlineListener)onlineMatchRef.off('value',onlineListener);else onlineMatchRef.off();
+    onlineMatchRef=null;onlineListener=null;
+  }
+  const name=onlineSearchName||currentUser?.username;
+  onlineSearchName=null;
+  if(name&&ensureDb(false))db.ref(`matchmaking/${name}`).remove();
+  document.getElementById('onlineStatus').textContent='';
+}
+
+function startOnlineTapGame(gid,myName,oppName){
+  const ov=document.createElement('div');ov.className='game-overlay';
+  const maxTaps=10;let myTaps=0,oppTaps=0,gameOver=false;
+  const gRef=db.ref(`games/${gid}`);
+  const myField=myName<oppName?'p1taps':'p2taps';
+  const oppField=myName<oppName?'p2taps':'p1taps';
+  
+  ov.innerHTML=`<div class="game-header">
+    <div class="game-title">⚡ Онлайн дуэль</div>
+    <div class="game-sub">Первый до ${maxTaps} тапов побеждает!</div>
+  </div>
+  <div class="tap-arena">
+    <div class="tap-zone mine" id="ot_myZone">
+      <div class="tap-player-info">${avatarHTML(myName,currentUser.avatar,28)}<span class="tap-player-name">${Security.esc(myName)}</span></div>
+      <div class="tap-score mine-c" id="ot_myScore">0</div>
+      <div class="tap-bar"><div class="tap-bar-fill tap-bar-mine" id="ot_myProg" style="width:0%"></div></div>
+      <button class="tap-btn-main" id="ot_tapBtn">👆 ТАП!</button>
+    </div>
+    <div class="tap-vs">VS</div>
+    <div class="tap-zone theirs" id="ot_theirZone">
+      <div class="tap-player-info">${avatarHTML(oppName,'',28)}<span class="tap-player-name">${Security.esc(oppName)}</span></div>
+      <div class="tap-score their-c" id="ot_theirScore">0</div>
+      <div class="tap-bar"><div class="tap-bar-fill tap-bar-their" id="ot_theirProg" style="width:0%"></div></div>
+      <div style="height:60px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#94a3b8;font-weight:800;">. . .</div>
+    </div>
+  </div>
+  <div class="game-status" id="ot_status">Удачи! 🎮</div>`;
+  document.body.appendChild(ov);
+  
+  let gameListener=null,lastActivity=Date.now();
+  // Real-time listener for opponent taps
+  gameListener=gRef.on('value',snap=>{
+    if(gameOver)return;
+    const d=snap.val();if(!d)return;
+    lastActivity=Date.now();
+    // Abandonment detection
+    if(d.status==='abandoned'){
+      gameOver=true;gRef.off('value',gameListener);
+      ov.remove();
+      showNotify('🏆 Соперник отключился! Победа засчитана!','ok');
+      endOnlineGame(true,maxTaps,0,myName,oppName);return;
+    }
+    const theirTaps=d[oppField]||0;
+    oppTaps=theirTaps;
+    const theirScoreEl=document.getElementById('ot_theirScore');
+    const theirProgEl=document.getElementById('ot_theirProg');
+    if(theirScoreEl){
+      theirScoreEl.textContent=theirTaps;
+      theirScoreEl.classList.add('bump');setTimeout(()=>theirScoreEl.classList.remove('bump'),100);
+    }
+    if(theirProgEl)theirProgEl.style.width=(theirTaps/maxTaps*100)+'%';
+    // Update zone styles
+    const myZ=document.getElementById('ot_myZone');
+    const thZ=document.getElementById('ot_theirZone');
+    if(myZ&&thZ){
+      myZ.classList.toggle('leading',myTaps>oppTaps);
+      thZ.classList.toggle('leading',oppTaps>myTaps);
+    }
+    // Check if opponent won
+    if(theirTaps>=maxTaps&&!gameOver){
+      gameOver=true;gRef.off('value',gameListener);
+      setTimeout(()=>{ov.remove();endOnlineGame(false,myTaps,theirTaps,myName,oppName);},400);
+    }
+  });
+  
+  document.getElementById('ot_tapBtn').addEventListener('click',async()=>{
+    if(gameOver)return;
+    lastActivity=Date.now();
+    myTaps++;
+    const myScoreEl=document.getElementById('ot_myScore');
+    const myProgEl=document.getElementById('ot_myProg');
+    if(myScoreEl){
+      myScoreEl.textContent=myTaps;
+      myScoreEl.classList.add('bump');setTimeout(()=>myScoreEl.classList.remove('bump'),80);
+    }
+    if(myProgEl)myProgEl.style.width=(myTaps/maxTaps*100)+'%';
+    // Haptic feedback on mobile
+    if(navigator.vibrate)navigator.vibrate(20);
+    // Update Firebase
+    await gRef.update({[myField]:myTaps});
+    if(myTaps>=maxTaps&&!gameOver){
+      gameOver=true;gRef.off('value',gameListener);
+      await gRef.update({status:'done',winner:myName});
+      setTimeout(()=>{ov.remove();endOnlineGame(true,myTaps,oppTaps,myName,oppName);},400);
+    }
+  });
+  
+  // Timeout: if no activity for 30s, abandon
+  const activityCheck=setInterval(()=>{
+    if(gameOver){clearInterval(activityCheck);return;}
+    if(Date.now()-lastActivity>30000){
+      clearInterval(activityCheck);
+      if(!gameOver){gameOver=true;gRef.off('value',gameListener);ov.remove();
+        showNotify('⏱️ Время вышло','warn');}
+    }
+  },5000);
+}
+
+async function endOnlineGame(isWin,myTaps,oppTaps,myName,oppName){
+  if(!currentUser)return;
+  const oldElo=currentUser.elo||0;
+  const oldStreak=currentUser.winStreak||0;
+  const newStreak=isWin?Math.min(20,oldStreak+1):0;
+  const eloChange=calcEloChange(oldElo,isWin,oldStreak);
+  const newElo=Math.max(0,oldElo+eloChange);
+  const oldLvl=calcLevel(currentUser.trophies||0);
+  const trophyGain=calcTrophyGain(isWin);
+  const newTrophies=(currentUser.trophies||0)+trophyGain;
+  const newLvl=calcLevel(newTrophies);
+  const newGold=(currentUser.gold||0)+(isWin?1:0);
+  const oldRank=getRank(oldElo),newRank=getRank(newElo);
+  await saveStats({elo:newElo,wins:(currentUser.wins||0)+(isWin?1:0),
+    losses:(currentUser.losses||0)+(isWin?0:1),
+    seasonWins:(currentUser.seasonWins||0)+(isWin?1:0),
+    seasonLosses:(currentUser.seasonLosses||0)+(isWin?0:1),
+    maxEloEver:Math.max(currentUser.maxEloEver||0,newElo),
+    trophies:newTrophies,gold:newGold,winStreak:newStreak});
+  await showResult({eloChange,isWin,oldElo,newElo,oldRank,newRank,winStreak:newStreak,
+    trophyGain,oldLevel:oldLvl.level,newLevel:newLvl.level,
+    oldLvlProg:oldLvl.progress,newLvlProg:newLvl.progress});
+  document.getElementById('onlineStatus').innerHTML=
+    `🏁 <b>${isWin?'ПОБЕДА 🏆':'ПОРАЖЕНИЕ 💀'}</b> — ${myTaps}:${oppTaps} тапов`;
+  loadLeaderboards();
+}
+
+// ══════════════════════════════════════════
+// PARTY SYSTEM
+// ══════════════════════════════════════════
+let currentPartyId=null,partyListener=null;
+
+function genPartyCode(){return Math.random().toString(36).toUpperCase().substr(2,6);}
+
+async function createParty(){
+  if(!currentUser){showNotify('Войдите в аккаунт!','err');return;}
+  if(currentPartyId)await leaveParty();
+  const code=genPartyCode();
+  const partyRef=db.ref(`parties/${code}`);
+  const existing=await partyRef.once('value');
+  if(existing.exists()){createParty();return;}// retry if code exists
+  await partyRef.set({
+    leader:currentUser.username,code:code,status:'waiting',createdAt:Date.now(),
+    members:{[currentUser.username]:{ready:false,done:false,result:null,score:0}}
+  });
+  partyRef.onDisconnect().update({status:'abandoned'});
+  currentPartyId=code;
+  document.getElementById('partyCodeDisplay').textContent=code;
+  document.getElementById('partyCreateInfo').style.display='block';
+  listenParty(code);
+  showNotify('🎉 Пати создано! Поделись кодом с другом.','ok');
+}
+
+async function joinParty(){
+  if(!currentUser){showNotify('Войдите в аккаунт!','err');return;}
+  const code=document.getElementById('partyCodeInput').value.trim().toUpperCase();
+  if(!code||code.length!==6){showNotify('Введи корректный 6-символьный код','err');return;}
+  const partyRef=db.ref(`parties/${code}`);
+  const snap=await partyRef.once('value');
+  if(!snap.exists()){showNotify('Пати не найдено!','err');return;}
+  const d=snap.val();
+  if(d.status!=='waiting'){showNotify('Пати уже началось!','warn');return;}
+  const members=d.members||{};
+  if(Object.keys(members).length>=2){showNotify('Пати уже полное!','warn');return;}
+  if(currentPartyId)await leaveParty();
+  await partyRef.child(`members/${currentUser.username}`).set({ready:false,done:false,result:null,score:0});
+  currentPartyId=code;
+  document.getElementById('partyCodeDisplay').textContent=code;
+  document.getElementById('partyCreateInfo').style.display='block';
+  document.getElementById('partyCodeInput').value='';
+  listenParty(code);
+  showNotify('✅ Вступил в пати!','ok');
+}
+
+function listenParty(code){
+  if(partyListener)db.ref(`parties/${currentPartyId}`).off('value',partyListener);
+  partyListener=db.ref(`parties/${code}`).on('value',snap=>{
+    const d=snap.val();if(!d){currentPartyId=null;document.getElementById('partyCreateInfo').style.display='none';return;}
+    const members=d.members||{};
+    const isLeader=d.leader===currentUser.username;
+    const allReady=Object.keys(members).length>=2;
+    document.getElementById('startPartyBattleBtn').disabled=!isLeader||!allReady||d.status!=='waiting';
+    // Render members
+    const list=document.getElementById('partyMembersList');
+    list.innerHTML='';
+    for(const [name,info] of Object.entries(members)){
+      const div=document.createElement('div');
+      let cls='party-member';
+      if(info.done)cls+=info.result==='win'?' done-win':' done-lose';
+      div.className=cls;
+      div.innerHTML=`${avatarHTML(name,null,36,'margin:0 auto 6px;')}
+        <div style="font-weight:700;font-size:13px;">${Security.esc(name)}${d.leader===name?' 👑':''}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">${info.done?(info.result==='win'?'🏆 Победа':'💀 Поражение'):info.ready?'✅ Готов':'⏳ Ожидание'}</div>`;
+      list.appendChild(div);
+    }
+    // Check if battle should start
+    if(d.status==='playing'&&!d.battleStarted){
+      db.ref(`parties/${code}`).update({battleStarted:true});
+      // Start battle for this user
+      const membersArr=Object.keys(members);
+      const partnerName=membersArr.find(n=>n!==currentUser.username);
+      startBotArena({partyId:code,partnerResult:null,partnerName});
+      // Listen for partner result
+      db.ref(`parties/${code}/members/${partnerName}/done`).on('value',ds=>{
+        if(ds.val()===true){
+          db.ref(`parties/${code}/members/${partnerName}`).once('value').then(ps=>{
+            // partner done - ELO already applied in endBattle
+          });
+        }
+      });
+    }
+  });
+}
+
+async function startPartyBattle(){
+  if(!currentPartyId)return;
+  const snap=await db.ref(`parties/${currentPartyId}`).once('value');
+  const d=snap.val();
+  if(!d||d.status!=='waiting')return;
+  if(Object.keys(d.members||{}).length<2){showNotify('Жди второго участника!','warn');return;}
+  await db.ref(`parties/${currentPartyId}`).update({status:'playing',battleStarted:false});
+}
+
+async function leaveParty(){
+  if(!currentPartyId)return;
+  const snap=await db.ref(`parties/${currentPartyId}`).once('value');
+  const d=snap.val();
+  if(d){
+    if(d.leader===currentUser.username)await db.ref(`parties/${currentPartyId}`).remove();
+    else await db.ref(`parties/${currentPartyId}/members/${currentUser.username}`).remove();
+  }
+  if(partyListener)db.ref(`parties/${currentPartyId}`).off('value',partyListener);
+  currentPartyId=null;partyListener=null;
+  document.getElementById('partyCreateInfo').style.display='none';
+  document.getElementById('partyMembersList').innerHTML='';
+  showNotify('Покинул пати','warn');
+}
+
+// ══════════════════════════════════════════
+// GLOBAL CHAT
+// ══════════════════════════════════════════
+let chatInited=false,lastChatMsgKey=null;
+
+function initChat(){
+  if(chatInited)return;chatInited=true;
+  const chatEl=document.getElementById('chatMessages');
+  chatEl.innerHTML='';
+  // Load last 100 messages
+  db.ref('chat/messages').limitToLast(100).once('value',snap=>{
+    chatEl.innerHTML='';
+    const msgs=snap.val()||{};
+    for(const[key,msg]of Object.entries(msgs)){
+      appendChatMsg(msg,key);
+      lastChatMsgKey=key;
+    }
+    chatEl.scrollTop=chatEl.scrollHeight;
+    // Listen for new messages
+    db.ref('chat/messages').limitToLast(200).on('child_added',ds=>{
+      const msg=ds.val();const key=ds.key;
+      if(lastChatMsgKey&&key<=lastChatMsgKey)return;
+      appendChatMsg(msg,key);
+      lastChatMsgKey=key;
+      // Scroll to bottom if near bottom
+      if(chatEl.scrollTop>chatEl.scrollHeight-chatEl.clientHeight-100)
+        chatEl.scrollTop=chatEl.scrollHeight;
+      // Badge if not on chat tab
+      if(!document.getElementById('chat').classList.contains('active-pane')){
+        const badge=document.getElementById('chatBadge');badge.style.display='block';
+      }
+    });
+  });
+}
+
+function appendChatMsg(msg,key){
+  const chatEl=document.getElementById('chatMessages');
+  const isOwn=currentUser&&msg.username===currentUser.username;
+  const div=document.createElement('div');
+  div.className='chat-msg'+(isOwn?' own':'');
+  const time=new Date(msg.ts||Date.now());
+  const timeStr=time.getHours().toString().padStart(2,'0')+':'+time.getMinutes().toString().padStart(2,'0');
+  div.innerHTML=`${avatarHTML(msg.username,msg.avatar||null,32)}
+    <div style="display:flex;flex-direction:column;${isOwn?'align-items:flex-end':''};">
+      <div class="chat-bubble">
+        ${!isOwn?`<div class="chat-msg-name">${Security.esc(msg.username)}</div>`:''}
+        <div class="chat-msg-text">${Security.esc(msg.text)}</div>
+        <div class="chat-msg-time">${timeStr}</div>
+      </div>
+    </div>`;
+  chatEl.appendChild(div);
+  // Limit to 200 nodes
+  while(chatEl.children.length>200)chatEl.firstChild.remove();
+}
+
+async function sendChatMsg(){
+  if(!currentUser){showNotify('Войдите в аккаунт!','err');return;}
+  const input=document.getElementById('chatInput');
+  let text=input.value.trim();
+  if(!text)return;
+  if(text.length>300)text=text.substr(0,300);
+  input.value='';
+  await db.ref('chat/messages').push({
+    username:currentUser.username,text:text,ts:Date.now(),
+    avatar:currentUser.avatar||null
+  });
+  // Keep only last 500 messages
+  const countSnap=await db.ref('chat/messages').once('value');
+  const count=countSnap.numChildren();
+  if(count>500){
+    const oldRef=await db.ref('chat/messages').limitToFirst(count-500).once('value');
+    const updates={};
+    oldRef.forEach(ch=>{updates[ch.key]=null;});
+    await db.ref('chat/messages').update(updates);
+  }
+}
+
+// ══════════════════════════════════════════
+// LEADERBOARDS
+// ══════════════════════════════════════════
+async function loadLeaderboards(){
+  const[uSnap,cSnap]=await Promise.all([db.ref('users').once('value'),db.ref('clans').once('value')]);
+  const users=uSnap.val()||{},clans=cSnap.val()||{};
+  function cTag(cn){if(!cn||!clans[cn])return'';return`<span style="color:var(--text3);font-size:11px;font-weight:700;">[${Security.esc(clans[cn].tag||cn.substr(0,4))}]</span> `;}
+  
+  const seasonArr=Object.entries(users).filter(([,d])=>!d.banned)
+    .map(([n,d])=>({n,elo:d.elo||0,clan:d.clan||'',av:d.avatar||''})).sort((a,b)=>b.elo-a.elo);
+  const medals=['🥇','🥈','🥉'];
+  
+  let sHtml=`<table><thead><tr><th>#</th><th>Игрок</th><th>Клан</th><th>Ранг</th><th>ЭЛО</th></tr></thead><tbody>`;
+  seasonArr.slice(0,15).forEach((p,i)=>{
+    sHtml+=`<tr onclick="openPlayerModal('${Security.esc(p.n)}')">
+      <td style="font-weight:800;color:var(--text3);">${i<3?medals[i]:i+1}</td>
+      <td style="display:flex;align-items:center;gap:8px;">${avatarHTML(p.n,p.av,28)}${cTag(p.clan)}<b>${Security.esc(p.n)}</b></td>
+      <td style="font-size:12px;color:var(--text3);">${clans[p.clan]?.tag?'['+Security.esc(clans[p.clan].tag)+']':Security.esc(p.clan||'—')}</td>
+      <td>${rankPill(p.elo)}</td><td><b>${p.elo}</b></td></tr>`;
+  });
+  sHtml+='</tbody></table>';
+  document.getElementById('seasonTop').innerHTML=sHtml;
+  
+  const allArr=Object.entries(users).filter(([,d])=>!d.banned)
+    .map(([n,d])=>({n,mx:d.maxEloEver||0,clan:d.clan||'',av:d.avatar||''})).sort((a,b)=>b.mx-a.mx);
+  let aHtml=`<table><thead><tr><th>#</th><th>Игрок</th><th>Ранг</th><th>Макс ЭЛО</th></tr></thead><tbody>`;
+  allArr.slice(0,15).forEach((p,i)=>{
+    aHtml+=`<tr onclick="openPlayerModal('${Security.esc(p.n)}')">
+      <td style="font-weight:800;color:var(--text3);">${i<3?medals[i]:i+1}</td>
+      <td style="display:flex;align-items:center;gap:8px;">${avatarHTML(p.n,p.av,28)}<b>${Security.esc(p.n)}</b></td>
+      <td>${rankPill(p.mx)}</td><td><b>${p.mx}</b></td></tr>`;
+  });
+  aHtml+='</tbody></table>';
+  document.getElementById('alltimeTop').innerHTML=aHtml;
+  
+  const cScores={};
+  for(const[,d]of Object.entries(users)){
+    if(!d.banned&&d.clan){
+      if(!cScores[d.clan])cScores[d.clan]={total:0,members:0};
+      cScores[d.clan].total+=d.elo||0;cScores[d.clan].members++;
+    }
+  }
+  const cArr=Object.entries(cScores)
+    .map(([name,d])=>({name,...d,tag:clans[name]?.tag||name.substr(0,4),leader:clans[name]?.leader||'?'}))
+    .sort((a,b)=>b.total-a.total);
+  let cHtml='';
+  cArr.slice(0,10).forEach((c,i)=>{
+    cHtml+=`<div class="list-row">
+      <div style="font-size:20px;">${i<3?medals[i]:i+1}</div>
+      <div class="list-row-info"><div class="list-row-name">[${Security.esc(c.tag)}] ${Security.esc(c.name)}</div>
+        <div class="list-row-sub">👑 ${Security.esc(c.leader)} · ${c.members} участников</div></div>
+      <div style="font-weight:900;color:var(--primary);">⚡ ${c.total}</div>
+    </div>`;
+  });
+  document.getElementById('clanTop').innerHTML=cArr.length?cHtml:'<div class="empty-state"><div class="empty-icon">🏰</div><p>Нет кланов</p></div>';
+}
+
+// ══════════════════════════════════════════
+// CLANS
+// ══════════════════════════════════════════
+async function loadClans(){
+  const snap=await db.ref('clans').once('value');
+  const clans=snap.val()||{};
+  let html='';
+  for(const[name,d]of Object.entries(clans)){
+    const mc=(d.members||[d.leader]).length;
+    const tag=d.tag||name.substr(0,4);
+    const isM=currentUser&&(d.members||[d.leader]).includes(currentUser.username);
+    html+=`<div class="list-row">
+      <div style="font-size:24px;">🏰</div>
+      <div class="list-row-info"><div class="list-row-name">[${Security.esc(tag)}] ${Security.esc(name)}</div>
+        <div class="list-row-sub">👑 ${Security.esc(d.leader)} · ${mc} участников</div></div>
+      ${currentUser&&!isM?`<button class="btn btn-sm joinClanBtn" data-clan="${Security.esc(name)}">➕ Вступить</button>`
+        :(isM?'<span style="color:var(--green);font-weight:700;font-size:13px;">✅ Мой</span>':'')}
+    </div>`;
+  }
+  document.getElementById('clanList').innerHTML=html||'<div class="empty-state"><div class="empty-icon">🏰</div><p>Нет кланов</p></div>';
+  document.querySelectorAll('.joinClanBtn').forEach(btn=>{
+    btn.onclick=async()=>{
+      if(!currentUser)return;
+      if(currentUser.clan){showNotify('Сначала покиньте текущий клан!','warn');return;}
+      const cData=(await db.ref(`clans/${btn.dataset.clan}`).once('value')).val();
+      const members=cData.members||[cData.leader];
+      if(!members.includes(currentUser.username))members.push(currentUser.username);
+      await db.ref(`clans/${btn.dataset.clan}/members`).set(members);
+      await saveStats({clan:btn.dataset.clan});
+      loadClans();showMyClan();showNotify('🏰 Вступил в клан!','ok');
+    };
+  });
+  showMyClan();
+}
+
+async function showMyClan(){
+  if(!currentUser?.clan){document.getElementById('myClanCard').style.display='none';return;}
+  const snap=await db.ref(`clans/${currentUser.clan}`).once('value');
+  const d=snap.val();
+  if(!d){document.getElementById('myClanCard').style.display='none';return;}
+  document.getElementById('myClanCard').style.display='block';
+  const tag=d.tag||currentUser.clan.substr(0,4);
+  const isLeader=d.leader===currentUser.username;
+  document.getElementById('myClanTitle').textContent=`🏰 [${tag}] ${currentUser.clan}`;
+  document.getElementById('myClanRankDisplay').innerHTML=isLeader
+    ?`<span class="rank-pill" style="background:linear-gradient(135deg,#ffd700,#ffa500);color:#333;">👑 Лидер</span>`
+    :`<span class="rank-pill" style="background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff;">⚔️ Участник</span>`;
+  const members=d.members||[d.leader];
+  let mHtml='';
+  for(const m of members){
+    const uSnap=await db.ref(`users/${m}`).once('value');const u=uSnap.val()||{};
+    mHtml+=`<div class="list-row">
+      ${avatarHTML(m,u.avatar||null,36)}
+      <div class="list-row-info"><div class="list-row-name">${Security.esc(m)}${m===d.leader?' 👑':''}</div>
+        <div class="list-row-sub">${rankPill(u.elo||0)} · ${u.elo||0} ЭЛО</div></div>
+    </div>`;
+  }
+  document.getElementById('clanMembersList').innerHTML=mHtml;
+}
+
+// ══════════════════════════════════════════
+// FRIENDS
+// ══════════════════════════════════════════
+async function loadFriends(){
+  if(!currentUser){document.getElementById('friendsList').innerHTML='<div class="empty-state"><p>Войдите в аккаунт</p></div>';return;}
+  const snap=await db.ref(`users/${currentUser.username}`).once('value');
+  const d=snap.val()||{};
+  const friends=d.friends||[];const reqs=d.friendRequests||[];
+  // Requests
+  let reqHtml='';
+  if(reqs.length>0){
+    reqHtml=`<div class="card-title">📬 Входящие заявки (${reqs.length})</div>`;
+    for(const r of reqs){
+      const uSnap=await db.ref(`users/${r}`).once('value');const u=uSnap.val()||{};
+      reqHtml+=`<div class="list-row req">${avatarHTML(r,u.avatar||null,36)}
+        <div class="list-row-info"><div class="list-row-name">${Security.esc(r)}</div>
+          <div class="list-row-sub">${getRank(u.elo||0).name}</div></div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-success btn-xs" onclick="acceptFriend('${Security.esc(r)}')">✅</button>
+          <button class="btn btn-danger btn-xs" onclick="declineFriend('${Security.esc(r)}')">✕</button>
+        </div></div>`;
+    }
+    const badge=document.getElementById('friendBadge');badge.textContent=reqs.length;badge.style.display='block';
+  }else{document.getElementById('friendBadge').style.display='none';}
+  document.getElementById('friendRequestsSection').innerHTML=reqHtml;
+  // Friends list
+  let fHtml=friends.length?`<div class="card-title">👥 Друзья (${friends.length})</div>`:'<div class="empty-state"><div class="empty-icon">👥</div><p>Добавь своих первых друзей!</p></div>';
+  for(const f of friends){
+    const uSnap=await db.ref(`users/${f}`).once('value');const u=uSnap.val()||{};
+    fHtml+=`<div class="list-row" onclick="openPlayerModal('${Security.esc(f)}')">
+      ${avatarHTML(f,u.avatar||null,36)}
+      <div class="list-row-info"><div class="list-row-name">${Security.esc(f)}</div>
+        <div class="list-row-sub">${rankPill(u.elo||0)} · ${u.wins||0} побед</div></div>
+      <button class="btn btn-gray btn-xs" onclick="event.stopPropagation();removeFriend('${Security.esc(f)}')">✕</button>
+    </div>`;
+  }
+  document.getElementById('friendsList').innerHTML=fHtml;
+}
+
+async function sendFriendRequest(){
+  if(!currentUser){showNotify('Войдите!','err');return;}
+  const target=document.getElementById('friendReqInput').value.trim();
+  if(!target){showNotify('Введите никнейм','warn');return;}
+  const targetErr=Security.validateNick(target);
+  if(targetErr){showNotify(targetErr==='HACK_ATTEMPT'?'Недопустимый никнейм':targetErr,'warn');return;}
+  if(target===currentUser.username){showNotify('Нельзя добавить себя','err');return;}
+  const snap=await db.ref(`users/${target}`).once('value');
+  if(!snap.exists()){showNotify('Игрок не найден','err');return;}
+  const d=snap.val();
+  if((d.friends||[]).includes(currentUser.username)){showNotify('Уже в друзьях','warn');return;}
+  const reqs=d.friendRequests||[];
+  if(reqs.includes(currentUser.username)){showNotify('Заявка уже отправлена','warn');return;}
+  reqs.push(currentUser.username);
+  await db.ref(`users/${target}/friendRequests`).set(reqs);
+  document.getElementById('friendReqInput').value='';
+  showNotify(`📨 Заявка отправлена игроку ${target}`,'ok');
+}
+
+async function acceptFriend(from){
+  if(!currentUser)return;
+  const myFriends=[...(currentUser.friends||[])];
+  if(!myFriends.includes(from))myFriends.push(from);
+  const myReqs=(currentUser.friendRequests||[]).filter(r=>r!==from);
+  await saveStats({friends:myFriends,friendRequests:myReqs});
+  const thSnap=await db.ref(`users/${from}`).once('value');
+  const th=thSnap.val()||{};
+  const thFriends=[...(th.friends||[])];
+  if(!thFriends.includes(currentUser.username))thFriends.push(currentUser.username);
+  await db.ref(`users/${from}/friends`).set(thFriends);
+  showNotify(`✅ ${from} теперь ваш друг!`,'ok');loadFriends();
+}
+
+async function declineFriend(from){
+  if(!currentUser)return;
+  const myReqs=(currentUser.friendRequests||[]).filter(r=>r!==from);
+  await saveStats({friendRequests:myReqs});loadFriends();
+}
+
+async function removeFriend(name){
+  if(!currentUser)return;
+  const myFriends=(currentUser.friends||[]).filter(f=>f!==name);
+  await saveStats({friends:myFriends});
+  const thSnap=await db.ref(`users/${name}`).once('value');
+  const th=thSnap.val()||{};
+  const thFriends=(th.friends||[]).filter(f=>f!==currentUser.username);
+  await db.ref(`users/${name}/friends`).set(thFriends);
+  showNotify('Удалён из друзей','warn');loadFriends();
+}
+
+// ══════════════════════════════════════════
+// PLAYER MODAL
+// ══════════════════════════════════════════
+async function openPlayerModal(username){
+  const snap=await db.ref(`users/${username}`).once('value');
+  if(!snap.exists())return;
+  const d=snap.val();
+  const modal=document.getElementById('playerModalOverlay');
+  const avWrap=document.getElementById('modalAvatarWrap');
+  let avImg=document.getElementById('modalAvatarImg');
+  if(!avImg){
+    avImg=document.createElement('img');
+    avImg.id='modalAvatarImg';
+    avImg.alt='';
+    avImg.style.cssText='display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;';
+  }
+  avWrap.style.background=avColor(username);
+  avWrap.textContent='';
+  if(d.avatar){avImg.src=d.avatar;avImg.style.display='block';avWrap.appendChild(avImg);}
+  else{avImg.style.display='none';avWrap.textContent=avLetter(username);}
+  document.getElementById('modalName').textContent=username;
+  document.getElementById('modalRankBadge').innerHTML=rankPill(d.elo||0);
+  document.getElementById('modalClan').textContent=d.clan?`Клан: ${d.clan}`:'Без клана';
+  document.getElementById('modalElo').textContent=d.elo||0;
+  document.getElementById('modalLevel').textContent=calcLevel(d.trophies||0).level;
+  const tot=(d.wins||0)+(d.losses||0);
+  document.getElementById('modalWr').textContent=tot?Math.round((d.wins/tot)*100)+'%':'0%';
+  document.getElementById('modalTrophies').textContent=d.trophies||0;
+  document.getElementById('modalStreak').textContent=(d.winStreak||0)>=2?`🔥 Стрик: ×${d.winStreak}`:'';
+  document.getElementById('modalAddFriendBtn').onclick=()=>{
+    if(!currentUser){showNotify('Войдите!','err');return;}
+    document.getElementById('friendReqInput').value=username;
+    sendFriendRequest();closeModal();
+  };
+  modal.style.display='flex';
+}
+function closeModal(){document.getElementById('playerModalOverlay').style.display='none';}
+
+// ══════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════
+async function checkAdmin(){
+  if(!currentUser||!ensureDb(false))return false;
+  const snap=await db.ref(`admins/${currentUser.username}`).once('value');
+  return snap.exists();
+}
+
+async function loadAdmins(){
+  const snap=await db.ref('admins').once('value');
+  const admins=snap.val()||{};
+  let html='';
+  for(const[name]of Object.entries(admins)){
+    html+=`<div class="admin-row">${avatarHTML(name,null,36)}
+      <div style="flex:1;font-weight:700;">${Security.esc(name)}</div>
+      <span class="rank-pill" style="background:var(--red);color:#fff;">🔑 Админ</span>
+    </div>`;
+  }
+  document.getElementById('adminsList').innerHTML=html||'<p style="color:var(--text3)">Нет администраторов</p>';
+  renderAdminUsers('');
+}
+
+async function renderAdminUsers(search=''){
+  const snap=await db.ref('users').once('value');
+  const users=snap.val()||{};
+  let html='';
+  for(const[name,d]of Object.entries(users)){
+    if(search&&!name.toLowerCase().includes(search.toLowerCase()))continue;
+    html+=`<div class="admin-row">
+      ${avatarHTML(name,d.avatar||null,36)}
+      <div style="flex:1;"><div style="font-weight:700;">${Security.esc(name)}</div>
+        <div style="font-size:12px;color:var(--text3);">${rankPill(d.elo||0)} · ${d.elo||0} ЭЛО</div></div>
+      ${d.banned
+        ?`<button class="btn btn-success btn-xs" onclick="adminUnban('${Security.esc(name)}')">♻️ Разбан</button>`
+        :`<button class="btn btn-danger btn-xs" onclick="adminBan('${Security.esc(name)}')">🚫 Бан</button>`}
+      <button class="btn btn-gold btn-xs" onclick="adminEditElo('${Security.esc(name)}',${d.elo||0})">✏️ ЭЛО</button>
+    </div>`;
+  }
+  document.getElementById('adminUsersList').innerHTML=html||'<p style="color:var(--text3)">Нет игроков</p>';
+}
+
+async function adminBan(username){
+  const reason=prompt(`Причина бана ${username}:`)||'Нарушение правил';
+  await db.ref(`users/${username}`).update({banned:true,banReason:reason});
+  showNotify(`🚫 ${username} заблокирован`,'ok');
+  renderAdminUsers(document.getElementById('adminSearch').value);
+}
+
+async function adminUnban(username){
+  await db.ref(`users/${username}`).update({banned:false,banReason:''});
+  showNotify(`✅ ${username} разблокирован`,'ok');
+  renderAdminUsers(document.getElementById('adminSearch').value);
+}
+
+async function adminEditElo(username,currentElo){
+  const newElo=prompt(`ЭЛО для ${username} (сейчас: ${currentElo}):`,currentElo);
+  if(newElo===null)return;
+  const val=parseInt(newElo);
+  if(isNaN(val)||val<0){showNotify('Некорректное ЭЛО','err');return;}
+  await db.ref(`users/${username}`).update({elo:val,maxEloEver:Math.max(val,currentElo)});
+  showNotify(`✅ ЭЛО ${username} изменено на ${val}`,'ok');
+  renderAdminUsers(document.getElementById('adminSearch').value);
+}
+
+// ══════════════════════════════════════════
+// SEASON SYSTEM
+// ══════════════════════════════════════════
+async function initSeason(){
+  if(!ensureDb(false))return;
+  let d={};
+  try{
+    const snap=await db.ref('season').once('value');
+    d=snap.val()||{};
+  }catch(e){
+    console.warn('Season read skipped:',e);
+  }
+  if(!d.end){
+    seasonEnd=Date.now()+30*24*3600*1000;
+    await db.ref('season').set({end:seasonEnd,started:Date.now()}).catch(e=>console.warn('Season write skipped:',e));
+  }else if(Date.now()>d.end){
+    await resetSeason(false);
+  }else{seasonEnd=d.end;}
+  updateSeasonTimer();
+  if(seasonTimerId)clearInterval(seasonTimerId);
+  seasonTimerId=setInterval(updateSeasonTimer,60000);
+}
+
+function updateSeasonTimer(){
+  const left=Math.max(0,seasonEnd-Date.now());
+  const days=Math.floor(left/86400000);
+  const hours=Math.floor((left%86400000)/3600000);
+  const el=document.getElementById('seasonCountdown');
+  if(el)el.textContent=`${days}д ${hours}ч`;
+}
+
+async function resetSeason(requireAdmin=true){
+  if(requireAdmin&&!await checkAdmin())return;
+  // Archive top players
+  const snap=await db.ref('users').once('value');
+  const users=snap.val()||{};
+  const top=Object.entries(users).filter(([,d])=>!d.banned)
+    .map(([n,d])=>({n,elo:d.seasonWins||0})).sort((a,b)=>b.elo-a.elo).slice(0,3);
+  await db.ref('season/lastWinners').set(top.map(p=>p.n));
+  // Reset seasonal stats
+  const updates={};
+  for(const[name]of Object.entries(users)){
+    updates[`users/${name}/elo`]=0;
+    updates[`users/${name}/seasonWins`]=0;
+    updates[`users/${name}/seasonLosses`]=0;
+    updates[`users/${name}/winStreak`]=0;
+  }
+  await db.ref().update(updates);
+  seasonEnd=Date.now()+30*24*3600*1000;
+  await db.ref('season').set({end:seasonEnd,started:Date.now()});
+  if(currentUser){
+    currentUser.elo=0;
+    currentUser.seasonWins=0;
+    currentUser.seasonLosses=0;
+    currentUser.winStreak=0;
+    renderProfile();
+    updateSideMini();
+  }
+  showNotify('🏆 Сезон завершён! Начинается новый сезон.','ok');
+}
+
+async function forceSeasonReset(){
+  await resetSeason(true);
+}
+
+// ══════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════
+function showNotify(msg,type='info',ms=3500){
+  const el=document.createElement('div');el.className='notify '+(type==='err'?'err':type==='ok'?'ok':type==='warn'?'warn':'');
+  el.textContent=msg;document.body.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.3s';setTimeout(()=>el.remove(),300);},ms);
+}
+
+window.addEventListener('unhandledrejection',e=>{
+  e.preventDefault();
+  showNotify(formatAppError(e.reason),'err');
+});
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function switchTab(tabId){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active-pane'));
+  const target=document.getElementById(tabId);if(target)target.classList.add('active-pane');
+  document.querySelectorAll('.tab-btn,.bnav-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.tab===tabId);
+  });
+  // Tab-specific actions
+  if(tabId==='leaderboards')loadLeaderboards();
+  if(tabId==='clans')loadClans();
+  if(tabId==='friends')loadFriends();
+  if(tabId==='shop')renderShop();
+  if(tabId==='admin')loadAdmins();
+  if(tabId==='chat'){
+    document.getElementById('chatBadge').style.display='none';
+    initChat();
+  }
+  // Close mobile sidebar
+  closeSidebar();
+}
+
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('mobileOverlay').classList.add('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// AUTH EVENTS
+// ══════════════════════════════════════════
+async function afterLogin(){
+  document.getElementById('authCard').style.display='none';
+  document.getElementById('profileInfo').style.display='block';
+  document.getElementById('sidebarUserMini').style.display='block';
+  updateSideMini();
+  try{
+    if(await checkAdmin()){
+      document.getElementById('forceSeasonEndBtn').style.display='inline-flex';
+      document.getElementById('adminTabBtn').style.display='flex';
+      if(currentUser.username==='qwenix'){
+        const adm=await db.ref('admins/qwenix').once('value');
+        if(!adm.exists())await db.ref('admins/qwenix').set({addedAt:Date.now()}).catch(()=>{});
+      }
+    }
+  }catch(e){console.warn('Admin check skipped:',e);}
+  renderProfile();renderShop();
+  initSeason().catch(e=>console.warn('Season init skipped:',e));
+  loadLeaderboards().catch(e=>console.warn('Leaderboards skipped:',e));
+}
+
+async function autoLogin(){
+  if(!ensureDb(false))return;
+  const saved=localStorage.getItem('domofon_user');if(!saved)return;
+  try{
+    const{username,password}=JSON.parse(saved);
+    const data=await doLogin(username,password);
+    currentUser={username,password,...data};
+    const fresh=(await db.ref(`users/${username}`).once('value')).val()||{};
+    currentUser={...currentUser,...fresh,username};
+    afterLogin();
+  }catch(e){localStorage.removeItem('domofon_user');}
+}
+
+// ══════════════════════════════════════════
+// EVENT LISTENERS
+// ══════════════════════════════════════════
+function setAuthBusy(isBusy){
+  document.getElementById('doLogin').disabled=isBusy;
+  document.getElementById('doRegister').disabled=isBusy;
+}
+
+let captchaAnswer='';
+function resetCaptcha(){
+  const a=2+Math.floor(Math.random()*8);
+  const b=2+Math.floor(Math.random()*8);
+  captchaAnswer=String(a+b);
+  const q=document.getElementById('captchaQuestion');
+  const input=document.getElementById('captchaInput');
+  if(q)q.textContent=`${a} + ${b} = ?`;
+  if(input)input.value='';
+}
+function checkCaptcha(msg){
+  const input=document.getElementById('captchaInput');
+  if(!input)return true;
+  if(input.value.trim()!==captchaAnswer){
+    msg.textContent='Неверная капча';
+    resetCaptcha();
+    return false;
+  }
+  return true;
+}
+resetCaptcha();
+
+document.getElementById('doLogin').onclick=async()=>{
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const msg=document.getElementById('authMsg');
+  if(!u||!p){msg.textContent='Заполните все поля!';return;}
+  if(!checkCaptcha(msg))return;
+  const nickErr=Security.validateNick(u);
+  if(nickErr&&nickErr!=='HACK_ATTEMPT'){msg.textContent=nickErr;return;}
+  if(nickErr==='HACK_ATTEMPT'){
+    msg.textContent='Недопустимый никнейм';return;
+  }
+  try{
+    setAuthBusy(true);
+    msg.textContent='⏳ Входим...';
+    const data=await doLogin(u,p);
+    currentUser={username:u,password:p,...data};
+    const fresh=(await db.ref(`users/${u}`).once('value')).val()||{};
+    currentUser={...currentUser,...fresh,username:u};
+    localStorage.setItem('domofon_user',JSON.stringify({username:u,password:p}));
+    msg.textContent='';afterLogin();
+  }catch(e){msg.textContent=formatAppError(e);}
+  finally{setAuthBusy(false);resetCaptcha();}
+};
+
+document.getElementById('doRegister').onclick=async()=>{
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const msg=document.getElementById('authMsg');
+  if(!u||!p){msg.textContent='Заполните все поля!';return;}
+  if(!checkCaptcha(msg))return;
+  try{
+    setAuthBusy(true);
+    msg.textContent='⏳ Регистрируем...';
+    const data=await doRegister(u,p);
+    currentUser={username:u,password:p,...data};
+    localStorage.setItem('domofon_user',JSON.stringify({username:u,password:p}));
+    showNotify('✅ Аккаунт создан!','ok');
+    msg.textContent='';afterLogin();
+  }catch(e){msg.textContent=formatAppError(e);}
+  finally{setAuthBusy(false);resetCaptcha();}
+};
+
+['loginUser','loginPass'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{
+    if(e.key==='Enter')document.getElementById('doLogin').click();
+  });
+});
+
+document.getElementById('logoutBtnSide').onclick=()=>{
+  currentUser=null;localStorage.removeItem('domofon_user');
+  document.getElementById('authCard').style.display='block';
+  document.getElementById('profileInfo').style.display='none';
+  document.getElementById('sidebarUserMini').style.display='none';
+  document.getElementById('forceSeasonEndBtn').style.display='none';
+  document.getElementById('adminTabBtn').style.display='none';
+  if(currentPartyId)leaveParty();
+};
+
+document.getElementById('startBotAimBtn').onclick=()=>{
+  if(currentUser)startBotArena();else showNotify('Войдите в аккаунт!','err');
+};
+document.getElementById('searchOnlineBtn').onclick=searchOnline;
+document.getElementById('refreshClans').onclick=loadClans;
+document.getElementById('sendFriendReqBtn').onclick=sendFriendRequest;
+document.getElementById('createPartyBtn').onclick=createParty;
+document.getElementById('joinPartyBtn').onclick=joinParty;
+document.getElementById('startPartyBattleBtn').onclick=startPartyBattle;
+document.getElementById('leavePartyBtn').onclick=leaveParty;
+document.getElementById('sendChatBtn').onclick=sendChatMsg;
+document.getElementById('chatInput').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMsg();}};
+document.getElementById('forceSeasonEndBtn').onclick=async()=>{if(await checkAdmin()){await forceSeasonReset();loadLeaderboards();}};
+
+document.getElementById('leaveClanBtn').addEventListener('click',async()=>{
+  if(!currentUser?.clan)return;
+  const cSnap=await db.ref(`clans/${currentUser.clan}`).once('value');
+  const cData=cSnap.val();
+  if(cData){
+    const members=(cData.members||[cData.leader]).filter(m=>m!==currentUser.username);
+    if(cData.leader===currentUser.username&&members.length>0)
+      await db.ref(`clans/${currentUser.clan}`).update({leader:members[0],members});
+    else if(members.length===0)await db.ref(`clans/${currentUser.clan}`).remove();
+    else await db.ref(`clans/${currentUser.clan}/members`).set(members);
+  }
+  await saveStats({clan:''});loadClans();showNotify('Покинул клан','warn');
+});
+
+document.getElementById('createClanBtn').onclick=async()=>{
+  if(!currentUser){showNotify('Войдите!','err');return;}
+  if(currentUser.clan){showNotify('Сначала покиньте текущий клан!','warn');return;}
+  const cname=document.getElementById('clanName').value.trim();
+  const ctag=document.getElementById('clanPrefix').value.trim().toUpperCase().substr(0,5);
+  if(!cname){showNotify('Введите название!','warn');return;}
+  const clanErr=Security.validateDbKey(cname,'Название клана');
+  if(clanErr){showNotify(clanErr,'warn');return;}
+  if(Security.containsScript(cname)||Security.containsScript(ctag)){showNotify('🚫 Запрещённые символы','err');return;}
+  const ex=await db.ref(`clans/${cname}`).once('value');
+  if(ex.exists()){showNotify('Клан уже существует!','warn');return;}
+  await db.ref(`clans/${cname}`).set({leader:currentUser.username,members:[currentUser.username],tag:ctag||cname.substr(0,4).toUpperCase(),createdAt:Date.now()});
+  await saveStats({clan:cname});loadClans();showNotify(`🏰 Клан [${ctag||cname.substr(0,4)}] создан!`,'ok');
+};
+
+document.getElementById('uploadAvatarBtnSide').onclick=()=>document.getElementById('avatarFileInput').click();
+document.getElementById('avatarFileInput').onchange=e=>{
+  const file=e.target.files[0];if(!file)return;
+  const fr=new FileReader();
+  fr.onload=ev=>{
+    const raw=ev.target.result;
+    const img=new Image();
+    img.onload=async()=>{
+      let avatar=raw;
+      if(file.size>800000||raw.length>950000){
+        const maxSide=512;
+        const scale=Math.min(1,maxSide/Math.max(img.width,img.height));
+        const canvas=document.createElement('canvas');
+        canvas.width=Math.max(1,Math.round(img.width*scale));
+        canvas.height=Math.max(1,Math.round(img.height*scale));
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        avatar=canvas.toDataURL('image/jpeg',0.86);
+      }
+      await saveStats({avatar});
+      renderProfile();
+      updateSideMini();
+      showNotify(file.size>800000?'✅ Аватар сжат и загружен!':'✅ Аватар обновлён!','ok');
+      e.target.value='';
+    };
+    img.onerror=()=>{
+      showNotify('Файл не похож на картинку. Выбери PNG, JPG, WEBP, GIF, BMP или SVG.','err');
+      e.target.value='';
+    };
+    img.src=raw;
+  };
+  fr.readAsDataURL(file);
+};
+
+document.getElementById('adminSearch').oninput=e=>renderAdminUsers(e.target.value);
+
+// Tab navigation
+document.querySelectorAll('.tab-btn,.bnav-btn').forEach(btn=>{
+  btn.onclick=()=>switchTab(btn.dataset.tab);
+});
+
+// Partycode uppercase
+document.getElementById('partyCodeInput').oninput=function(){this.value=this.value.toUpperCase();};
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+if(ensureDb()){
+  autoLogin();
+  initSeason().catch(e=>console.warn('Season init skipped:',e));
+}else{
+  setAuthBusy(true);
+}
+</script>
 
 </body>
 </html>
+
+
+
+
+
