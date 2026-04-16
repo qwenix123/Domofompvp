@@ -1,0 +1,208 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domofon | Глобальное Обновление</title>
+    <style>
+        :root {
+            --dark-space: #05070a;
+            --neon-blue: #00d2ff;
+            --deep-purple: #3a1c71;
+            --gold: #ffaf7b;
+        }
+
+        @keyframes bgRotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Trebuchet MS', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-space);
+            background-image: radial-gradient(circle at center, #1a2a44 0%, #05070a 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Эффект сканирования (как на старых мониторах) */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 420px;
+            z-index: 10;
+        }
+
+        /* Главный блок с неоновым свечением */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border-radius: 35px;
+            padding: 40px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.1);
+            position: relative;
+        }
+
+        .header-status {
+            color: var(--neon-blue);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            animation: blink 1.5s infinite;
+        }
+
+        .main-title {
+            font-size: 45px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            line-height: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            background: linear-gradient(90deg, #ffaf7b, #d76d77, #3a1c71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 60px;
+        }
+
+        .info-text {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 25px 0;
+            line-height: 1.6;
+        }
+
+        /* Индикатор процесса */
+        .loader-box {
+            margin: 30px 0;
+        }
+
+        .loader-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 10px;
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+
+        .bar-container {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bar-value {
+            height: 100%;
+            width: 75%;
+            background: var(--neon-blue);
+            box-shadow: 0 0 20px var(--neon-blue);
+            position: relative;
+        }
+
+        /* Сетка с информацией */
+        .footer-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .val {
+            display: block;
+            font-size: 20px;
+            font-weight: 900;
+            color: white;
+        }
+
+        .lbl {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="glass-panel">
+        <div class="header-status">Система в режиме обслуживания</div>
+        
+        <h1 class="main-title">DOMOFON<br><span class="highlight">РЕКОД</span></h1>
+        
+        <p class="info-text">
+            Мы полностью переписываем проект с нуля. <br>
+            <strong>Старая версия отключена.</strong> <br>
+            В данный момент переносим базу данных и настраиваем новый функционал.
+        </p>
+
+        <div class="loader-box">
+            <div class="loader-label">
+                <span>Ожидание выхода 2.0</span>
+                <span>75%</span>
+            </div>
+            <div class="bar-container">
+                <div class="bar-value"></div>
+            </div>
+        </div>
+
+        <div class="footer-info">
+            <div class="info-card">
+                <span class="val">СКОРО</span>
+                <span class="lbl">ЗАПУСК</span>
+            </div>
+            <div class="info-card">
+                <span class="val">NEW UI</span>
+                <span class="lbl">ДИЗАЙН</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
