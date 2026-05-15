@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOMOFON PvP: Полная перезагрузка // V2.0 RECODE</title>
+    <title>DOMOFON PvP: Технические работы // RECODE</title>
     <!-- Подключаем современный шрифт -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* Палитра: премиальный синий, белый, акцентный розовый */
             --bg-deep: #03010b;
-            --main-accent: #6236ff; /* Красивый фиолетовый */
-            --main-accent-2: #ff2e63; /* Яркий акцентный */
+            --main-accent: #6236ff; 
+            --main-accent-2: #ff2e63; 
             --light-text: #ffffff;
             --text-muted: #b0aecf;
-            
-            /* Разное */
             --ease: cubic-bezier(0.23, 1, 0.32, 1);
-            --shadow-soft: 0 10px 40px rgba(0,0,0,0.4);
         }
 
         * {
@@ -40,7 +36,7 @@
             line-height: 1.6;
         }
 
-        /* 1. Очень красивый фон: Живые градиенты */
+        /* Премиальный фон: Живые градиенты */
         #interactive-bg {
             position: fixed;
             top: 0;
@@ -55,7 +51,7 @@
             position: absolute;
             border-radius: 50%;
             filter: blur(80px);
-            opacity: 0.5;
+            opacity: 0.4;
             animation: moveGradient 15s infinite alternate var(--ease);
         }
 
@@ -68,7 +64,7 @@
             100% { transform: translate(150px, 80px) rotate(30deg); }
         }
 
-        /* Текстура шума (придает дороговизну) */
+        /* Текстура шума */
         #noise-overlay {
             position: fixed;
             top: 0;
@@ -88,11 +84,12 @@
             text-align: center;
             position: relative;
             z-index: 10;
+            padding: 40px 0;
         }
 
         /* Хедер */
         header {
-            margin-bottom: 70px;
+            margin-bottom: 60px;
             animation: fadeInDown 1.2s var(--ease) both;
         }
 
@@ -109,217 +106,234 @@
             filter: drop-shadow(0 0 20px rgba(160, 196, 255, 0.4));
         }
 
+        /* Плашка тех. работ */
         .status-badge {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 46, 99, 0.1);
             backdrop-filter: blur(10px);
-            padding: 8px 18px;
+            padding: 8px 22px;
             border-radius: 100px;
             display: inline-block;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: var(--main-accent-2);
             text-transform: uppercase;
             letter-spacing: 0.2em;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 46, 99, 0.3);
             margin-bottom: 30px;
-            margin-top: -10px;
+            animation: pulseGlow 2s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 10px rgba(255, 46, 99, 0.1); border-color: rgba(255, 46, 99, 0.3); }
+            100% { box-shadow: 0 0 20px rgba(255, 46, 99, 0.3); border-color: rgba(255, 46, 99, 0.6); }
         }
 
         .tagline {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: var(--text-muted);
             max-width: 600px;
             margin: 0 auto;
+            font-weight: 400;
         }
 
-        /* Сетка премиальных карточек */
+        /* Сетка карточек */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
-            margin-bottom: 80px;
+            margin-bottom: 60px;
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
             padding: 40px;
             backdrop-filter: blur(15px);
             transition: transform 0.6s var(--ease), border-color 0.6s var(--ease), box-shadow 0.6s var(--ease);
             text-align: left;
-            position: relative;
-            overflow: hidden;
             animation: fadeInUp 1s var(--ease) both;
         }
 
-        /* Устанавливаем задержки анимации для карточек */
-        .feature-card:nth-child(1) { animation-delay: 0.3s; }
-        .feature-card:nth-child(2) { animation-delay: 0.5s; }
-        .feature-card:nth-child(3) { animation-delay: 0.7s; }
+        .feature-card:nth-child(1) { animation-delay: 0.2s; }
+        .feature-card:nth-child(2) { animation-delay: 0.4s; }
+        .feature-card:nth-child(3) { animation-delay: 0.6s; }
 
         .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 50px rgba(100, 50, 255, 0.2);
-        }
-
-        /* Эффект блика при наведении */
-        .feature-card::after {
-            content: '';
-            position: absolute;
-            top: -100%; left: -100%;
-            width: 300%; height: 300%;
-            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%);
-            pointer-events: none;
-            transition: all 0.6s var(--ease);
-        }
-        .feature-card:hover::after {
-            top: -150%; left: -50%;
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 40px rgba(100, 50, 255, 0.15);
         }
 
         .card-num {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--main-accent);
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: block;
+            letter-spacing: 0.1em;
         }
 
         .feature-card h3 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 600;
             margin-bottom: 15px;
             color: #fff;
         }
 
         .feature-card p {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
             line-height: 1.7;
         }
 
-        /* Элегантная Кнопка */
-        .action-button-container {
+        /* Красивая панель прогресса тех. работ */
+        .maintenance-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+            backdrop-filter: blur(20px);
             animation: fadeInUp 1s var(--ease) both;
-            animation-delay: 1.1s;
+            animation-delay: 0.8s;
         }
 
-        .recode-btn {
-            position: relative;
-            display: inline-block;
-            padding: 20px 60px;
-            font-size: 1.3rem;
+        .panel-title {
+            font-size: 1.1rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.15em;
+            margin-bottom: 25px;
             color: #fff;
-            text-decoration: none;
-            border: 20px;
-            border-radius: 50px;
-            background: linear-gradient(135deg, var(--main-accent) 0%, var(--main-accent-2) 100%);
-            box-shadow: 0 10px 40px rgba(255, 46, 99, 0.4);
-            cursor: pointer;
-            transition: all 0.4s var(--ease);
+        }
+
+        /* Анимированный Прогресс-бар */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            height: 8px;
+            width: 100%;
             overflow: hidden;
-            border: none;
+            position: relative;
+            margin-bottom: 15px;
         }
 
-        .recode-btn:hover {
-            box-shadow: 0 15px 50px rgba(255, 46, 99, 0.7);
-            transform: scale(1.05);
+        .progress-bar {
+            height: 100%;
+            width: 75%; /* Процент готовности */
+            background: linear-gradient(90deg, var(--main-accent) 0%, var(--main-accent-2) 100%);
+            border-radius: 100px;
+            position: relative;
+            animation: progressLoad 3s var(--ease) forwards;
         }
 
-        /* Анимационные Keyframes */
+        /* Свечение на конце полосы */
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #fff, 0 0 30px var(--main-accent-2);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .pulse-text {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Анимации */
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-40px); }
+            from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(40px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Адаптивность для мобильных */
+        @keyframes progressLoad {
+            from { width: 0%; }
+            to { width: 78%; } /* Сюда можно вписать текущий процент */
+        }
+
+        /* Адаптивность */
         @media (max-width: 768px) {
-            .logo-main { font-size: 3rem; letter-spacing: 0.05em; }
-            .tagline { font-size: 1.2rem; }
+            .logo-main { font-size: 3.5rem; }
+            .tagline { font-size: 1.1rem; }
             .features-grid { grid-template-columns: 1fr; }
             .feature-card { padding: 30px; }
-            .recode-btn { width: 100%; text-align: center; font-size: 1rem; padding: 18px 0; }
+            .maintenance-panel { padding: 30px 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. Очень красивый фон -->
+    <!-- Живой задний фон -->
     <div id="interactive-bg">
         <div class="gradient-circle c1"></div>
         <div class="gradient-circle c2"></div>
         <div class="gradient-circle c3"></div>
     </div>
     
-    <!-- Текстура поверх фона -->
     <div id="noise-overlay"></div>
 
     <div class="main-wrapper">
         <header>
             <div class="logo-main">DOMOFON PvP</div>
             <div>
-                <span class="status-badge">Project RECODE // V2.0</span>
+                <span class="status-badge">ТЕХНИЧЕСКИЕ РАБОТЫ</span>
             </div>
-            <p class="tagline">Красивое обновление. Написано с чистого листа.</p>
+            <p class="tagline">Переносим проект на совершенно новое ядро. Переписываем всё с нуля для идеальной игры.</p>
         </header>
 
         <div class="features-grid">
-            <!-- Карточка 1 -->
             <div class="feature-card">
-                <span class="card-num">#01</span>
-                <h3>Эстетика Кода</h3>
-                <p>Мы полностью удалили старый код. Написали ядро с нуля, используя современные архитектурные паттерны для безупречной работы.</p>
+                <span class="card-num">STAGE 01</span>
+                <h3>Рекод Ядра</h3>
+                <p>Старый исходный код полностью удален. Новая архитектура готова на 100%, завершается оптимизация базы данных.</p>
             </div>
 
-            <!-- Карточка 2 -->
             <div class="feature-card">
-                <span class="card-num">#02</span>
-                <h3>Премиум PvP</h3>
-                <p>Баланс механик, выверенный до мелочей. Честные сражения без задержек, плавные анимации и точная регистрация попаданий.</p>
+                <span class="card-num">STAGE 02</span>
+                <h3>PvP и Синхронизация</h3>
+                <p>Тестируем новую регистрацию урона и отклик. Бои станут максимально отзывчивыми, плавными и честными.</p>
             </div>
 
-            <!-- Карточка 3 -->
             <div class="feature-card">
-                <span class="card-num">#03</span>
-                <h3>Beautiful UX</h3>
-                <p>Интерфейс, созданный вдохновлять. Элегантный HUD, красивые переходы и интуитивный дизайн для комфортной игры.</p>
+                <span class="card-num">STAGE 03</span>
+                <h3>Новый Интерфейс</h3>
+                <p>Интегрируем стильный, современный UI. Все меню, HUD и кастомизация перерисованы для вашего визуального удовольствия.</p>
             </div>
         </div>
 
-        <div class="action-button-container">
-            <button class="recode-btn" onclick="startUpdate(this)">Установить V2.0</button>
+        <!-- Красивый блок статуса вместо кнопки -->
+        <div class="maintenance-panel">
+            <div class="panel-title">Статус обновления v2.0</div>
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="progress-info">
+                <span>Сборка и компиляция кода...</span>
+                <span class="pulse-text">78%</span>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Простой скрипт для эффекта на кнопке при клике
-        function startUpdate(btn) {
-            btn.innerHTML = 'Загрузка...';
-            btn.style.background = 'rgba(255,255,255,0.08)';
-            btn.style.color = 'var(--text-muted)';
-            btn.style.boxShadow = '0 0 20px rgba(255,255,255,0.1)';
-            btn.style.borderColor = 'rgba(255,255,255,0.1)';
-            btn.style.transform = 'scale(0.95)';
-            btn.disabled = true;
-
-            setTimeout(() => {
-                btn.innerHTML = 'ГОТОВО К ЗАПУСКУ';
-                btn.style.background = 'linear-gradient(135deg, #42ff6b 0%, #2997ff 100%)';
-                btn.style.boxShadow = '0 10px 40px rgba(66, 255, 107, 0.3)';
-                btn.style.color = '#fff';
-                btn.style.transform = 'scale(1.0)';
-                alert('Новая, красивая версия DOMOFON PvP готова к запуску! Наслаждайтесь обновлением.');
-            }, 2500);
-        }
-    </script>
 </body>
 </html>
